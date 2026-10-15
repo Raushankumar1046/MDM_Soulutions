@@ -335,6 +335,8 @@
       <button class="btn btn-success" onclick="broadcastPolicy(2, false)">✅ Allow Software Install</button>
       <button class="btn btn-danger" onclick="broadcastPolicy(3, true)">📁 Restrict External Transfer</button>
       <button class="btn btn-success" onclick="broadcastPolicy(3, false)">📂 Allow External Transfer</button>
+      <button class="btn" onclick="broadcastLock()">🔒 Lock All</button>
+      <button class="btn" onclick="broadcastMessagePrompt()">📢 Message All</button>
       <button class="btn" onclick="fetchData()" style="margin-left: auto;">🔄 Refresh Now</button>
     </div>
 
@@ -459,6 +461,18 @@
               </label>
             </div>
           </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+            <button class="btn" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 10, 'Lock Screen')">
+              🔒 Lock Screen
+            </button>
+            <button class="btn" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="promptSendMessage('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
+              💬 Send Alert
+            </button>
+            <button class="btn btn-danger" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 11, 'Restart Laptop')">
+              🔄 Reboot
+            </button>
+          </div>
         </div>
       `).join('');
     }
@@ -515,6 +529,75 @@
         setTimeout(fetchData, 1000);
       } catch (err) {
         alert("Broadcast failed: " + err);
+      }
+    }
+
+    async function sendRemoteAction(machineName, connectionId, actionType, actionName) {
+      if (!confirm(`Are you sure you want to execute [${actionName}] on ${machineName}?`)) return;
+      try {
+        await fetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connectionId: connectionId,
+            machineName: machineName,
+            policy: actionType,
+            enableRestriction: true
+          })
+        });
+        setTimeout(fetchData, 800);
+      } catch (err) {
+        alert("Action failed: " + err);
+      }
+    }
+
+    async function promptSendMessage(machineName, connectionId) {
+      const text = prompt(`Enter notification message to display on ${machineName}'s screen:`, "IT Security Notice: Please save your work and connect to company network.");
+      if (!text) return;
+      try {
+        await fetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connectionId: connectionId,
+            machineName: machineName,
+            policy: 12, // SendNotification
+            enableRestriction: true,
+            payload: text
+          })
+        });
+        setTimeout(fetchData, 800);
+      } catch (err) {
+        alert("Message dispatch failed: " + err);
+      }
+    }
+
+    async function broadcastLock() {
+      if (!confirm("Are you sure you want to LOCK all connected laptops simultaneously?")) return;
+      try {
+        await fetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ policy: 10, enableRestriction: true })
+        });
+        setTimeout(fetchData, 1000);
+      } catch (err) {
+        alert("Broadcast lock failed: " + err);
+      }
+    }
+
+    async function broadcastMessagePrompt() {
+      const text = prompt("Enter broadcast notification message for ALL laptops:", "Company Notice: Important IT security maintenance in progress.");
+      if (!text) return;
+      try {
+        await fetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ policy: 12, enableRestriction: true, payload: text })
+        });
+        setTimeout(fetchData, 1000);
+      } catch (err) {
+        alert("Broadcast message failed: " + err);
       }
     }
 

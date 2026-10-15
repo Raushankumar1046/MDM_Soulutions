@@ -192,6 +192,57 @@ public class Worker : BackgroundService
                         : "Failed to update Removable Storage write protection policies.";
                     break;
 
+                case PolicyType.LockWorkstation:
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "rundll32.exe",
+                        Arguments = "user32.dll,LockWorkStation",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                    result.Success = true;
+                    result.Message = "Workstation screen locked successfully.";
+                    break;
+
+                case PolicyType.RestartLaptop:
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "shutdown.exe",
+                        Arguments = "/r /t 10 /c \"IT Administrator has initiated a remote system restart.\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                    result.Success = true;
+                    result.Message = "System restart scheduled with 10s countdown.";
+                    break;
+
+                case PolicyType.SendNotification:
+                    var messageText = string.IsNullOrWhiteSpace(command.Payload) ? "IT Security Notification from Administrator." : command.Payload;
+                    try
+                    {
+                        var msgProc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "msg.exe",
+                            Arguments = $"* /TIME:60 \"{messageText.Replace("\"", "\\\"")}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        });
+                        msgProc?.WaitForExit(3000);
+                    }
+                    catch
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "powershell.exe",
+                            Arguments = $"-NoProfile -Command \"Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('{messageText.Replace("'", "''")}', 'CyberShield IT Management Alert')\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        });
+                    }
+                    result.Success = true;
+                    result.Message = "Notification alert displayed on user screen.";
+                    break;
+
                 default:
                     result.Success = false;
                     result.Message = $"Policy type {command.Policy} is unsupported.";

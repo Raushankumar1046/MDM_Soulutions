@@ -64,7 +64,8 @@ app.MapPost("/api/policies/dispatch", async (
     var cmd = new PolicyCommand
     {
         Policy = (PolicyType)request.Policy,
-        EnableRestriction = request.EnableRestriction
+        EnableRestriction = request.EnableRestriction,
+        Payload = request.Payload
     };
 
     if (string.IsNullOrEmpty(request.ConnectionId) && string.IsNullOrEmpty(request.MachineName))
@@ -106,4 +107,5 @@ public class PolicyDispatchRequest
     public string? MachineName { get; set; }
     public int Policy { get; set; }
     public bool EnableRestriction { get; set; }
+    public string? Payload { get; set; }
 }
