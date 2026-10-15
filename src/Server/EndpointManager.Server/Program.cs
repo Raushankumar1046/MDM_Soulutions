@@ -15,8 +15,12 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 // Register Embedded LiteDB Service
 builder.Services.AddSingleton<LiteDbService>();
 
-// Register SignalR
-builder.Services.AddSignalR();
+// Register SignalR with high message size limit for Screen Capture frames (10 MB)
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+    options.EnableDetailedErrors = true;
+});
 
 // Register UDP Auto-Discovery Service
 builder.Services.AddHostedService<UdpDiscoveryServerService>();
@@ -33,8 +37,12 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseCors();
 
-// Map SignalR Hub Endpoint
-app.MapHub<EndpointHub>("/hubs/endpoints");
+// Map SignalR Hub Endpoint with large buffer
+app.MapHub<EndpointHub>("/hubs/endpoints", options =>
+{
+    options.ApplicationMaxBufferSize = 10 * 1024 * 1024;
+    options.TransportMaxBufferSize = 10 * 1024 * 1024;
+});
 
 // API: List all devices (Online & Offline)
 app.MapGet("/api/devices", (LiteDbService db) =>

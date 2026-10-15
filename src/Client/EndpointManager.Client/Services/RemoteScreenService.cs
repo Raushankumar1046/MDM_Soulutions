@@ -56,8 +56,10 @@ public class RemoteScreenService : IDisposable
         {
             var jpegCodec = GetJpegEncoder();
             var encoderParams = new EncoderParameters(1);
-            // 55% quality gives great visual clarity while keeping frame size ~40-70KB for fluid 6-8 FPS
-            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 55L);
+            // 45% quality gives great visual clarity while keeping frame size ~20-35KB for ultra-fluid stream
+            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 45L);
+
+            _logger.LogInformation("Screen stream capture loop active -> Admin: {AdminId}", targetAdminConnectionId);
 
             while (!token.IsCancellationRequested && hubConnection.State == HubConnectionState.Connected)
             {
@@ -72,8 +74,8 @@ public class RemoteScreenService : IDisposable
                         screenHeight = 1080;
                     }
 
-                    // Target resolution for responsive remote assistance (max 1280 wide to save bandwidth)
-                    int targetWidth = Math.Min(screenWidth, 1280);
+                    // 1024px max width is optimal for remote control bandwidth & fluidity
+                    int targetWidth = Math.Min(screenWidth, 1024);
                     int targetHeight = (int)((double)targetWidth / screenWidth * screenHeight);
 
                     using var fullBmp = new Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
@@ -111,7 +113,7 @@ public class RemoteScreenService : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug("Screen capture frame dropped: {Msg}", ex.Message);
+                    _logger.LogWarning("Screen capture error: {Msg}", ex.Message);
                     await Task.Delay(500, token);
                 }
             }
