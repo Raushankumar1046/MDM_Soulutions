@@ -1,0 +1,18 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Database & Runtime Data
+*.db
+*.db-shm
+*.db-wal
+endpoints_data.db
+
+## Logs
+*.log
+.vs/
+.idea/
