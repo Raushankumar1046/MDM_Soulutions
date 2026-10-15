@@ -39,13 +39,24 @@ public class EndpointHub : Hub<IEndpointClientContract>
     public Task SendHeartbeat(ClientHeartbeat heartbeat)
     {
         heartbeat.ConnectionId = Context.ConnectionId;
+        heartbeat.TimestampUtc = DateTime.UtcNow;
+
+        // Purge any stale/dead connection entries for this same host
+        foreach (var kvp in ConnectedClients.ToArray())
+        {
+            if (kvp.Key != Context.ConnectionId && kvp.Value.MachineName.Equals(heartbeat.MachineName, StringComparison.OrdinalIgnoreCase))
+            {
+                ConnectedClients.TryRemove(kvp.Key, out _);
+            }
+        }
+
         ConnectedClients[Context.ConnectionId] = heartbeat;
 
         // Persist to LiteDB
         _dbService.UpsertHeartbeat(heartbeat, Context.ConnectionId);
 
-        _logger.LogInformation("Heartbeat received: {Host} [{IP}] | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans}", 
-            heartbeat.MachineName, heartbeat.IpAddress, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted);
+        _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans}", 
+            heartbeat.MachineName, heartbeat.IpAddress, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted);
 
         return Task.CompletedTask;
     }
@@ -69,16 +80,23 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // Helper to resolve active connectionId even if machine name or reconnected ID was passed
     private string ResolveTargetConnectionId(string targetId)
     {
+        // If targetId matches machineName, find freshest connection
+        var byHost = ConnectedClients
+            .Where(c => c.Value.MachineName.Equals(targetId, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(c => c.Value.TimestampUtc)
+            .FirstOrDefault();
+
+        if (!string.IsNullOrEmpty(byHost.Key))
+        {
+            return byHost.Key;
+        }
+
         if (ConnectedClients.ContainsKey(targetId))
         {
             return targetId;
         }
 
-        var match = ConnectedClients.FirstOrDefault(c => 
-            c.Value.MachineName.Equals(targetId, StringComparison.OrdinalIgnoreCase) ||
-            c.Key.Equals(targetId, StringComparison.OrdinalIgnoreCase));
-
-        return !string.IsNullOrEmpty(match.Key) ? match.Key : targetId;
+        return targetId;
     }
 
     // === Remote Terminal Relay ===
