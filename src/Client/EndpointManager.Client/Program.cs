@@ -19,6 +19,9 @@ builder.Services.AddSingleton<ExternalFileTransferPolicyManager>();
 // Register UDP Auto-Discovery Client
 builder.Services.AddSingleton<UdpDiscoveryClient>();
 
+// Register Geo-Location Service
+builder.Services.AddSingleton<LocationService>();
+
 // Register Main SignalR / Endpoint Worker
 builder.Services.AddHostedService<Worker>();
 

@@ -16,6 +16,7 @@ public class Worker : BackgroundService
     private readonly SoftwareInstallPolicyManager _softwarePolicyManager;
     private readonly ExternalFileTransferPolicyManager _fileTransferPolicyManager;
     private readonly UdpDiscoveryClient _udpDiscoveryClient;
+    private readonly LocationService _locationService;
     private readonly IConfiguration _config;
     private HubConnection? _hubConnection;
     private string? _currentServerUrl;
@@ -26,6 +27,7 @@ public class Worker : BackgroundService
         SoftwareInstallPolicyManager softwarePolicyManager,
         ExternalFileTransferPolicyManager fileTransferPolicyManager,
         UdpDiscoveryClient udpDiscoveryClient,
+        LocationService locationService,
         IConfiguration config)
     {
         _logger = logger;
@@ -33,6 +35,7 @@ public class Worker : BackgroundService
         _softwarePolicyManager = softwarePolicyManager;
         _fileTransferPolicyManager = fileTransferPolicyManager;
         _udpDiscoveryClient = udpDiscoveryClient;
+        _locationService = locationService;
         _config = config;
     }
 
@@ -99,6 +102,8 @@ public class Worker : BackgroundService
                     {
                         try
                         {
+                            var loc = await _locationService.GetCurrentLocationAsync();
+
                             var heartbeat = new ClientHeartbeat
                             {
                                 ConnectionId = _hubConnection.ConnectionId ?? string.Empty,
@@ -109,6 +114,12 @@ public class Worker : BackgroundService
                                 UsbStorageBlocked = _usbPolicyManager.IsUsbStorageBlocked(),
                                 SoftwareInstallDisabled = _softwarePolicyManager.IsSoftwareInstallationDisabled(),
                                 ExternalFileTransferRestricted = _fileTransferPolicyManager.IsExternalFileTransferRestricted(),
+                                City = loc?.City,
+                                Region = loc?.Region,
+                                Country = loc?.Country,
+                                Latitude = loc?.Latitude,
+                                Longitude = loc?.Longitude,
+                                Isp = loc?.Isp,
                                 TimestampUtc = DateTime.UtcNow
                             };
 

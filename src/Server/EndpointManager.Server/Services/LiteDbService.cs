@@ -14,6 +14,12 @@ public class EndpointDeviceRecord
     public bool UsbStorageBlocked { get; set; }
     public bool SoftwareInstallDisabled { get; set; }
     public bool ExternalFileTransferRestricted { get; set; }
+    public string? City { get; set; }
+    public string? Region { get; set; }
+    public string? Country { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public string? Isp { get; set; }
     public bool IsOnline { get; set; }
     public DateTime LastSeenUtc { get; set; } = DateTime.UtcNow;
 }
@@ -73,6 +79,12 @@ public class LiteDbService : IDisposable
                     UsbStorageBlocked = heartbeat.UsbStorageBlocked,
                     SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled,
                     ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted,
+                    City = heartbeat.City,
+                    Region = heartbeat.Region,
+                    Country = heartbeat.Country,
+                    Latitude = heartbeat.Latitude,
+                    Longitude = heartbeat.Longitude,
+                    Isp = heartbeat.Isp,
                     IsOnline = true,
                     LastSeenUtc = DateTime.UtcNow
                 };
@@ -87,6 +99,12 @@ public class LiteDbService : IDisposable
                 existing.UsbStorageBlocked = heartbeat.UsbStorageBlocked;
                 existing.SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled;
                 existing.ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted;
+                existing.City = heartbeat.City ?? existing.City;
+                existing.Region = heartbeat.Region ?? existing.Region;
+                existing.Country = heartbeat.Country ?? existing.Country;
+                existing.Latitude = heartbeat.Latitude ?? existing.Latitude;
+                existing.Longitude = heartbeat.Longitude ?? existing.Longitude;
+                existing.Isp = heartbeat.Isp ?? existing.Isp;
                 existing.IsOnline = true;
                 existing.LastSeenUtc = DateTime.UtcNow;
                 _devices.Update(existing);
