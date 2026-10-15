@@ -593,7 +593,7 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+  <script src="/signalr.min.js"></script>
   <script>
     async function fetchData() {
       try {
@@ -705,10 +705,10 @@
 
           <!-- Remote Assist Gateway Actions -->
           <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openTerminalModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
+            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openTerminalModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.machineName)}')">
               💻 PowerShell
             </button>
-            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openRemoteDesktopModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
+            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openRemoteDesktopModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.machineName)}')">
               🖥️ Remote Desktop
             </button>
           </div>
@@ -862,9 +862,13 @@
 
     function initSignalR() {
       if (typeof signalR === 'undefined') {
-        console.warn('SignalR library not yet loaded, retrying in 500ms...');
-        setTimeout(initSignalR, 500);
-        return;
+        console.warn('SignalR library not yet loaded, retrying in 300ms...');
+        setTimeout(initSignalR, 300);
+        return Promise.reject('SignalR not loaded yet');
+      }
+
+      if (hubConn && hubConn.state === signalR.HubConnectionState.Connected) {
+        return Promise.resolve();
       }
 
       hubConn = new signalR.HubConnectionBuilder()
@@ -914,13 +918,16 @@
         img.src = 'data:image/jpeg;base64,' + base64;
       });
 
-      hubConn.start()
+      return hubConn.start()
         .then(() => console.log('Admin Hub connected via SignalR'))
-        .catch(err => console.error('SignalR Hub Connection Error:', err));
+        .catch(err => {
+          console.error('SignalR Hub Connection Error:', err);
+          throw err;
+        });
     }
 
     // --- Terminal Functions ---
-    function openTerminalModal(machineName, connectionId) {
+    async function openTerminalModal(machineName, connectionId) {
       if (!connectionId) {
         alert("This endpoint is not connected to the real-time gateway.");
         return;
@@ -932,6 +939,14 @@
       document.getElementById('termTargetHost').textContent = machineName;
       document.getElementById('terminalModal').classList.add('active');
       document.getElementById('termInput').focus();
+
+      try {
+        if (!hubConn || hubConn.state !== signalR.HubConnectionState.Connected) {
+          await initSignalR();
+        }
+      } catch (err) {
+        console.error("SignalR init error:", err);
+      }
     }
 
     function closeTerminalModal() {
@@ -952,7 +967,7 @@
     async function executeTerminalCommand() {
       const input = document.getElementById('termInput');
       const cmdText = input.value.trim();
-      if (!cmdText || !activeTermConnId || !hubConn) return;
+      if (!cmdText || !activeTermConnId) return;
 
       const screen = document.getElementById('termScreen');
       const cmdLine = document.createElement('div');
@@ -969,6 +984,9 @@
       }
 
       try {
+        if (!hubConn || hubConn.state !== signalR.HubConnectionState.Connected) {
+          await initSignalR();
+        }
         await hubConn.invoke('SendTerminalCommand', activeTermConnId, {
           SessionId: currentTermSessionId,
           CommandText: cmdText
@@ -976,7 +994,7 @@
       } catch (err) {
         const errLine = document.createElement('div');
         errLine.className = 'term-line-err';
-        errLine.textContent = `Failed to send command: ${err}`;
+        errLine.textContent = `Failed to send command: ${err.message || err}`;
         screen.appendChild(errLine);
         if (execBtn) {
           execBtn.disabled = false;
@@ -986,7 +1004,7 @@
     }
 
     // --- Remote Desktop Functions ---
-    function openRemoteDesktopModal(machineName, connectionId) {
+    async function openRemoteDesktopModal(machineName, connectionId) {
       if (!connectionId) {
         alert("This endpoint is not connected to the real-time gateway.");
         return;
@@ -997,20 +1015,34 @@
 
       document.getElementById('remoteTargetHost').textContent = machineName;
       const overlay = document.getElementById('remoteWaitingOverlay');
-      if (overlay) overlay.style.display = 'flex';
+      if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.innerHTML = `
+          <div style="font-size: 32px;">⚡</div>
+          <span id="remoteWaitStatus">Connecting to ${escapeHtml(machineName)} Screen...</span>
+          <span style="font-size: 11px; color: #94a3b8;">Ensure updated EndpointManager.Client is running on the client machine.</span>
+        `;
+      }
       document.getElementById('remoteDesktopModal').classList.add('active');
 
-      if (hubConn) {
-        hubConn.invoke('StartRemoteScreen', activeScreenConnId).catch(err => {
-          console.error("Failed to start remote screen stream:", err);
-          alert("Error starting remote screen stream: " + err);
-        });
+      try {
+        if (!hubConn || hubConn.state !== signalR.HubConnectionState.Connected) {
+          console.log("Connecting SignalR hub for remote stream...");
+          await initSignalR();
+        }
+        await hubConn.invoke('StartRemoteScreen', activeScreenConnId);
+        const statusEl = document.getElementById('remoteWaitStatus');
+        if (statusEl) statusEl.textContent = "Screen stream requested! Waiting for first frame...";
+      } catch (err) {
+        console.error("Failed to start remote screen stream:", err);
+        const statusEl = document.getElementById('remoteWaitStatus');
+        if (statusEl) statusEl.innerHTML = `<span style="color: #ef4444;">Error: ${escapeHtml(err.message || err)}</span>`;
       }
       setupCanvasEvents();
     }
 
     function closeRemoteDesktopModal() {
-      if (hubConn && activeScreenConnId) {
+      if (hubConn && activeScreenConnId && hubConn.state === signalR.HubConnectionState.Connected) {
         hubConn.invoke('StopRemoteScreen', activeScreenConnId).catch(console.error);
       }
       isScreenStreaming = false;

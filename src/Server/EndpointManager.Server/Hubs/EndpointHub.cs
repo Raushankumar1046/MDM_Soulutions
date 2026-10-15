@@ -66,14 +66,30 @@ public class EndpointHub : Hub<IEndpointClientContract>
         return Task.CompletedTask;
     }
 
+    // Helper to resolve active connectionId even if machine name or reconnected ID was passed
+    private string ResolveTargetConnectionId(string targetId)
+    {
+        if (ConnectedClients.ContainsKey(targetId))
+        {
+            return targetId;
+        }
+
+        var match = ConnectedClients.FirstOrDefault(c => 
+            c.Value.MachineName.Equals(targetId, StringComparison.OrdinalIgnoreCase) ||
+            c.Key.Equals(targetId, StringComparison.OrdinalIgnoreCase));
+
+        return !string.IsNullOrEmpty(match.Key) ? match.Key : targetId;
+    }
+
     // === Remote Terminal Relay ===
     public async Task SendTerminalCommand(string targetConnectionId, TerminalCommand command)
     {
-        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
-        _logger.LogInformation("Admin dispatching Terminal Command to [{Host}]: {Cmd}", hostName, command.CommandText);
+        string resolvedId = ResolveTargetConnectionId(targetConnectionId);
+        string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
+        _logger.LogInformation("Admin dispatching Terminal Command to [{Host}] ({Id}): {Cmd}", hostName, resolvedId, command.CommandText);
         _dbService.LogAudit(hostName, "RemoteTerminal", false, true, $"PowerShell executed: {command.CommandText}");
 
-        await Clients.Client(targetConnectionId).ExecuteTerminalCommand(command);
+        await Clients.Client(resolvedId).ExecuteTerminalCommand(command);
     }
 
     public async Task SendTerminalOutput(TerminalOutput output)
@@ -85,20 +101,22 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // === Remote Screen Stream & Input Relay ===
     public async Task StartRemoteScreen(string targetConnectionId)
     {
-        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
-        _logger.LogInformation("Starting Remote Screen Session -> [{Host}] for Admin [{AdminId}]", hostName, Context.ConnectionId);
+        string resolvedId = ResolveTargetConnectionId(targetConnectionId);
+        string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
+        _logger.LogInformation("Starting Remote Screen Session -> [{Host}] ({Id}) for Admin [{AdminId}]", hostName, resolvedId, Context.ConnectionId);
         _dbService.LogAudit(hostName, "RemoteScreen", true, true, $"Admin initiated live screen stream");
 
-        await Clients.Client(targetConnectionId).StartScreenStream(Context.ConnectionId);
+        await Clients.Client(resolvedId).StartScreenStream(Context.ConnectionId);
     }
 
     public async Task StopRemoteScreen(string targetConnectionId)
     {
-        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
-        _logger.LogInformation("Stopping Remote Screen Session -> [{Host}]", hostName);
+        string resolvedId = ResolveTargetConnectionId(targetConnectionId);
+        string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
+        _logger.LogInformation("Stopping Remote Screen Session -> [{Host}] ({Id})", hostName, resolvedId);
         _dbService.LogAudit(hostName, "RemoteScreen", false, true, $"Admin terminated live screen stream");
 
-        await Clients.Client(targetConnectionId).StopScreenStream();
+        await Clients.Client(resolvedId).StopScreenStream();
     }
 
     public async Task SendScreenFrame(string targetAdminConnectionId, string base64Frame)
@@ -108,6 +126,7 @@ public class EndpointHub : Hub<IEndpointClientContract>
 
     public async Task SendRemoteInput(string targetConnectionId, RemoteInputEvent input)
     {
-        await Clients.Client(targetConnectionId).ProcessRemoteInput(input);
+        string resolvedId = ResolveTargetConnectionId(targetConnectionId);
+        await Clients.Client(resolvedId).ProcessRemoteInput(input);
     }
 }
