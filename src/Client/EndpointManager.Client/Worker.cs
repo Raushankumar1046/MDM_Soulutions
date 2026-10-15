@@ -17,6 +17,8 @@ public class Worker : BackgroundService
     private readonly ExternalFileTransferPolicyManager _fileTransferPolicyManager;
     private readonly UdpDiscoveryClient _udpDiscoveryClient;
     private readonly LocationService _locationService;
+    private readonly RemoteTerminalService _terminalService;
+    private readonly RemoteScreenService _screenService;
     private readonly IConfiguration _config;
     private HubConnection? _hubConnection;
     private string? _currentServerUrl;
@@ -28,6 +30,8 @@ public class Worker : BackgroundService
         ExternalFileTransferPolicyManager fileTransferPolicyManager,
         UdpDiscoveryClient udpDiscoveryClient,
         LocationService locationService,
+        RemoteTerminalService terminalService,
+        RemoteScreenService screenService,
         IConfiguration config)
     {
         _logger = logger;
@@ -36,6 +40,8 @@ public class Worker : BackgroundService
         _fileTransferPolicyManager = fileTransferPolicyManager;
         _udpDiscoveryClient = udpDiscoveryClient;
         _locationService = locationService;
+        _terminalService = terminalService;
+        _screenService = screenService;
         _config = config;
     }
 
@@ -78,6 +84,10 @@ public class Worker : BackgroundService
                     .Build();
 
                 _hubConnection.On<PolicyCommand>(nameof(IEndpointClientContract.ExecutePolicy), HandlePolicyCommandAsync);
+                _hubConnection.On<TerminalCommand>(nameof(IEndpointClientContract.ExecuteTerminalCommand), cmd => _terminalService.ExecuteCommandAsync(cmd, _hubConnection));
+                _hubConnection.On<string>(nameof(IEndpointClientContract.StartScreenStream), adminId => _screenService.StartScreenStream(adminId, _hubConnection));
+                _hubConnection.On(nameof(IEndpointClientContract.StopScreenStream), () => _screenService.StopScreenStream());
+                _hubConnection.On<RemoteInputEvent>(nameof(IEndpointClientContract.ProcessRemoteInput), input => _screenService.ProcessRemoteInput(input));
 
                 _hubConnection.Reconnecting += error =>
                 {

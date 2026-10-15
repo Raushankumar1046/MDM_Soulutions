@@ -303,6 +303,162 @@
       color: var(--text-muted);
       font-size: 14px;
     }
+
+    /* Modal Backdrop & Windows */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-window {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    .modal-close:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Terminal Window Styles */
+    .terminal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 520px;
+    }
+
+    .terminal-screen {
+      flex: 1;
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #38bdf8;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .terminal-screen .term-line-cmd {
+      color: #a855f7;
+      font-weight: 600;
+    }
+    .terminal-screen .term-line-err {
+      color: #f87171;
+    }
+    .terminal-screen .term-line-ok {
+      color: #e2e8f0;
+    }
+
+    .terminal-input-bar {
+      display: flex;
+      gap: 10px;
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #f8fafc;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      outline: none;
+    }
+    .terminal-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Remote Desktop Screen Modal */
+    .remote-desktop-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      background: #060911;
+    }
+
+    .canvas-container {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      cursor: crosshair;
+    }
+
+    #remoteCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      max-height: 68vh;
+      background: #000;
+    }
+
+    .remote-controls-bar {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
@@ -365,6 +521,79 @@
     </div>
   </div>
 
+  <!-- Modal: Remote PowerShell Terminal -->
+  <div class="modal-backdrop" id="terminalModal">
+    <div class="modal-window" style="width: 880px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>💻 Remote PowerShell Gateway:</span>
+          <span id="termTargetHost" style="color: #38bdf8; font-family: monospace;">DESKTOP-NAME</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="clearTerminal()">🧹 Clear</button>
+          <button class="modal-close" onclick="closeTerminalModal()">&times;</button>
+        </div>
+      </div>
+      <div class="terminal-body">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Quick Cmds:</span>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Id,ProcessName,CPU,WorkingSet64')">Top CPU</button>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('ipconfig /all')">ipconfig</button>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('Get-Service | Where-Object Status -eq Running')">Services</button>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('whoami /priv')">Privileges</button>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('netstat -ano | Select-Object -First 20')">Netstat</button>
+          <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('systeminfo | Select-String \"OS Name\",\"Total Physical Memory\"')">System Info</button>
+        </div>
+        <div class="terminal-screen" id="termScreen">
+          <div><span style="color: #10b981;">[CyberShield Remote PowerShell Terminal Ready]</span></div>
+          <div><span style="color: var(--text-muted);">Execute administrative PowerShell commands directly on remote endpoint.</span></div>
+        </div>
+        <div class="terminal-input-bar">
+          <input type="text" class="terminal-input" id="termInput" placeholder="Enter PowerShell command... (e.g. dir, Get-Process, sfc /scannow)" onkeydown="if(event.key==='Enter') executeTerminalCommand()">
+          <button class="btn btn-success" id="termExecBtn" style="padding: 8px 18px;" onclick="executeTerminalCommand()">▶ Execute</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Live Remote Desktop Screen & Control -->
+  <div class="modal-backdrop" id="remoteDesktopModal">
+    <div class="modal-window" style="width: 1280px; max-width: 98vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🖥️ Live Remote Desktop Assist:</span>
+          <span id="remoteTargetHost" style="color: #a855f7; font-family: monospace;">DESKTOP-NAME</span>
+          <span class="status-badge online" id="remoteFpsBadge" style="margin-left: 8px;">Live Stream ~8 FPS</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)">⊞ Win</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('ESCAPE', 27)">Esc</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)">Enter</button>
+          <button class="modal-close" onclick="closeRemoteDesktopModal()">&times;</button>
+        </div>
+      </div>
+      <div class="remote-desktop-body">
+        <div class="canvas-container" id="canvasContainer">
+          <canvas id="remoteCanvas" tabindex="0"></canvas>
+          <div id="remoteWaitingOverlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #94a3b8; font-size: 14px;">
+            <div style="font-size: 32px;">⚡</div>
+            <span>Connecting to Endpoint Live Screen Capture Stream...</span>
+          </div>
+        </div>
+        <div class="remote-controls-bar">
+          <div style="display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-muted);">
+            <span>🖱️ Direct Mouse & Keyboard Control Active. Click anywhere on screen to control.</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="remoteTextInput" placeholder="Type text to send to remote..." style="background: #090d16; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; width: 240px;" onkeydown="if(event.key==='Enter') sendTextToRemote()">
+            <button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="sendTextToRemote()">⌨️ Send Text</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
   <script>
     async function fetchData() {
       try {
@@ -471,6 +700,16 @@
             </button>
             <button class="btn btn-danger" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 11, 'Restart Laptop')">
               🔄 Reboot
+            </button>
+          </div>
+
+          <!-- Remote Assist Gateway Actions -->
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openTerminalModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
+              💻 PowerShell
+            </button>
+            <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openRemoteDesktopModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
+              🖥️ Remote Desktop
             </button>
           </div>
         </div>
@@ -608,9 +847,262 @@
       });
     }
 
+    // ========================================================
+    // Remote Assist Gateway: SignalR, Terminal & Remote Desktop
+    // ========================================================
+    let hubConn = null;
+    let activeTermConnId = null;
+    let activeTermHost = null;
+    let currentTermSessionId = null;
+
+    let activeScreenConnId = null;
+    let activeScreenHost = null;
+    let isScreenStreaming = false;
+    let lastMouseMoveSent = 0;
+
+    function initSignalR() {
+      if (typeof signalR === 'undefined') {
+        console.warn('SignalR library not yet loaded, retrying in 500ms...');
+        setTimeout(initSignalR, 500);
+        return;
+      }
+
+      hubConn = new signalR.HubConnectionBuilder()
+        .withUrl('/hubs/endpoints')
+        .withAutomaticReconnect()
+        .build();
+
+      hubConn.on('ReceiveTerminalOutput', (output) => {
+        if (!output) return;
+        const screen = document.getElementById('termScreen');
+        if (output.outputText) {
+          const line = document.createElement('div');
+          line.className = output.isError ? 'term-line-err' : 'term-line-ok';
+          line.textContent = output.outputText;
+          screen.appendChild(line);
+          screen.scrollTop = screen.scrollHeight;
+        }
+        if (output.isCompleted) {
+          const line = document.createElement('div');
+          line.style.color = '#10b981';
+          line.style.fontSize = '11px';
+          line.style.marginTop = '4px';
+          line.textContent = '--- Command finished ---';
+          screen.appendChild(line);
+          screen.scrollTop = screen.scrollHeight;
+          const execBtn = document.getElementById('termExecBtn');
+          if (execBtn) {
+            execBtn.disabled = false;
+            execBtn.textContent = '▶ Execute';
+          }
+        }
+      });
+
+      hubConn.on('ReceiveScreenFrame', (base64) => {
+        if (!isScreenStreaming) return;
+        const overlay = document.getElementById('remoteWaitingOverlay');
+        if (overlay) overlay.style.display = 'none';
+
+        const canvas = document.getElementById('remoteCanvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = 'data:image/jpeg;base64,' + base64;
+      });
+
+      hubConn.start()
+        .then(() => console.log('Admin Hub connected via SignalR'))
+        .catch(err => console.error('SignalR Hub Connection Error:', err));
+    }
+
+    // --- Terminal Functions ---
+    function openTerminalModal(machineName, connectionId) {
+      if (!connectionId) {
+        alert("This endpoint is not connected to the real-time gateway.");
+        return;
+      }
+      activeTermConnId = connectionId;
+      activeTermHost = machineName;
+      currentTermSessionId = 'term_' + Date.now();
+
+      document.getElementById('termTargetHost').textContent = machineName;
+      document.getElementById('terminalModal').classList.add('active');
+      document.getElementById('termInput').focus();
+    }
+
+    function closeTerminalModal() {
+      document.getElementById('terminalModal').classList.remove('active');
+      activeTermConnId = null;
+    }
+
+    function clearTerminal() {
+      const screen = document.getElementById('termScreen');
+      screen.innerHTML = '<div><span style="color: #10b981;">[Terminal Cleared]</span></div>';
+    }
+
+    function setAndRunCmd(cmd) {
+      document.getElementById('termInput').value = cmd;
+      executeTerminalCommand();
+    }
+
+    async function executeTerminalCommand() {
+      const input = document.getElementById('termInput');
+      const cmdText = input.value.trim();
+      if (!cmdText || !activeTermConnId || !hubConn) return;
+
+      const screen = document.getElementById('termScreen');
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'term-line-cmd';
+      cmdLine.textContent = `PS > ${cmdText}`;
+      screen.appendChild(cmdLine);
+      screen.scrollTop = screen.scrollHeight;
+
+      input.value = '';
+      const execBtn = document.getElementById('termExecBtn');
+      if (execBtn) {
+        execBtn.disabled = true;
+        execBtn.textContent = '⏳ Running...';
+      }
+
+      try {
+        await hubConn.invoke('SendTerminalCommand', activeTermConnId, {
+          SessionId: currentTermSessionId,
+          CommandText: cmdText
+        });
+      } catch (err) {
+        const errLine = document.createElement('div');
+        errLine.className = 'term-line-err';
+        errLine.textContent = `Failed to send command: ${err}`;
+        screen.appendChild(errLine);
+        if (execBtn) {
+          execBtn.disabled = false;
+          execBtn.textContent = '▶ Execute';
+        }
+      }
+    }
+
+    // --- Remote Desktop Functions ---
+    function openRemoteDesktopModal(machineName, connectionId) {
+      if (!connectionId) {
+        alert("This endpoint is not connected to the real-time gateway.");
+        return;
+      }
+      activeScreenConnId = connectionId;
+      activeScreenHost = machineName;
+      isScreenStreaming = true;
+
+      document.getElementById('remoteTargetHost').textContent = machineName;
+      const overlay = document.getElementById('remoteWaitingOverlay');
+      if (overlay) overlay.style.display = 'flex';
+      document.getElementById('remoteDesktopModal').classList.add('active');
+
+      if (hubConn) {
+        hubConn.invoke('StartRemoteScreen', activeScreenConnId).catch(err => {
+          console.error("Failed to start remote screen stream:", err);
+          alert("Error starting remote screen stream: " + err);
+        });
+      }
+      setupCanvasEvents();
+    }
+
+    function closeRemoteDesktopModal() {
+      if (hubConn && activeScreenConnId) {
+        hubConn.invoke('StopRemoteScreen', activeScreenConnId).catch(console.error);
+      }
+      isScreenStreaming = false;
+      activeScreenConnId = null;
+      document.getElementById('remoteDesktopModal').classList.remove('active');
+    }
+
+    function getNormalizedCoords(e, canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      return {
+        nx: Math.max(0, Math.min(1, x)),
+        ny: Math.max(0, Math.min(1, y))
+      };
+    }
+
+    function sendRemoteInput(eventType, nx, ny, button = 0, keyCode = 0, text = null) {
+      if (!hubConn || !activeScreenConnId || !isScreenStreaming) return;
+      hubConn.invoke('SendRemoteInput', activeScreenConnId, {
+        EventType: eventType,
+        NormalizedX: nx,
+        NormalizedY: ny,
+        Button: button,
+        KeyCode: keyCode,
+        Text: text
+      }).catch(console.error);
+    }
+
+    function sendKeyToRemote(name, keyCode) {
+      if (!activeScreenConnId) return;
+      sendRemoteInput(6, 0, 0, 0, keyCode); // KeyDown
+      setTimeout(() => sendRemoteInput(7, 0, 0, 0, keyCode), 60); // KeyUp
+    }
+
+    function sendTextToRemote() {
+      const input = document.getElementById('remoteTextInput');
+      const text = input.value;
+      if (!text || !activeScreenConnId) return;
+      sendRemoteInput(8, 0, 0, 0, 0, text);
+      input.value = '';
+    }
+
+    let canvasEventsConfigured = false;
+    function setupCanvasEvents() {
+      if (canvasEventsConfigured) return;
+      const canvas = document.getElementById('remoteCanvas');
+      if (!canvas) return;
+      canvasEventsConfigured = true;
+
+      canvas.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - lastMouseMoveSent > 60) { // Throttle mousemove to ~16 events/sec
+          lastMouseMoveSent = now;
+          const { nx, ny } = getNormalizedCoords(e, canvas);
+          sendRemoteInput(1, nx, ny);
+        }
+      });
+
+      canvas.addEventListener('mousedown', (e) => {
+        const { nx, ny } = getNormalizedCoords(e, canvas);
+        sendRemoteInput(2, nx, ny, e.button);
+      });
+
+      canvas.addEventListener('mouseup', (e) => {
+        const { nx, ny } = getNormalizedCoords(e, canvas);
+        sendRemoteInput(3, nx, ny, e.button);
+      });
+
+      canvas.addEventListener('dblclick', (e) => {
+        const { nx, ny } = getNormalizedCoords(e, canvas);
+        sendRemoteInput(5, nx, ny, 0);
+      });
+
+      canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+      });
+
+      canvas.addEventListener('keydown', (e) => {
+        if (e.keyCode === 9) e.preventDefault(); // prevent Tab from defocusing canvas
+        sendRemoteInput(6, 0, 0, 0, e.keyCode);
+      });
+
+      canvas.addEventListener('keyup', (e) => {
+        sendRemoteInput(7, 0, 0, 0, e.keyCode);
+      });
+    }
+
     // Auto-refresh every 3 seconds for real-time responsiveness
     fetchData();
     setInterval(fetchData, 3000);
+    initSignalR();
   </script>
 </body>
 </html>

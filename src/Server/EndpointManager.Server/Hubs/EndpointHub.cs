@@ -65,4 +65,49 @@ public class EndpointHub : Hub<IEndpointClientContract>
 
         return Task.CompletedTask;
     }
+
+    // === Remote Terminal Relay ===
+    public async Task SendTerminalCommand(string targetConnectionId, TerminalCommand command)
+    {
+        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
+        _logger.LogInformation("Admin dispatching Terminal Command to [{Host}]: {Cmd}", hostName, command.CommandText);
+        _dbService.LogAudit(hostName, "RemoteTerminal", false, true, $"PowerShell executed: {command.CommandText}");
+
+        await Clients.Client(targetConnectionId).ExecuteTerminalCommand(command);
+    }
+
+    public async Task SendTerminalOutput(TerminalOutput output)
+    {
+        // Broadcast output to admin browser sessions
+        await Clients.All.ReceiveTerminalOutput(output);
+    }
+
+    // === Remote Screen Stream & Input Relay ===
+    public async Task StartRemoteScreen(string targetConnectionId)
+    {
+        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
+        _logger.LogInformation("Starting Remote Screen Session -> [{Host}] for Admin [{AdminId}]", hostName, Context.ConnectionId);
+        _dbService.LogAudit(hostName, "RemoteScreen", true, true, $"Admin initiated live screen stream");
+
+        await Clients.Client(targetConnectionId).StartScreenStream(Context.ConnectionId);
+    }
+
+    public async Task StopRemoteScreen(string targetConnectionId)
+    {
+        string hostName = ConnectedClients.TryGetValue(targetConnectionId, out var client) ? client.MachineName : targetConnectionId;
+        _logger.LogInformation("Stopping Remote Screen Session -> [{Host}]", hostName);
+        _dbService.LogAudit(hostName, "RemoteScreen", false, true, $"Admin terminated live screen stream");
+
+        await Clients.Client(targetConnectionId).StopScreenStream();
+    }
+
+    public async Task SendScreenFrame(string targetAdminConnectionId, string base64Frame)
+    {
+        await Clients.Client(targetAdminConnectionId).ReceiveScreenFrame(base64Frame);
+    }
+
+    public async Task SendRemoteInput(string targetConnectionId, RemoteInputEvent input)
+    {
+        await Clients.Client(targetConnectionId).ProcessRemoteInput(input);
+    }
 }

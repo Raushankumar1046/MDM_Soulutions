@@ -22,6 +22,10 @@ builder.Services.AddSingleton<UdpDiscoveryClient>();
 // Register Geo-Location Service
 builder.Services.AddSingleton<LocationService>();
 
+// Register Remote Assist Services (Terminal & Screen Stream)
+builder.Services.AddSingleton<RemoteTerminalService>();
+builder.Services.AddSingleton<RemoteScreenService>();
+
 // Register Main SignalR / Endpoint Worker
 builder.Services.AddHostedService<Worker>();
 
