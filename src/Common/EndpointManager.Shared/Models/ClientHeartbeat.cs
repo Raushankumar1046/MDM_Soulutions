@@ -16,5 +16,6 @@ public class ClientHeartbeat
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? Isp { get; set; }
+    public string NetworkLocation { get; set; } = "In Office"; // "In Office" or "Remote / WFH"
     public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
 }

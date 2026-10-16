@@ -22,6 +22,7 @@ public class Worker : BackgroundService
     private readonly IConfiguration _config;
     private HubConnection? _hubConnection;
     private string? _currentServerUrl;
+    private string _currentLocationType = "In Office";
 
     public Worker(
         ILogger<Worker> logger, 
@@ -53,22 +54,12 @@ public class Worker : BackgroundService
         {
             try
             {
-                // 1. Resolve Server URL (Auto-Discovery or Config)
-                var configuredUrl = _config.GetValue<string>("ServerUrl")?.Trim();
-                bool isAutoMode = string.IsNullOrEmpty(configuredUrl) || 
-                                  configuredUrl.Equals("auto", StringComparison.OrdinalIgnoreCase);
+                // 1. Resolve Best Server URL with Auto Dual-IP Fallback (Office LAN vs Remote / WFH)
+                var (resolvedUrl, locationType) = await ResolveActiveServerEndpointAsync(stoppingToken);
+                _currentServerUrl = resolvedUrl;
+                _currentLocationType = locationType;
 
-                if (isAutoMode)
-                {
-                    _logger.LogInformation("Server URL set to 'auto'. Initiating UDP broadcast discovery on office network...");
-                    _currentServerUrl = await _udpDiscoveryClient.DiscoverServerUrlAsync(stoppingToken);
-                }
-                else
-                {
-                    _currentServerUrl = configuredUrl;
-                }
-
-                _logger.LogInformation("Connecting to Central Server at: {Url}", _currentServerUrl);
+                _logger.LogInformation("Connecting to Central Server at: {Url} (Location Mode: {Location})", _currentServerUrl, _currentLocationType);
 
                 // 2. Setup Hub Connection
                 _hubConnection = new HubConnectionBuilder()
@@ -103,7 +94,7 @@ public class Worker : BackgroundService
 
                 // Connect with retry
                 await _hubConnection.StartAsync(stoppingToken);
-                _logger.LogInformation("Successfully connected to Central Management Server!");
+                _logger.LogInformation("Successfully connected to Central Management Server via {Location}!", _currentLocationType);
 
                 // 3. Heartbeat loop while connected
                 while (!stoppingToken.IsCancellationRequested && _hubConnection.State != HubConnectionState.Disconnected)
@@ -130,6 +121,7 @@ public class Worker : BackgroundService
                                 Latitude = loc?.Latitude,
                                 Longitude = loc?.Longitude,
                                 Isp = loc?.Isp,
+                                NetworkLocation = _currentLocationType,
                                 TimestampUtc = DateTime.UtcNow
                             };
 
@@ -269,6 +261,91 @@ public class Worker : BackgroundService
         {
             await _hubConnection.InvokeAsync("ReportExecutionResult", result);
         }
+    }
+
+    private record ServerEndpointCandidate(string Url, string LocationType, bool IsLocal);
+
+    private async Task<(string Url, string LocationType)> ResolveActiveServerEndpointAsync(CancellationToken stoppingToken)
+    {
+        var configuredRemoteUrl = _config.GetValue<string>("ServerUrl")?.Trim();
+        var configuredLocalUrl = _config.GetValue<string>("LocalServerUrl")?.Trim();
+
+        var candidates = new List<ServerEndpointCandidate>();
+
+        // 1. If LocalServerUrl is explicitly configured with an IP, add it first
+        if (!string.IsNullOrEmpty(configuredLocalUrl) && !configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            candidates.Add(new ServerEndpointCandidate(configuredLocalUrl, "In Office", true));
+        }
+
+        // 2. Try fast UDP Auto-Discovery (Office Network broadcast)
+        if (string.IsNullOrEmpty(configuredLocalUrl) || configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var discovered = await _udpDiscoveryClient.TryDiscoverServerUrlAsync(TimeSpan.FromSeconds(1.5), stoppingToken);
+                if (!string.IsNullOrEmpty(discovered) && !candidates.Any(c => c.Url.Equals(discovered, StringComparison.OrdinalIgnoreCase)))
+                {
+                    candidates.Add(new ServerEndpointCandidate(discovered, "In Office", true));
+                }
+            }
+            catch { }
+        }
+
+        // 3. Add Remote / Public Static IP or Cloudflare URL
+        if (!string.IsNullOrEmpty(configuredRemoteUrl) && !configuredRemoteUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!candidates.Any(c => c.Url.Equals(configuredRemoteUrl, StringComparison.OrdinalIgnoreCase)))
+            {
+                candidates.Add(new ServerEndpointCandidate(configuredRemoteUrl, "Work From Home", false));
+            }
+        }
+
+        if (candidates.Count == 0)
+        {
+            _logger.LogWarning("No specific server URL found, falling back to full UDP discovery...");
+            var autoUrl = await _udpDiscoveryClient.DiscoverServerUrlAsync(stoppingToken);
+            return (autoUrl, "In Office");
+        }
+
+        // Fast TCP probe to find the reachable endpoint without blocking
+        foreach (var candidate in candidates)
+        {
+            _logger.LogInformation("Testing reachability for [{Location}] server: {Url}...", candidate.LocationType, candidate.Url);
+            if (await IsTcpReachableAsync(candidate.Url, TimeSpan.FromSeconds(1.5)))
+            {
+                _logger.LogInformation("Endpoint is reachable: {Url} ({Location})", candidate.Url, candidate.LocationType);
+                return (candidate.Url, candidate.LocationType);
+            }
+            else
+            {
+                _logger.LogWarning("Endpoint not responding: {Url}. Checking next candidate...", candidate.Url);
+            }
+        }
+
+        // If none responded to quick TCP probe, return the first one to let SignalR try full HTTP negotiation
+        var defaultCandidate = candidates.FirstOrDefault(c => !c.IsLocal) ?? candidates[0];
+        return (defaultCandidate.Url, defaultCandidate.LocationType);
+    }
+
+    private static async Task<bool> IsTcpReachableAsync(string url, TimeSpan timeout)
+    {
+        try
+        {
+            var uri = new Uri(url);
+            using var tcp = new TcpClient();
+            var connectTask = tcp.ConnectAsync(uri.Host, uri.Port);
+            var completed = await Task.WhenAny(connectTask, Task.Delay(timeout));
+            if (completed == connectTask && tcp.Connected)
+            {
+                return true;
+            }
+        }
+        catch
+        {
+            // TCP connect failed or timed out
+        }
+        return false;
     }
 
     private static string GetLocalIpAddress()

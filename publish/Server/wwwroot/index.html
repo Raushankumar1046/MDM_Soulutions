@@ -191,6 +191,28 @@
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
+    .badge-loc {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-loc.office {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+    }
+    .badge-loc.remote {
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.2);
+    }
+
     .details-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -660,11 +682,17 @@
         <div class="header-stats">
           <div class="stat-pill">
             <div class="stat-dot green" id="onlineDot"></div>
-            <span>Online Endpoints: <strong id="onlineCount">0</strong></span>
+            <span>Online: <strong id="onlineCount">0</strong></span>
+          </div>
+          <div class="stat-pill">
+            <span>🏢 Office: <strong id="officeCount" style="color: #6ee7b7;">0</strong></span>
+          </div>
+          <div class="stat-pill">
+            <span>🏠 WFH: <strong id="wfhCount" style="color: #d8b4fe;">0</strong></span>
           </div>
           <div class="stat-pill">
             <div class="stat-dot blue"></div>
-            <span>Total Registered: <strong id="totalCount">0</strong></span>
+            <span>Total: <strong id="totalCount">0</strong></span>
           </div>
         </div>
         <div class="user-profile-bar">
@@ -1059,7 +1087,12 @@
     function renderDevices(devices) {
       const grid = document.getElementById('devicesGrid');
       const onlineCount = devices.filter(d => d.isOnline).length;
+      const officeCount = devices.filter(d => d.isOnline && d.networkLocation === 'In Office').length;
+      const wfhCount = devices.filter(d => d.isOnline && d.networkLocation !== 'In Office').length;
+
       document.getElementById('onlineCount').textContent = onlineCount;
+      if (document.getElementById('officeCount')) document.getElementById('officeCount').textContent = officeCount;
+      if (document.getElementById('wfhCount')) document.getElementById('wfhCount').textContent = wfhCount;
       document.getElementById('totalCount').textContent = devices.length;
 
       if (!devices || devices.length === 0) {
@@ -1067,15 +1100,25 @@
         return;
       }
 
-      grid.innerHTML = devices.map(d => `
+      grid.innerHTML = devices.map(d => {
+        const isOffice = (d.networkLocation === 'In Office');
+        const locLabel = isOffice ? '🏢 In Office' : '🏠 Work From Home';
+        const locClass = isOffice ? 'office' : 'remote';
+
+        return `
         <div class="card">
           <div class="card-header">
             <div class="host-title">
               💻 <span>${escapeHtml(d.machineName)}</span>
             </div>
-            <span class="status-badge ${d.isOnline ? 'online' : 'offline'}">
-              ${d.isOnline ? 'Online' : 'Offline'}
-            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="badge-loc ${locClass}" title="Location: ${locLabel}">
+                ${locLabel}
+              </span>
+              <span class="status-badge ${d.isOnline ? 'online' : 'offline'}">
+                ${d.isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
           </div>
 
           <div class="details-row">

@@ -20,6 +20,7 @@ public class EndpointDeviceRecord
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? Isp { get; set; }
+    public string NetworkLocation { get; set; } = "In Office";
     public bool IsOnline { get; set; }
     public DateTime LastSeenUtc { get; set; } = DateTime.UtcNow;
 }
@@ -86,6 +87,7 @@ public class LiteDbService : IDisposable
                     Latitude = heartbeat.Latitude,
                     Longitude = heartbeat.Longitude,
                     Isp = heartbeat.Isp,
+                    NetworkLocation = heartbeat.NetworkLocation ?? "In Office",
                     IsOnline = true,
                     LastSeenUtc = DateTime.UtcNow
                 };
@@ -106,6 +108,7 @@ public class LiteDbService : IDisposable
                 existing.Latitude = heartbeat.Latitude ?? existing.Latitude;
                 existing.Longitude = heartbeat.Longitude ?? existing.Longitude;
                 existing.Isp = heartbeat.Isp ?? existing.Isp;
+                existing.NetworkLocation = heartbeat.NetworkLocation ?? existing.NetworkLocation;
                 existing.IsOnline = true;
                 existing.LastSeenUtc = DateTime.UtcNow;
                 _devices.Update(existing);

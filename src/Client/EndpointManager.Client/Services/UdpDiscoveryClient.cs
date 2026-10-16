@@ -74,4 +74,37 @@ public class UdpDiscoveryClient
 
         throw new OperationCanceledException(cancellationToken);
     }
+
+    public async Task<string?> TryDiscoverServerUrlAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var udpClient = new UdpClient();
+            udpClient.EnableBroadcast = true;
+            udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+
+            var discoverBytes = Encoding.UTF8.GetBytes(DiscoveryConstants.DiscoverMessage);
+            var broadcastEndpoint = new IPEndPoint(IPAddress.Broadcast, DiscoveryConstants.UdpPort);
+
+            await udpClient.SendAsync(discoverBytes, discoverBytes.Length, broadcastEndpoint);
+            
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(timeout);
+
+            var result = await udpClient.ReceiveAsync(timeoutCts.Token);
+            var message = Encoding.UTF8.GetString(result.Buffer);
+            if (message.StartsWith(DiscoveryConstants.AnnouncePrefix))
+            {
+                var serverUrl = message.Substring(DiscoveryConstants.AnnouncePrefix.Length).Trim();
+                _logger.LogInformation("UDP Discovery found local server: {Url}", serverUrl);
+                return serverUrl;
+            }
+        }
+        catch
+        {
+            // UDP broadcast didn't receive response within timeout
+        }
+        return null;
+    }
 }

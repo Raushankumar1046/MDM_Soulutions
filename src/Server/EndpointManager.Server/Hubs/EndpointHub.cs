@@ -60,13 +60,28 @@ public class EndpointHub : Hub<IEndpointClientContract>
             }
         }
 
+        // Ensure NetworkLocation is assigned
+        if (string.IsNullOrWhiteSpace(heartbeat.NetworkLocation))
+        {
+            var httpCtx = Context.GetHttpContext();
+            var remoteIp = httpCtx?.Connection.RemoteIpAddress?.ToString() ?? "";
+            if (remoteIp.StartsWith("192.168.") || remoteIp.StartsWith("10.") || remoteIp.StartsWith("172.") || remoteIp == "127.0.0.1" || remoteIp == "::1")
+            {
+                heartbeat.NetworkLocation = "In Office";
+            }
+            else
+            {
+                heartbeat.NetworkLocation = "Work From Home";
+            }
+        }
+
         ConnectedClients[Context.ConnectionId] = heartbeat;
 
         // Persist to LiteDB
         _dbService.UpsertHeartbeat(heartbeat, Context.ConnectionId);
 
-        _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans}", 
-            heartbeat.MachineName, heartbeat.IpAddress, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted);
+        _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Loc}) ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans}", 
+            heartbeat.MachineName, heartbeat.IpAddress, heartbeat.NetworkLocation, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted);
 
         return Task.CompletedTask;
     }
