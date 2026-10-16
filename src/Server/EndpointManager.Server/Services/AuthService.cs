@@ -46,10 +46,30 @@ public class AuthService
         try
         {
             var admin = _usersCollection.FindById("admin");
+            var flagPath = Path.Combine(AppContext.BaseDirectory, "reset_admin.flag");
+            if (admin == null || File.Exists(flagPath))
+            {
+                ResetAdminPassword("admin123");
+                if (File.Exists(flagPath))
+                {
+                    try { File.Delete(flagPath); } catch { }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize default admin user in LiteDB.");
+        }
+    }
+
+    public void ResetAdminPassword(string newPassword = "admin123")
+    {
+        try
+        {
+            var (hash, salt) = HashPassword(newPassword);
+            var admin = _usersCollection.FindById("admin");
             if (admin == null)
             {
-                // Create temporary default credentials: admin / admin123
-                var (hash, salt) = HashPassword("admin123");
                 admin = new AdminUserRecord
                 {
                     Username = "admin",
@@ -58,12 +78,18 @@ public class AuthService
                     CreatedAtUtc = DateTime.UtcNow
                 };
                 _usersCollection.Insert(admin);
-                _logger.LogWarning("Created initial temporary admin account: Username='admin', Password='admin123'. Change this password after initial login.");
             }
+            else
+            {
+                admin.PasswordHash = hash;
+                admin.Salt = salt;
+                _usersCollection.Update(admin);
+            }
+            _logger.LogWarning("Admin password has been set to: '{Password}'", newPassword);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize default admin user in LiteDB.");
+            _logger.LogError(ex, "Failed to set admin password.");
         }
     }
 

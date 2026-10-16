@@ -42,6 +42,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+if (args.Contains("--reset-admin"))
+{
+    var auth = app.Services.GetRequiredService<AuthService>();
+    auth.ResetAdminPassword("admin123");
+    Console.WriteLine("==========================================================");
+    Console.WriteLine("  SUCCESS: Admin password has been reset to: admin123");
+    Console.WriteLine("==========================================================");
+    return;
+}
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseCors();
