@@ -12,6 +12,12 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot")
 });
 
+// Enable Windows Service background execution
+builder.Host.UseWindowsService();
+
+// Bind to all network interfaces on port 5000 by default
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
 // Register Embedded LiteDB Service
 builder.Services.AddSingleton<LiteDbService>();
 
