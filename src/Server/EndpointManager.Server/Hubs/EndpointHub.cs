@@ -10,14 +10,24 @@ public class EndpointHub : Hub<IEndpointClientContract>
 {
     private readonly ILogger<EndpointHub> _logger;
     private readonly LiteDbService _dbService;
+    private readonly AuthService _authService;
 
     // Fast in-memory map of active connections: ConnectionId -> ClientHeartbeat
     public static readonly ConcurrentDictionary<string, ClientHeartbeat> ConnectedClients = new();
 
-    public EndpointHub(ILogger<EndpointHub> logger, LiteDbService dbService)
+    public EndpointHub(ILogger<EndpointHub> logger, LiteDbService dbService, AuthService authService)
     {
         _logger = logger;
         _dbService = dbService;
+        _authService = authService;
+    }
+
+    private bool IsAuthorizedAdmin()
+    {
+        var httpCtx = Context.GetHttpContext();
+        if (httpCtx == null) return false;
+        var token = AuthService.ExtractBearerToken(httpCtx.Request);
+        return _authService.ValidateToken(token, out _);
     }
 
     public override Task OnConnectedAsync()
@@ -102,6 +112,12 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // === Remote Terminal Relay ===
     public async Task SendTerminalCommand(string targetConnectionId, TerminalCommand command)
     {
+        if (!IsAuthorizedAdmin())
+        {
+            _logger.LogWarning("Unauthorized attempt to dispatch Terminal Command.");
+            throw new HubException("Unauthorized: Valid authentication token required.");
+        }
+
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
         _logger.LogInformation("Admin dispatching Terminal Command to [{Host}] ({Id}): {Cmd}", hostName, resolvedId, command.CommandText);
@@ -119,6 +135,12 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // === Remote Screen Stream & Input Relay ===
     public async Task StartRemoteScreen(string targetConnectionId)
     {
+        if (!IsAuthorizedAdmin())
+        {
+            _logger.LogWarning("Unauthorized attempt to start Remote Screen Session.");
+            throw new HubException("Unauthorized: Valid authentication token required.");
+        }
+
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
         _logger.LogInformation("Starting Remote Screen Session -> [{Host}] ({Id}) for Admin [{AdminId}]", hostName, resolvedId, Context.ConnectionId);
@@ -129,6 +151,12 @@ public class EndpointHub : Hub<IEndpointClientContract>
 
     public async Task StopRemoteScreen(string targetConnectionId)
     {
+        if (!IsAuthorizedAdmin())
+        {
+            _logger.LogWarning("Unauthorized attempt to stop Remote Screen Session.");
+            throw new HubException("Unauthorized: Valid authentication token required.");
+        }
+
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
         _logger.LogInformation("Stopping Remote Screen Session -> [{Host}] ({Id})", hostName, resolvedId);
@@ -144,6 +172,12 @@ public class EndpointHub : Hub<IEndpointClientContract>
 
     public async Task SendRemoteInput(string targetConnectionId, RemoteInputEvent input)
     {
+        if (!IsAuthorizedAdmin())
+        {
+            _logger.LogWarning("Unauthorized attempt to send Remote Input.");
+            throw new HubException("Unauthorized: Valid authentication token required.");
+        }
+
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         await Clients.Client(resolvedId).ProcessRemoteInput(input);
     }

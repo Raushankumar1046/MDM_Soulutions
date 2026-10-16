@@ -21,6 +21,9 @@ builder.WebHost.UseUrls("http://0.0.0.0:5000");
 // Register Embedded LiteDB Service
 builder.Services.AddSingleton<LiteDbService>();
 
+// Register Authentication & Session Service
+builder.Services.AddSingleton<AuthService>();
+
 // Register SignalR with high message size limit for Screen Capture frames (10 MB)
 builder.Services.AddSignalR(options =>
 {
@@ -50,9 +53,56 @@ app.MapHub<EndpointHub>("/hubs/endpoints", options =>
     options.TransportMaxBufferSize = 10 * 1024 * 1024;
 });
 
-// API: List all devices (Online & Offline)
-app.MapGet("/api/devices", (LiteDbService db) =>
+// === Authentication Endpoints ===
+app.MapPost("/api/auth/login", (LoginRequest req, AuthService auth) =>
 {
+    var (success, token, message) = auth.Login(req.Username, req.Password);
+    if (!success)
+    {
+        return Results.Json(new { Success = false, Message = message }, statusCode: 401);
+    }
+    return Results.Ok(new { Success = true, Token = token, Username = req.Username.Trim().ToLowerInvariant(), ExpiresInHours = 24 });
+});
+
+app.MapGet("/api/auth/verify", (HttpRequest req, AuthService auth) =>
+{
+    var token = AuthService.ExtractBearerToken(req);
+    if (auth.ValidateToken(token, out var username))
+    {
+        return Results.Ok(new { Valid = true, Username = username });
+    }
+    return Results.Unauthorized();
+});
+
+app.MapPost("/api/auth/logout", (HttpRequest req, AuthService auth) =>
+{
+    var token = AuthService.ExtractBearerToken(req);
+    auth.Logout(token);
+    return Results.Ok(new { Success = true });
+});
+
+app.MapPost("/api/auth/change-password", (ChangePasswordRequest req, HttpRequest httpReq, AuthService auth) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out var username))
+    {
+        return Results.Unauthorized();
+    }
+    var (success, message) = auth.ChangePassword(username, req.CurrentPassword, req.NewPassword);
+    return success ? Results.Ok(new { Success = true, Message = message }) : Results.BadRequest(new { Success = false, Message = message });
+});
+
+// === Protected Management APIs (Requires Bearer Token) ===
+
+// API: List all devices (Online & Offline)
+app.MapGet("/api/devices", (HttpRequest httpReq, AuthService auth, LiteDbService db) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _))
+    {
+        return Results.Unauthorized();
+    }
+
     var devices = db.GetAllDevices();
     // Reconcile online state with current memory connections
     foreach (var d in devices)
@@ -64,17 +114,31 @@ app.MapGet("/api/devices", (LiteDbService db) =>
 });
 
 // API: Recent Audit Trail
-app.MapGet("/api/audit", (LiteDbService db) =>
+app.MapGet("/api/audit", (HttpRequest httpReq, AuthService auth, LiteDbService db) =>
 {
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _))
+    {
+        return Results.Unauthorized();
+    }
+
     return Results.Ok(db.GetRecentAuditLogs(30));
 });
 
 // API: Dispatch Remote Policy Command
 app.MapPost("/api/policies/dispatch", async (
     PolicyDispatchRequest request, 
+    HttpRequest httpReq,
+    AuthService auth,
     LiteDbService db,
     IHubContext<EndpointHub, IEndpointClientContract> hubContext) =>
 {
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _))
+    {
+        return Results.Unauthorized();
+    }
+
     var cmd = new PolicyCommand
     {
         Policy = (PolicyType)request.Policy,
@@ -114,6 +178,18 @@ app.MapPost("/api/policies/dispatch", async (
 });
 
 app.Run();
+
+public class LoginRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class ChangePasswordRequest
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}
 
 public class PolicyDispatchRequest
 {

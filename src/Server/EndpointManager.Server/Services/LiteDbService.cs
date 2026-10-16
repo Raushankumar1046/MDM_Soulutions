@@ -39,6 +39,7 @@ public class PolicyAuditRecord
 public class LiteDbService : IDisposable
 {
     private readonly LiteDatabase _db;
+    public LiteDatabase Database => _db;
     private readonly ILiteCollection<EndpointDeviceRecord> _devices;
     private readonly ILiteCollection<PolicyAuditRecord> _auditLogs;
     private readonly ILogger<LiteDbService> _logger;

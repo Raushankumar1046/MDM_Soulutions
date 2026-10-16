@@ -459,10 +459,195 @@
       justify-content: space-between;
       flex-wrap: wrap;
     }
+
+    /* Authentication & Login Screen Styles */
+    .login-wrapper {
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(22, 29, 47, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(59, 130, 246, 0.15);
+      animation: fadeInCard 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #60a5fa, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    }
+
+    .login-hint {
+      margin-top: 24px;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px dashed rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #93c5fd;
+      line-height: 1.5;
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-profile-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Login Screen -->
+  <div id="loginView" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          🛡️ CyberShield MDM
+        </div>
+        <p class="login-sub">Administrator Access &amp; Gateway Authentication</p>
+      </div>
+
+      <div id="loginError" class="login-error"></div>
+
+      <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+        <div class="form-group">
+          <label class="form-label">Admin Username</label>
+          <input type="text" class="form-input" id="loginUsername" placeholder="e.g. admin" required autocomplete="username" autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+          <span>🔐 Sign In to Console</span>
+        </button>
+      </form>
+
+      <div class="login-hint">
+        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>⚡ Default Temporary Setup Credentials:</span>
+        </div>
+        <div>Username: <strong style="color: #fff;">admin</strong></div>
+        <div>Password: <strong style="color: #fff;">admin123</strong></div>
+        <div style="margin-top: 6px; font-size: 11px; color: #94a3b8;">
+          Saved securely in server LiteDB. You can update this password anytime via the header key icon after signing in.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Container -->
+  <div class="container" id="dashboardView" style="display: none;">
     <header>
       <div class="logo-section">
         <h1>
@@ -471,14 +656,21 @@
         </h1>
         <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Lightweight Centralized Endpoint Management & Security Gateway</p>
       </div>
-      <div class="header-stats">
-        <div class="stat-pill">
-          <div class="stat-dot green" id="onlineDot"></div>
-          <span>Online Endpoints: <strong id="onlineCount">0</strong></span>
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <div class="header-stats">
+          <div class="stat-pill">
+            <div class="stat-dot green" id="onlineDot"></div>
+            <span>Online Endpoints: <strong id="onlineCount">0</strong></span>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-dot blue"></div>
+            <span>Total Registered: <strong id="totalCount">0</strong></span>
+          </div>
         </div>
-        <div class="stat-pill">
-          <div class="stat-dot blue"></div>
-          <span>Total Registered: <strong id="totalCount">0</strong></span>
+        <div class="user-profile-bar">
+          <span style="font-size: 13px; color: #93c5fd; font-weight: 600;">👤 <span id="headerUsername">admin</span></span>
+          <button class="btn btn-sm" onclick="openChangePasswordModal()" title="Change Admin Password">🔑 Password</button>
+          <button class="btn btn-sm btn-danger" onclick="logout()" title="Logout">🚪 Logout</button>
         </div>
       </div>
     </header>
@@ -593,13 +785,265 @@
     </div>
   </div>
 
+  <!-- Modal: Change Admin Password -->
+  <div class="modal-backdrop" id="changePasswordModal">
+    <div class="modal-window" style="width: 420px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🔑 Change Admin Password</span>
+        </div>
+        <button class="modal-close" onclick="closeChangePasswordModal()">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <div id="changePassAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" class="form-input" id="currentPassInput" placeholder="Current password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password (min 6 characters)</label>
+          <input type="password" class="form-input" id="newPassInput" placeholder="New strong password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" class="form-input" id="confirmPassInput" placeholder="Confirm new password" onkeydown="if(event.key==='Enter') submitChangePassword()">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button class="btn" onclick="closeChangePasswordModal()">Cancel</button>
+          <button class="btn btn-success" id="btnSubmitChangePass" onclick="submitChangePassword()">Save Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/signalr.min.js"></script>
   <script>
+    const TOKEN_KEY = 'cybershield_admin_token';
+    const USER_KEY = 'cybershield_admin_user';
+    let pollIntervalId = null;
+
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY);
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        throw new Error("Missing authentication token. Please login.");
+      }
+      options.headers = options.headers || {};
+      if (options.headers instanceof Headers) {
+        options.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(url, options);
+      if (res.status === 401) {
+        console.warn("401 Unauthorized encountered from:", url);
+        logout(true);
+        throw new Error("Session expired or unauthorized. Please login again.");
+      }
+      return res;
+    }
+
+    function showLogin(reason) {
+      document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('loginView').style.display = 'flex';
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+        pollIntervalId = null;
+      }
+      const errBox = document.getElementById('loginError');
+      if (reason) {
+        errBox.textContent = reason;
+        errBox.style.display = 'flex';
+      } else {
+        errBox.style.display = 'none';
+      }
+    }
+
+    function showDashboard(username) {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'block';
+      const userEl = document.getElementById('headerUsername');
+      if (userEl) userEl.textContent = username || localStorage.getItem(USER_KEY) || 'admin';
+
+      if (!pollIntervalId) {
+        fetchData();
+        pollIntervalId = setInterval(fetchData, 3000);
+      }
+    }
+
+    async function handleLogin() {
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const errBox = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+
+      errBox.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Authenticating...</span>';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: usernameInput.value.trim(),
+            password: passwordInput.value
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Authentication failed');
+        }
+
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, data.username);
+        passwordInput.value = '';
+        showDashboard(data.username);
+        initSignalR();
+      } catch (err) {
+        errBox.textContent = '❌ ' + (err.message || 'Login failed');
+        errBox.style.display = 'flex';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🔐 Sign In to Console</span>';
+      }
+    }
+
+    async function logout(dueToExpiry = false) {
+      const token = getToken();
+      if (token) {
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (_) {}
+      }
+
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+
+      if (hubConn && hubConn.state === signalR.HubConnectionState.Connected) {
+        try { hubConn.stop(); } catch (_) {}
+      }
+
+      showLogin(dueToExpiry ? '⚠️ Your session has expired or is invalid. Please sign in again.' : null);
+    }
+
+    async function checkAuthAndInit() {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/verify', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.valid) {
+            showDashboard(data.username);
+            initSignalR();
+            return;
+          }
+        }
+        logout(true);
+      } catch (err) {
+        console.error("Auth verification failed:", err);
+        showLogin();
+      }
+    }
+
+    function openChangePasswordModal() {
+      document.getElementById('currentPassInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmPassInput').value = '';
+      const alertBox = document.getElementById('changePassAlert');
+      alertBox.style.display = 'none';
+      document.getElementById('changePasswordModal').classList.add('active');
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('changePasswordModal').classList.remove('active');
+    }
+
+    async function submitChangePassword() {
+      const currentPassword = document.getElementById('currentPassInput').value;
+      const newPassword = document.getElementById('newPassInput').value;
+      const confirmPassword = document.getElementById('confirmPassInput').value;
+      const alertBox = document.getElementById('changePassAlert');
+      const btn = document.getElementById('btnSubmitChangePass');
+
+      alertBox.style.display = 'none';
+
+      if (!currentPassword) {
+        alertBox.textContent = 'Please enter your current password.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+      if (!newPassword || newPassword.length < 6) {
+        alertBox.textContent = 'New password must be at least 6 characters.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alertBox.textContent = 'New passwords do not match.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const res = await authFetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to update password');
+        }
+
+        alertBox.textContent = '✅ Password updated successfully!';
+        alertBox.style.background = 'rgba(16,185,129,0.2)';
+        alertBox.style.color = '#6ee7b7';
+        alertBox.style.display = 'block';
+        setTimeout(() => {
+          closeChangePasswordModal();
+        }, 1200);
+      } catch (err) {
+        alertBox.textContent = '❌ ' + (err.message || 'Failed to update password');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Password';
+      }
+    }
+
     async function fetchData() {
       try {
         const [devicesRes, auditRes] = await Promise.all([
-          fetch('/api/devices'),
-          fetch('/api/audit')
+          authFetch('/api/devices'),
+          authFetch('/api/audit')
         ]);
         
         const devices = await devicesRes.json();
@@ -737,7 +1181,7 @@
 
     async function togglePolicy(machineName, connectionId, policyType, enable) {
       try {
-        await fetch(`/api/policies/dispatch`, {
+        await authFetch(`/api/policies/dispatch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -756,7 +1200,7 @@
     async function broadcastPolicy(policyType, enable) {
       if (!confirm(`Are you sure you want to enforce this policy fleetwide across ALL laptops?`)) return;
       try {
-        await fetch(`/api/policies/dispatch`, {
+        await authFetch(`/api/policies/dispatch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -774,7 +1218,7 @@
     async function sendRemoteAction(machineName, connectionId, actionType, actionName) {
       if (!confirm(`Are you sure you want to execute [${actionName}] on ${machineName}?`)) return;
       try {
-        await fetch('/api/policies/dispatch', {
+        await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -794,7 +1238,7 @@
       const text = prompt(`Enter notification message to display on ${machineName}'s screen:`, "IT Security Notice: Please save your work and connect to company network.");
       if (!text) return;
       try {
-        await fetch('/api/policies/dispatch', {
+        await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -814,7 +1258,7 @@
     async function broadcastLock() {
       if (!confirm("Are you sure you want to LOCK all connected laptops simultaneously?")) return;
       try {
-        await fetch('/api/policies/dispatch', {
+        await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ policy: 10, enableRestriction: true })
@@ -829,7 +1273,7 @@
       const text = prompt("Enter broadcast notification message for ALL laptops:", "Company Notice: Important IT security maintenance in progress.");
       if (!text) return;
       try {
-        await fetch('/api/policies/dispatch', {
+        await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ policy: 12, enableRestriction: true, payload: text })
@@ -872,7 +1316,9 @@
       }
 
       hubConn = new signalR.HubConnectionBuilder()
-        .withUrl('/hubs/endpoints')
+        .withUrl('/hubs/endpoints', {
+          accessTokenFactory: () => getToken() || ''
+        })
         .withAutomaticReconnect()
         .build();
 
@@ -1131,10 +1577,8 @@
       });
     }
 
-    // Auto-refresh every 3 seconds for real-time responsiveness
-    fetchData();
-    setInterval(fetchData, 3000);
-    initSignalR();
+    // Verify authentication and initialize console
+    checkAuthAndInit();
   </script>
 </body>
 </html>
