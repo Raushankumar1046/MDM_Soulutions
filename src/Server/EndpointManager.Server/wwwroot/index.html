@@ -326,6 +326,207 @@
       font-size: 14px;
     }
 
+    /* Main Navigation Tabs */
+    .main-nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav-tab.active {
+      background: rgba(59, 130, 246, 0.16);
+      border-color: #3b82f6;
+      color: #60a5fa;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Filter & Search Bar */
+    .filter-search-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .search-input-box {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px 8px 34px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-input-box input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-icon-inside {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .status-filter-pills {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .filter-pill-btn.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Scalable Enterprise Device Table (100+ clients) */
+    .devices-table-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      margin-bottom: 24px;
+    }
+
+    .device-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .device-table th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .device-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .device-table tr {
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+
+    .device-table tr:hover {
+      background: rgba(59, 130, 246, 0.09);
+    }
+
+    .device-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-host-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .table-host-name {
+      font-weight: 700;
+      color: #f8fafc;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .device-table tr:hover .table-host-name {
+      color: #38bdf8;
+    }
+
+    .policy-mini-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+
+    .policy-mini-badge.blocked {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .policy-mini-badge.allowed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
     /* Modal Backdrop & Windows */
     .modal-backdrop {
       position: fixed;
@@ -445,41 +646,97 @@
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
 
-    /* Remote Desktop Screen Modal */
-    .remote-desktop-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-      background: #060911;
+    /* AnyDesk-Style Dedicated Full-Screen Remote Desktop Window */
+    #remoteDesktopModal.modal-backdrop {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #000 !important;
+      align-items: stretch !important;
+      justify-content: stretch !important;
+      z-index: 99999 !important;
+      overflow: hidden !important;
     }
 
+    #remoteDesktopModal .modal-window {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background: #030712 !important;
+      box-shadow: none !important;
+    }
+
+    .remote-desktop-header {
+      height: 44px;
+      min-height: 44px;
+      padding: 0 16px;
+      background: #0b1329;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .remote-desktop-body {
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 !important;
+      height: calc(100vh - 44px) !important;
+      width: 100vw !important;
+      background: #000 !important;
+      overflow: hidden !important;
+      position: relative !important;
+    }
+
+    /* Canvas Viewport Container */
     .canvas-container {
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      overflow: hidden;
       background: #000;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
       cursor: crosshair;
-    }
-
-    #remoteCanvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      max-height: 68vh;
-      background: #000;
-    }
-
-    .remote-controls-bar {
-      display: flex;
-      gap: 10px;
+      flex: 1;
       width: 100%;
+      height: 100%;
+      user-select: none;
+    }
+
+    /* View Mode: Fit Screen (Default: Scales cleanly so entire desktop + taskbar are 100% visible) */
+    .canvas-container.mode-fit {
+      display: flex;
+      justify-content: center;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      overflow: hidden;
+    }
+
+    .canvas-container.mode-fit #remoteCanvas {
+      max-width: 100vw;
+      max-height: calc(100vh - 44px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      margin: auto;
+    }
+
+    /* View Mode: 1:1 Scroll (Full native pixel resolution with horizontal and vertical scrollbars) */
+    .canvas-container.mode-scroll {
+      overflow: auto !important;
+      display: block !important;
+    }
+
+    .canvas-container.mode-scroll #remoteCanvas {
+      max-width: none !important;
+      max-height: none !important;
+      width: auto !important;
+      height: auto !important;
+      display: block !important;
+      margin: 0;
     }
 
     /* Authentication & Login Screen Styles */
@@ -703,41 +960,339 @@
       </div>
     </header>
 
-    <div class="global-actions">
-      <span style="font-size: 13px; color: var(--text-muted); align-self: center; margin-right: 8px;">Fleet Actions:</span>
-      <button class="btn btn-danger" onclick="broadcastPolicy(1, true)">🔒 Block USB Fleetwide</button>
-      <button class="btn btn-success" onclick="broadcastPolicy(1, false)">🔓 Unblock USB Fleetwide</button>
-      <button class="btn btn-danger" onclick="broadcastPolicy(2, true)">🚫 Block Software Install</button>
-      <button class="btn btn-success" onclick="broadcastPolicy(2, false)">✅ Allow Software Install</button>
-      <button class="btn btn-danger" onclick="broadcastPolicy(3, true)">📁 Restrict External Transfer</button>
-      <button class="btn btn-success" onclick="broadcastPolicy(3, false)">📂 Allow External Transfer</button>
-      <button class="btn" onclick="broadcastLock()">🔒 Lock All</button>
-      <button class="btn" onclick="broadcastMessagePrompt()">📢 Message All</button>
-      <button class="btn" onclick="fetchData()" style="margin-left: auto;">🔄 Refresh Now</button>
+    <!-- Main Navigation Tabs -->
+    <div class="main-nav-tabs">
+      <button class="nav-tab active" id="tabBtnEndpoints" onclick="switchMainTab('endpoints')">
+        <span>💻 Managed Endpoints</span>
+        <span class="status-badge online" id="tabEndpointCount" style="padding: 2px 7px; font-size: 11px;">0</span>
+      </button>
+      <button class="nav-tab" id="tabBtnAudit" onclick="switchMainTab('audit')">
+        <span>📋 Policy Execution Audit Logs</span>
+        <span class="status-badge" id="tabAuditCount" style="padding: 2px 7px; font-size: 11px; background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3);">0</span>
+      </button>
+      <button class="nav-tab" id="tabBtnWebFilter" onclick="switchMainTab('webfilter')">
+        <span>🌐 Web Filter Blacklist</span>
+        <span class="status-badge" id="tabWebFilterCount" style="padding: 2px 7px; font-size: 11px; background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3);">0</span>
+      </button>
     </div>
 
-    <!-- Active Laptops Grid -->
-    <div class="grid" id="devicesGrid">
-      <div class="empty-state">Connecting to Server Gateway...</div>
+    <!-- Section: Endpoints (List & Grid) -->
+    <div id="endpointsSection">
+      <!-- Fleetwide Quick Action Toolbar -->
+      <div class="global-actions">
+        <span style="font-size: 13px; color: var(--text-muted); align-self: center; margin-right: 8px;">Fleet Actions:</span>
+        <button class="btn btn-danger" onclick="broadcastPolicy(1, true)">🔒 Block USB Fleetwide</button>
+        <button class="btn btn-success" onclick="broadcastPolicy(1, false)">🔓 Unblock USB Fleetwide</button>
+        <button class="btn btn-danger" onclick="broadcastPolicy(2, true)">🚫 Block Software Install</button>
+        <button class="btn btn-success" onclick="broadcastPolicy(2, false)">✅ Allow Software Install</button>
+        <button class="btn btn-danger" onclick="broadcastPolicy(3, true)">📁 Restrict External Transfer</button>
+        <button class="btn btn-success" onclick="broadcastPolicy(3, false)">📂 Allow External Transfer</button>
+        <button class="btn" onclick="broadcastLock()">🔒 Lock All</button>
+        <button class="btn" onclick="broadcastMessagePrompt()">📢 Message All</button>
+        <button class="btn" onclick="fetchData()" style="margin-left: auto;">🔄 Refresh Now</button>
+      </div>
+
+      <!-- Filter & Search Toolbar -->
+      <div class="filter-search-bar">
+        <div class="search-input-box">
+          <span class="search-icon-inside">🔍</span>
+          <input type="text" id="deviceSearchInput" placeholder="Filter by hostname, user, IP, or location..." oninput="handleDeviceSearchFilter()">
+        </div>
+        <div class="status-filter-pills">
+          <button class="filter-pill-btn active" id="filterAll" onclick="setDeviceStatusFilter('all')">All (<span id="filterCountAll">0</span>)</button>
+          <button class="filter-pill-btn" id="filterOnline" onclick="setDeviceStatusFilter('online')">🟢 Online (<span id="filterCountOnline">0</span>)</button>
+          <button class="filter-pill-btn" id="filterOffice" onclick="setDeviceStatusFilter('office')">🏢 In Office (<span id="filterCountOffice">0</span>)</button>
+          <button class="filter-pill-btn" id="filterWfh" onclick="setDeviceStatusFilter('wfh')">🏠 WFH (<span id="filterCountWfh">0</span>)</button>
+          <button class="filter-pill-btn" id="filterOffline" onclick="setDeviceStatusFilter('offline')">🔴 Offline (<span id="filterCountOffline">0</span>)</button>
+        </div>
+        <div style="display: flex; gap: 4px; align-items: center; margin-left: auto;">
+          <button class="btn btn-sm btn-primary" id="viewModeTableBtn" onclick="setDeviceLayout('table')" title="Compact Table List (Recommended for 100+ endpoints)">☰ List View</button>
+          <button class="btn btn-sm" id="viewModeGridBtn" onclick="setDeviceLayout('grid')" title="Full Cards Grid View">⊞ Grid View</button>
+        </div>
+      </div>
+
+      <!-- Scalable Enterprise Table View (Default) -->
+      <div class="devices-table-wrap" id="devicesTableWrap">
+        <table class="device-table">
+          <thead>
+            <tr>
+              <th style="width: 250px;">Endpoint Laptop</th>
+              <th style="width: 140px;">Status</th>
+              <th style="width: 150px;">Location</th>
+              <th>IP &amp; User</th>
+              <th>Enforced Policies</th>
+              <th style="width: 120px;">Last Seen</th>
+              <th style="width: 130px; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="devicesTableBody">
+            <tr><td colspan="7" class="empty-state">Loading endpoint devices...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Active Laptops Grid View (Alternative toggle) -->
+      <div class="grid" id="devicesGrid" style="display: none;">
+        <div class="empty-state">Connecting to Server Gateway...</div>
+      </div>
     </div>
 
-    <!-- Policy Audit Trail -->
-    <div class="audit-card">
-      <h3 style="font-size: 16px; font-weight: 600;">📋 Recent Policy Execution Audit Logs</h3>
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Timestamp (Local)</th>
-            <th>Endpoint Host</th>
-            <th>Policy</th>
-            <th>Status</th>
-            <th>Execution Details</th>
-          </tr>
-        </thead>
-        <tbody id="auditTableBody">
-          <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No policy execution events recorded yet.</td></tr>
-        </tbody>
-      </table>
+    <!-- Section: Audit Logs (Dedicated Tab View) -->
+    <div id="auditSection" style="display: none;">
+      <div class="filter-search-bar" style="margin-bottom: 16px;">
+        <div class="search-input-box">
+          <span class="search-icon-inside">🔍</span>
+          <input type="text" id="auditSearchInput" placeholder="Filter audit logs by host, policy, or execution details..." oninput="handleAuditSearchFilter()">
+        </div>
+        <button class="btn" onclick="fetchData()">🔄 Refresh Logs</button>
+      </div>
+
+      <div class="audit-card" style="margin-top: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="font-size: 16px; font-weight: 600;">📋 Policy Execution &amp; Security Audit Trail</h3>
+          <span style="font-size: 12px; color: var(--text-muted);">Real-time server &amp; agent execution ledger</span>
+        </div>
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th style="width: 180px;">Timestamp (Local)</th>
+              <th style="width: 180px;">Endpoint Host</th>
+              <th style="width: 180px;">Policy</th>
+              <th style="width: 120px;">Status</th>
+              <th>Execution Details</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No policy execution events recorded yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section: Web Filter Blacklist Manager (Dedicated Tab View) -->
+    <div id="webfilterSection" style="display: none;">
+      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 16px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+              🌐 Enterprise Web &amp; URL Blacklist Manager
+            </h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+              Domains added here are blocked across all endpoints via Chrome/Edge Enterprise URLBlocklist &amp; Windows Hosts Sinkhole.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-sm" onclick="fetchBlockedDomains()" style="background: rgba(255,255,255,0.05);">🔄 Refresh List</button>
+          </div>
+        </div>
+
+        <!-- Add Domain Input & Quick Presets -->
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 8px;">ADD DOMAIN TO BLACKLIST</div>
+          <div style="display: flex; gap: 10px; max-width: 650px;">
+            <input type="text" id="blacklistDomainInput" placeholder="Type domain to block (e.g. cricbuzz.com, hotstar.com, bet365.com)..."
+                   style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text-main); font-size: 13px;"
+                   onkeydown="if(event.key === 'Enter') submitAddDomain()">
+            <button class="btn btn-primary" onclick="submitAddDomain()" style="padding: 9px 16px; font-size: 13px;">
+              🚫 Block Domain
+            </button>
+          </div>
+
+          <!-- Quick Presets -->
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap;">
+            <span style="font-size: 11px; color: var(--text-muted);">Quick Add Presets:</span>
+            <button class="btn btn-sm" onclick="addPresetDomains(['hotstar.com', 'jiocinema.com', 'spotify.com'])" style="font-size: 11px; padding: 3px 8px; background: rgba(168,85,247,0.12); color: #d8b4fe; border-color: rgba(168,85,247,0.3);">
+              + OTT Streaming (Hotstar, JioCinema, Spotify)
+            </button>
+            <button class="btn btn-sm" onclick="addPresetDomains(['dream11.com', 'my11circle.com', 'bet365.com', 'stake.com'])" style="font-size: 11px; padding: 3px 8px; background: rgba(239,68,68,0.12); color: #fca5a5; border-color: rgba(239,68,68,0.3);">
+              + Gambling &amp; Betting (Dream11, Bet365, Stake)
+            </button>
+            <button class="btn btn-sm" onclick="addPresetDomains(['roblox.com', 'steamcommunity.com', 'discord.com'])" style="font-size: 11px; padding: 3px 8px; background: rgba(245,158,11,0.12); color: #fde68a; border-color: rgba(245,158,11,0.3);">
+              + Gaming &amp; Social (Roblox, Discord, Steam)
+            </button>
+          </div>
+        </div>
+
+        <!-- Blocked Domains Chips & Search Filter -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">
+            Currently Blocked Domains (<span id="totalBlockedCount">0</span>)
+          </div>
+          <input type="text" id="domainFilterInput" placeholder="Filter domains..." oninput="renderBlockedDomainsList()"
+                 style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; color: var(--text-main); font-size: 12px; width: 200px;">
+        </div>
+
+        <div id="fullBlockedDomainsContainer" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 400px; overflow-y: auto; padding: 4px;">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Dedicated Device Management & Policy Control -->
+  <div class="modal-backdrop" id="deviceManagementModal">
+    <div class="modal-window" style="width: 680px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span style="font-size: 18px;">💻</span>
+          <span id="modalDeviceHost" style="color: #38bdf8; font-family: monospace; font-size: 16px; font-weight: 700;">DESKTOP-NAME</span>
+          <span class="status-badge online" id="modalDeviceStatus">Online</span>
+          <span class="badge-loc office" id="modalDeviceLoc">🏢 In Office</span>
+        </div>
+        <button class="modal-close" onclick="closeDeviceModal()">&times;</button>
+      </div>
+      <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 80vh; overflow-y: auto;">
+        <!-- Specs & Info Row -->
+        <div class="details-row" style="margin-bottom: 0;">
+          <span>User: <strong id="modalDeviceUser">SYSTEM</strong></span>
+          <span>IP Address: <strong id="modalDeviceIp">127.0.0.1</strong></span>
+          <span>Operating System: <strong id="modalDeviceOs">Windows 11</strong></span>
+          <span>Last Heartbeat: <strong id="modalDeviceLastSeen">Just now</strong></span>
+        </div>
+
+        <!-- Geo Location Strip -->
+        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">📍</span>
+            <div>
+              <div style="color: #93c5fd; font-weight: 600;" id="modalDeviceGeo">Office Local Network</div>
+              <div style="color: var(--text-muted); font-size: 11px;" id="modalDeviceIsp">Local LAN</div>
+            </div>
+          </div>
+          <a id="modalDeviceMapsLink" href="#" target="_blank" style="display: none; color: #60a5fa; text-decoration: none; font-weight: 600; font-size: 11px; align-items: center; gap: 4px; background: rgba(255,255,255,0.08); padding: 5px 10px; border-radius: 6px;">
+            🗺️ Open Google Maps ↗
+          </a>
+        </div>
+
+        <!-- Policy Controls -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+          <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+            🛡️ Security Policy Enforcements
+          </div>
+          <div class="policy-group" style="padding-top: 0; border-top: none;">
+            <div class="policy-item">
+              <div class="policy-info">
+                <span class="policy-title">USB Mass Storage Lock</span>
+                <span class="policy-sub">Blocks USB drives, pen drives & flash storage (HKLM USBSTOR)</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalUsbSwitch" onchange="handleModalPolicyToggle(1, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="policy-item">
+              <div class="policy-info">
+                <span class="policy-title">Software Installation Block</span>
+                <span class="policy-sub">Restricts unauthorized MSI installer & executable installations</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalSoftwareSwitch" onchange="handleModalPolicyToggle(2, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="policy-item">
+              <div class="policy-info">
+                <span class="policy-title">External File Exfiltration Lock</span>
+                <span class="policy-sub">Read-only restriction on removable and portable storage devices</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalTransferSwitch" onchange="handleModalPolicyToggle(3, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="policy-item">
+              <div class="policy-info">
+                <span class="policy-title">Web &amp; Entertainment Filtering</span>
+                <span class="policy-sub">Blocks YouTube, Facebook, Instagram &amp; Video Streaming (Hosts &amp; Browser URLBlocklist)</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalWebFilterSwitch" onchange="handleModalPolicyToggle(4, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Custom Domain Fast Manager Inside Device Modal -->
+            <div style="margin-top: 10px; padding: 10px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.25); border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 600; color: #93c5fd;">🌐 Custom Blocked Websites (<span id="modalDomainCount">0</span>)</span>
+                <button class="btn btn-sm" onclick="switchMainTab('webfilter'); closeDeviceModal();" style="font-size: 11px; padding: 3px 8px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);">
+                  ⚙️ Full Manager ↗
+                </button>
+              </div>
+              <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                <input type="text" id="modalQuickAddDomainInput" placeholder="Add custom domain (e.g. cricbuzz.com)" 
+                       style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; color: var(--text-main); font-size: 12px;"
+                       onkeydown="if(event.key === 'Enter') addQuickDomainFromModal()">
+                <button class="btn btn-sm btn-primary" onclick="addQuickDomainFromModal()" style="font-size: 11px; padding: 5px 10px;">
+                  + Add
+                </button>
+              </div>
+              <div id="modalDomainChips" style="display: flex; flex-wrap: wrap; gap: 5px; max-height: 100px; overflow-y: auto;">
+                <!-- Chips loaded dynamically -->
+              </div>
+            </div>
+
+            <!-- Device Allowed Exceptions (Whitelist for this PC only) -->
+            <div style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.05); border: 1px dashed rgba(16, 185, 129, 0.3); border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 12px; font-weight: 600; color: #6ee7b7;">
+                  ✅ Allowed Websites (Whitelist for this PC: <span id="modalAllowedCount">0</span>)
+                </span>
+                <span style="font-size: 10px; color: var(--text-muted);">Allowed for only this user/PC</span>
+              </div>
+              <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                <input type="text" id="modalAddExceptionInput" placeholder="Allow site (e.g. youtube.com)" 
+                       style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; color: var(--text-main); font-size: 12px;"
+                       onkeydown="if(event.key === 'Enter') addDeviceExceptionFromModal()">
+                <button class="btn btn-sm btn-success" onclick="addDeviceExceptionFromModal()" style="font-size: 11px; padding: 5px 10px;">
+                  + Allow Site
+                </button>
+              </div>
+              <div id="modalAllowedChips" style="display: flex; flex-wrap: wrap; gap: 5px; max-height: 100px; overflow-y: auto;">
+                <!-- Exception chips loaded dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remote Management & Tools -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+          <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+            ⚡ Remote Support &amp; Administration
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn" id="modalBtnRemote" style="padding: 10px; font-size: 13px; justify-content: center; background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;" onclick="triggerModalRemoteDesktop()">
+              🖥️ Remote Desktop (AnyDesk)
+            </button>
+            <button class="btn" id="modalBtnPowerShell" style="padding: 10px; font-size: 13px; justify-content: center; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" onclick="triggerModalPowerShell()">
+              💻 Remote PowerShell
+            </button>
+            <button class="btn" id="modalBtnLock" style="padding: 10px; font-size: 13px; justify-content: center;" onclick="triggerModalAction(10, 'Lock Screen')">
+              🔒 Lock Remote Screen
+            </button>
+            <button class="btn" id="modalBtnMsg" style="padding: 10px; font-size: 13px; justify-content: center;" onclick="triggerModalMessage()">
+              💬 Send IT Alert Message
+            </button>
+            <button class="btn btn-danger" id="modalBtnRestart" style="grid-column: span 2; padding: 10px; font-size: 13px; justify-content: center;" onclick="triggerModalAction(11, 'Restart Laptop')">
+              🔄 Reboot Client Machine
+            </button>
+          </div>
+        </div>
+
+        <!-- Danger Zone: Remove Client -->
+        <div style="border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #f87171;">Remove Client from MDM Console</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Permanently removes device record and active sessions from server database.</div>
+          </div>
+          <button class="btn btn-danger" style="padding: 8px 14px; font-size: 12px; font-weight: 600;" onclick="removeCurrentModalDevice()">
+            🗑️ Delete Client
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -776,37 +1331,45 @@
     </div>
   </div>
 
-  <!-- Modal: Live Remote Desktop Screen & Control -->
+  <!-- Modal: AnyDesk-Style Live Remote Desktop Screen & Control -->
   <div class="modal-backdrop" id="remoteDesktopModal">
-    <div class="modal-window" style="width: 1280px; max-width: 98vw;">
-      <div class="modal-header">
-        <div class="modal-title">
-          <span>🖥️ Live Remote Desktop Assist:</span>
-          <span id="remoteTargetHost" style="color: #a855f7; font-family: monospace;">DESKTOP-NAME</span>
-          <span class="status-badge online" id="remoteFpsBadge" style="margin-left: 8px;">Live Stream ~8 FPS</span>
+    <div class="modal-window">
+      <div class="remote-desktop-header">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="font-size: 16px;">🖥️</span>
+          <span style="font-weight: 600; font-size: 14px; color: #fff;">Remote:</span>
+          <span id="remoteTargetHost" style="color: #a855f7; font-family: monospace; font-size: 14px; font-weight: 700;">DESKTOP-NAME</span>
+          <span class="status-badge online" id="remoteFpsBadge" style="padding: 2px 8px; font-size: 11px;">Live Stream</span>
+          <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-family: monospace;" id="remoteResLabel">Detecting Native Res...</span>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)">⊞ Win</button>
-          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('ESCAPE', 27)">Esc</button>
-          <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)">Enter</button>
-          <button class="modal-close" onclick="closeRemoteDesktopModal()">&times;</button>
+          <!-- View Modes -->
+          <div style="display: inline-flex; background: rgba(255,255,255,0.06); padding: 2px; border-radius: 6px; border: 1px solid var(--border);">
+            <button class="btn btn-primary" id="btnModeFit" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('fit')" title="Scale entire remote screen to fit view without scrolling (Taskbar always visible)">🔍 Fit Screen</button>
+            <button class="btn" id="btnModeScroll" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('scroll')" title="Display 100% full original resolution with horizontal and vertical scrollbars">📜 1:1 Scroll</button>
+          </div>
+          <button class="btn" style="padding: 4px 9px; font-size: 11px;" onclick="toggleFullscreen()" title="Toggle Browser Fullscreen (F11 style)">⛶ Fullscreen</button>
+          <span style="color: rgba(255,255,255,0.2);">|</span>
+          <!-- Remote Keys -->
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)" title="Send Windows Key">⊞ Win</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendTaskMgrShortcut()" title="Open Task Manager (Ctrl+Shift+Esc)">⚡ TaskMgr</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ESCAPE', 27)">Esc</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)">Enter</button>
+          <span style="color: rgba(255,255,255,0.2);">|</span>
+          <!-- Text Sender in Header -->
+          <input type="text" id="remoteTextInput" placeholder="Type text to send to remote..." style="background: #090d16; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: #fff; font-size: 11px; width: 170px;" onkeydown="if(event.key==='Enter') sendTextToRemote()">
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendTextToRemote()">⌨️ Send</button>
+          <span style="color: rgba(255,255,255,0.2);">|</span>
+          <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11px; font-weight: 600;" onclick="closeRemoteDesktopModal()">✕ Disconnect</button>
         </div>
       </div>
       <div class="remote-desktop-body">
-        <div class="canvas-container" id="canvasContainer">
+        <div class="canvas-container mode-fit" id="canvasContainer">
           <canvas id="remoteCanvas" tabindex="0"></canvas>
-          <div id="remoteWaitingOverlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #94a3b8; font-size: 14px;">
-            <div style="font-size: 32px;">⚡</div>
-            <span>Connecting to Endpoint Live Screen Capture Stream...</span>
-          </div>
-        </div>
-        <div class="remote-controls-bar">
-          <div style="display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-muted);">
-            <span>🖱️ Direct Mouse & Keyboard Control Active. Click anywhere on screen to control.</span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="remoteTextInput" placeholder="Type text to send to remote..." style="background: #090d16; border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; width: 240px;" onkeydown="if(event.key==='Enter') sendTextToRemote()">
-            <button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="sendTextToRemote()">⌨️ Send Text</button>
+          <div id="remoteWaitingOverlay" style="position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #94a3b8; font-size: 14px; z-index: 10;">
+            <div style="font-size: 36px;">⚡</div>
+            <span id="remoteWaitStatus" style="font-size: 16px; font-weight: 600; color: #e2e8f0;">Connecting to Endpoint Native Screen Stream...</span>
+            <span style="font-size: 12px; color: #64748b;">Establishing direct hardware-accelerated remote session...</span>
           </div>
         </div>
       </div>
@@ -1067,6 +1630,98 @@
       }
     }
 
+    let allLoadedDevices = [];
+    let allLoadedAuditLogs = [];
+    let globalBlockedDomains = [];
+    let currentMainTab = 'endpoints'; // 'endpoints', 'audit', or 'webfilter'
+    let currentDeviceFilter = 'all'; // 'all', 'online', 'office', 'wfh', 'offline'
+    let currentDeviceLayout = 'table'; // 'table' or 'grid'
+    let selectedModalDevice = null;
+
+    function switchMainTab(tab) {
+      currentMainTab = tab;
+      const tabEndpoints = document.getElementById('tabBtnEndpoints');
+      const tabAudit = document.getElementById('tabBtnAudit');
+      const tabWebFilter = document.getElementById('tabBtnWebFilter');
+      const endpointsSec = document.getElementById('endpointsSection');
+      const auditSec = document.getElementById('auditSection');
+      const webfilterSec = document.getElementById('webfilterSection');
+
+      if (tabEndpoints) tabEndpoints.classList.toggle('active', tab === 'endpoints');
+      if (tabAudit) tabAudit.classList.toggle('active', tab === 'audit');
+      if (tabWebFilter) tabWebFilter.classList.toggle('active', tab === 'webfilter');
+      if (endpointsSec) endpointsSec.style.display = (tab === 'endpoints') ? 'block' : 'none';
+      if (auditSec) auditSec.style.display = (tab === 'audit') ? 'block' : 'none';
+      if (webfilterSec) {
+        webfilterSec.style.display = (tab === 'webfilter') ? 'block' : 'none';
+        if (tab === 'webfilter') fetchBlockedDomains();
+      }
+    }
+
+    function setDeviceLayout(mode) {
+      currentDeviceLayout = mode;
+      const btnTable = document.getElementById('viewModeTableBtn');
+      const btnGrid = document.getElementById('viewModeGridBtn');
+      const tableWrap = document.getElementById('devicesTableWrap');
+      const gridWrap = document.getElementById('devicesGrid');
+
+      if (btnTable) btnTable.classList.toggle('btn-primary', mode === 'table');
+      if (btnGrid) btnGrid.classList.toggle('btn-primary', mode === 'grid');
+      if (tableWrap) tableWrap.style.display = (mode === 'table') ? 'block' : 'none';
+      if (gridWrap) gridWrap.style.display = (mode === 'grid') ? 'grid' : 'none';
+    }
+
+    function setDeviceStatusFilter(filter) {
+      currentDeviceFilter = filter.toLowerCase();
+      ['All', 'Online', 'Office', 'Wfh', 'Offline'].forEach(f => {
+        const el = document.getElementById('filter' + f);
+        if (el) el.classList.toggle('active', f.toLowerCase() === currentDeviceFilter);
+      });
+      applyDeviceFilters();
+    }
+
+    function handleDeviceSearchFilter() {
+      applyDeviceFilters();
+    }
+
+    function applyDeviceFilters() {
+      const searchBox = document.getElementById('deviceSearchInput');
+      const query = (searchBox ? searchBox.value : '').toLowerCase().trim();
+
+      const filtered = allLoadedDevices.filter(d => {
+        // Status filter
+        const isOnline = !!d.isOnline;
+        const isOffice = (d.networkLocation === 'In Office');
+        if (currentDeviceFilter === 'online' && !isOnline) return false;
+        if (currentDeviceFilter === 'offline' && isOnline) return false;
+        if (currentDeviceFilter === 'office' && (!isOnline || !isOffice)) return false;
+        if (currentDeviceFilter === 'wfh' && (!isOnline || isOffice)) return false;
+
+        // Query filter
+        if (query) {
+          const matchHost = (d.machineName || '').toLowerCase().includes(query);
+          const matchUser = (d.userName || '').toLowerCase().includes(query);
+          const matchIp = (d.ipAddress || '').toLowerCase().includes(query);
+          const matchCity = (d.city || '').toLowerCase().includes(query);
+          const matchLoc = (d.networkLocation || '').toLowerCase().includes(query);
+          if (!matchHost && !matchUser && !matchIp && !matchCity && !matchLoc) return false;
+        }
+
+        return true;
+      });
+
+      renderDevicesTable(filtered);
+      renderDevicesGrid(filtered);
+
+      // If modal is currently open, keep its state synchronized
+      if (selectedModalDevice) {
+        const fresh = allLoadedDevices.find(d => d.machineName === selectedModalDevice.machineName);
+        if (fresh) {
+          populateDeviceModal(fresh);
+        }
+      }
+    }
+
     async function fetchData() {
       try {
         const [devicesRes, auditRes] = await Promise.all([
@@ -1074,29 +1729,250 @@
           authFetch('/api/audit')
         ]);
         
-        const devices = await devicesRes.json();
-        const logs = await auditRes.json();
+        allLoadedDevices = await devicesRes.json();
+        allLoadedAuditLogs = await auditRes.json();
 
-        renderDevices(devices);
-        renderAudit(logs);
+        updateHeaderAndFilterBadges(allLoadedDevices);
+        applyDeviceFilters();
+        renderAudit(allLoadedAuditLogs);
+        fetchBlockedDomains();
       } catch (err) {
         console.error("Fetch failed", err);
       }
     }
 
-    function renderDevices(devices) {
-      const grid = document.getElementById('devicesGrid');
+    async function fetchBlockedDomains() {
+      try {
+        const res = await authFetch('/api/webfilter/domains');
+        if (res.ok) {
+          globalBlockedDomains = await res.json();
+          renderBlockedDomainsList();
+          renderModalDomainChips();
+          const count = globalBlockedDomains.length;
+          const tabBadge = document.getElementById('tabWebFilterCount');
+          if (tabBadge) tabBadge.textContent = count;
+          const totalBadge = document.getElementById('totalBlockedCount');
+          if (totalBadge) totalBadge.textContent = count;
+          const modalBadge = document.getElementById('modalDomainCount');
+          if (modalBadge) modalBadge.textContent = count;
+        }
+      } catch (err) {
+        console.error("Failed to load blocked domains", err);
+      }
+    }
+
+    function renderBlockedDomainsList() {
+      const container = document.getElementById('fullBlockedDomainsContainer');
+      if (!container) return;
+      const filter = (document.getElementById('domainFilterInput')?.value || '').toLowerCase().trim();
+      const list = globalBlockedDomains.filter(d => !filter || d.toLowerCase().includes(filter));
+
+      if (list.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 12px; padding: 12px;">No blocked domains match filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(domain => `
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 6px 10px; font-size: 12px; font-family: monospace; color: #fca5a5;">
+          <span>🌐 <strong>${escapeHtml(domain)}</strong></span>
+          <button onclick="removeBlockedDomain('${escapeHtml(domain)}')" title="Remove &amp; Allow domain" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; font-weight: bold; line-height: 1; padding: 0 2px;">
+            &times;
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderModalDomainChips() {
+      const container = document.getElementById('modalDomainChips');
+      if (!container) return;
+      if (globalBlockedDomains.length === 0) {
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 11px;">No custom domains.</span>`;
+        return;
+      }
+
+      container.innerHTML = globalBlockedDomains.slice(0, 15).map(domain => `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-family: monospace; color: #fca5a5;">
+          ${escapeHtml(domain)}
+          <span onclick="removeBlockedDomain('${escapeHtml(domain)}')" style="cursor: pointer; font-weight: bold; color: #ef4444; margin-left: 2px;">&times;</span>
+        </span>
+      `).join('') + (globalBlockedDomains.length > 15 ? `<span style="font-size: 11px; color: var(--text-muted); align-self: center;">+${globalBlockedDomains.length - 15} more</span>` : '');
+    }
+
+    async function submitAddDomain() {
+      const input = document.getElementById('blacklistDomainInput');
+      if (!input) return;
+      const domain = input.value.trim();
+      if (!domain) return;
+      await addDomainApi(domain);
+      input.value = '';
+    }
+
+    async function addQuickDomainFromModal() {
+      const input = document.getElementById('modalQuickAddDomainInput');
+      if (!input) return;
+      const domain = input.value.trim();
+      if (!domain) return;
+      await addDomainApi(domain);
+      input.value = '';
+    }
+
+    async function addPresetDomains(domains) {
+      for (const d of domains) {
+        if (!globalBlockedDomains.includes(d)) {
+          await addDomainApi(d);
+        }
+      }
+    }
+
+    async function addDomainApi(domain) {
+      try {
+        const res = await authFetch('/api/webfilter/domains', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: domain })
+        });
+        if (res.ok) {
+          await fetchBlockedDomains();
+          fetchData(); // Refresh audit
+        } else {
+          const err = await res.json();
+          alert(err.message || 'Failed to add domain');
+        }
+      } catch (err) {
+        alert('Network error while adding domain: ' + err.message);
+      }
+    }
+
+    async function removeBlockedDomain(domain) {
+      if (!confirm(`Are you sure you want to unblock domain '${domain}'?`)) return;
+      try {
+        const res = await authFetch(`/api/webfilter/domains/${encodeURIComponent(domain)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          await fetchBlockedDomains();
+          fetchData(); // Refresh audit
+        } else {
+          alert('Failed to remove domain');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    function updateHeaderAndFilterBadges(devices) {
       const onlineCount = devices.filter(d => d.isOnline).length;
       const officeCount = devices.filter(d => d.isOnline && d.networkLocation === 'In Office').length;
       const wfhCount = devices.filter(d => d.isOnline && d.networkLocation !== 'In Office').length;
+      const offlineCount = devices.filter(d => !d.isOnline).length;
+      const totalCount = devices.length;
 
-      document.getElementById('onlineCount').textContent = onlineCount;
-      if (document.getElementById('officeCount')) document.getElementById('officeCount').textContent = officeCount;
-      if (document.getElementById('wfhCount')) document.getElementById('wfhCount').textContent = wfhCount;
-      document.getElementById('totalCount').textContent = devices.length;
+      // Header pills
+      const onlineEl = document.getElementById('onlineCount');
+      const officeEl = document.getElementById('officeCount');
+      const wfhEl = document.getElementById('wfhCount');
+      const totalEl = document.getElementById('totalCount');
+      if (onlineEl) onlineEl.textContent = onlineCount;
+      if (officeEl) officeEl.textContent = officeCount;
+      if (wfhEl) wfhEl.textContent = wfhCount;
+      if (totalEl) totalEl.textContent = totalCount;
+
+      // Tab badges
+      const tabEpEl = document.getElementById('tabEndpointCount');
+      const tabAuEl = document.getElementById('tabAuditCount');
+      if (tabEpEl) tabEpEl.textContent = totalCount;
+      if (tabAuEl) tabAuEl.textContent = allLoadedAuditLogs.length;
+
+      // Filter pills
+      const fAll = document.getElementById('filterCountAll');
+      const fOn = document.getElementById('filterCountOnline');
+      const fOff = document.getElementById('filterCountOffice');
+      const fWfh = document.getElementById('filterCountWfh');
+      const fOffline = document.getElementById('filterCountOffline');
+      if (fAll) fAll.textContent = totalCount;
+      if (fOn) fOn.textContent = onlineCount;
+      if (fOff) fOff.textContent = officeCount;
+      if (fWfh) fWfh.textContent = wfhCount;
+      if (fOffline) fOffline.textContent = offlineCount;
+    }
+
+    function renderDevicesTable(devices) {
+      const tbody = document.getElementById('devicesTableBody');
+      if (!tbody) return;
 
       if (!devices || devices.length === 0) {
-        grid.innerHTML = '<div class="empty-state">No client laptops have connected yet. Run <code>EndpointManager.Client.exe</code> on a client machine.</div>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No matching endpoint devices found. Run <code>EndpointManager.Client.exe</code> on client laptop.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = devices.map(d => {
+        const isOffice = (d.networkLocation === 'In Office');
+        const locLabel = isOffice ? '🏢 In Office' : '🏠 WFH';
+        const locClass = isOffice ? 'office' : 'remote';
+
+        return `
+          <tr onclick="openDeviceModal('${escapeHtml(d.machineName)}')">
+            <td>
+              <div class="table-host-cell">
+                <span style="font-size: 18px;">💻</span>
+                <div>
+                  <div class="table-host-name">${escapeHtml(d.machineName)}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml((d.osVersion || '').substring(0, 24))}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge ${d.isOnline ? 'online' : 'offline'}">
+                ${d.isOnline ? '🟢 Online' : '🔴 Offline'}
+              </span>
+            </td>
+            <td>
+              <span class="badge-loc ${locClass}">
+                ${locLabel}
+              </span>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+                ${d.city ? `${escapeHtml(d.city)}, ${escapeHtml(d.country || '')}` : 'Office LAN'}
+              </div>
+            </td>
+            <td>
+              <div>👤 <strong>${escapeHtml(d.userName || 'SYSTEM')}</strong></div>
+              <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${escapeHtml(d.ipAddress)}</div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <span class="policy-mini-badge ${d.usbStorageBlocked ? 'blocked' : 'allowed'}">
+                  ${d.usbStorageBlocked ? '🔒 USB' : '🔓 USB'}
+                </span>
+                <span class="policy-mini-badge ${d.softwareInstallDisabled ? 'blocked' : 'allowed'}">
+                  ${d.softwareInstallDisabled ? '🚫 Software' : '✅ Software'}
+                </span>
+                <span class="policy-mini-badge ${d.externalFileTransferRestricted ? 'blocked' : 'allowed'}">
+                  ${d.externalFileTransferRestricted ? '📁 Exfil' : '📂 Transfer'}
+                </span>
+                <span class="policy-mini-badge ${d.webFilteringBlocked ? 'blocked' : 'allowed'}">
+                  ${d.webFilteringBlocked ? '🚫 Web' : '🌐 Web'}
+                </span>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 12px; color: var(--text-muted);">${new Date(d.lastSeenUtc).toLocaleTimeString()}</div>
+            </td>
+            <td style="text-align: right;" onclick="event.stopPropagation()">
+              <button class="btn btn-sm btn-primary" onclick="openDeviceModal('${escapeHtml(d.machineName)}')" title="Open Device Management Modal">
+                ⚙️ Manage
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderDevicesGrid(devices) {
+      const grid = document.getElementById('devicesGrid');
+      if (!grid) return;
+
+      if (!devices || devices.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No matching endpoint devices found.</div>';
         return;
       }
 
@@ -1106,7 +1982,7 @@
         const locClass = isOffice ? 'office' : 'remote';
 
         return `
-        <div class="card">
+        <div class="card" onclick="openDeviceModal('${escapeHtml(d.machineName)}')">
           <div class="card-header">
             <div class="host-title">
               💻 <span>${escapeHtml(d.machineName)}</span>
@@ -1124,11 +2000,11 @@
           <div class="details-row">
             <span>User: <strong>${escapeHtml(d.userName || 'SYSTEM')}</strong></span>
             <span>IP: <strong>${escapeHtml(d.ipAddress)}</strong></span>
-            <span>OS: <strong>${escapeHtml(d.osVersion.substring(0, 22))}...</strong></span>
+            <span>OS: <strong>${escapeHtml((d.osVersion || '').substring(0, 22))}...</strong></span>
             <span>Last Seen: <strong>${new Date(d.lastSeenUtc).toLocaleTimeString()}</strong></span>
           </div>
 
-          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;">
+          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; font-size: 12px;" onclick="event.stopPropagation()">
             <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               <span>📍</span>
               <span style="color: #93c5fd; font-weight: 500;">
@@ -1143,7 +2019,7 @@
             ` : ''}
           </div>
 
-          <div class="policy-group">
+          <div class="policy-group" onclick="event.stopPropagation()">
             <div class="policy-item">
               <div class="policy-info">
                 <span class="policy-title">USB Mass Storage</span>
@@ -1176,9 +2052,20 @@
                 <span class="slider"></span>
               </label>
             </div>
+
+            <div class="policy-item">
+              <div class="policy-info">
+                <span class="policy-title">Web &amp; Entertainment Filter</span>
+                <span class="policy-sub">Block YouTube, Social Media &amp; Streaming</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" ${d.webFilteringBlocked ? 'checked' : ''} onchange="togglePolicy('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 4, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
           </div>
 
-          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <div style="display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);" onclick="event.stopPropagation()">
             <button class="btn" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 10, 'Lock Screen')">
               🔒 Lock Screen
             </button>
@@ -1191,7 +2078,7 @@
           </div>
 
           <!-- Remote Assist Gateway Actions -->
-          <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <div style="display: flex; gap: 8px; margin-top: 8px;" onclick="event.stopPropagation()">
             <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openTerminalModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.machineName)}')">
               💻 PowerShell
             </button>
@@ -1200,12 +2087,254 @@
             </button>
           </div>
         </div>
+      `;
+      }).join('');
+    }
+
+    // Modal: Device Management
+    function openDeviceModal(machineName) {
+      const device = allLoadedDevices.find(d => d.machineName === machineName);
+      if (!device) return;
+      populateDeviceModal(device);
+      document.getElementById('deviceManagementModal').classList.add('active');
+    }
+
+    function populateDeviceModal(d) {
+      selectedModalDevice = d;
+      const isOffice = (d.networkLocation === 'In Office');
+      const locLabel = isOffice ? '🏢 In Office' : '🏠 Work From Home';
+      const locClass = isOffice ? 'office' : 'remote';
+
+      document.getElementById('modalDeviceHost').textContent = d.machineName;
+      
+      const statusBadge = document.getElementById('modalDeviceStatus');
+      statusBadge.className = 'status-badge ' + (d.isOnline ? 'online' : 'offline');
+      statusBadge.textContent = d.isOnline ? 'Online' : 'Offline';
+
+      const locBadge = document.getElementById('modalDeviceLoc');
+      locBadge.className = 'badge-loc ' + locClass;
+      locBadge.textContent = locLabel;
+
+      document.getElementById('modalDeviceUser').textContent = d.userName || 'SYSTEM';
+      document.getElementById('modalDeviceIp').textContent = d.ipAddress;
+      document.getElementById('modalDeviceOs').textContent = d.osVersion;
+      document.getElementById('modalDeviceLastSeen').textContent = new Date(d.lastSeenUtc).toLocaleString();
+
+      document.getElementById('modalDeviceGeo').textContent = d.city ? `${d.city}, ${d.country || ''}` : 'Office Local Network';
+      document.getElementById('modalDeviceIsp').textContent = d.isp ? `ISP: ${d.isp}` : 'Local LAN';
+
+      const mapsLink = document.getElementById('modalDeviceMapsLink');
+      if (d.latitude && d.longitude) {
+        mapsLink.href = `https://www.google.com/maps?q=${d.latitude},${d.longitude}`;
+        mapsLink.style.display = 'inline-flex';
+      } else {
+        mapsLink.style.display = 'none';
+      }
+
+      // Switches
+      document.getElementById('modalUsbSwitch').checked = !!d.usbStorageBlocked;
+      document.getElementById('modalSoftwareSwitch').checked = !!d.softwareInstallDisabled;
+      document.getElementById('modalTransferSwitch').checked = !!d.externalFileTransferRestricted;
+      document.getElementById('modalWebFilterSwitch').checked = !!d.webFilteringBlocked;
+
+      // Online-only buttons
+      const isOnline = !!d.isOnline;
+      const btnRemote = document.getElementById('modalBtnRemote');
+      const btnPs = document.getElementById('modalBtnPowerShell');
+      const btnLock = document.getElementById('modalBtnLock');
+      const btnMsg = document.getElementById('modalBtnMsg');
+      const btnRestart = document.getElementById('modalBtnRestart');
+
+      [btnRemote, btnPs, btnLock, btnMsg, btnRestart].forEach(b => {
+        if (!b) return;
+        b.disabled = !isOnline;
+        b.style.opacity = isOnline ? '1' : '0.5';
+        b.style.cursor = isOnline ? 'pointer' : 'not-allowed';
+      });
+
+      renderModalDomainChips();
+      renderModalDeviceExceptions(d);
+      loadAndRenderDeviceExceptions(d.machineName);
+    }
+
+    function renderModalDeviceExceptions(d) {
+      const container = document.getElementById('modalAllowedChips');
+      const countEl = document.getElementById('modalAllowedCount');
+      if (!container) return;
+      const exceptions = d.webFilterAllowedExceptions || [];
+      if (countEl) countEl.textContent = exceptions.length;
+
+      if (exceptions.length === 0) {
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 11px;">No exceptions allowed for this PC (all blacklisted sites remain blocked).</span>`;
+        return;
+      }
+
+      container.innerHTML = exceptions.map(domain => `
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 4px; padding: 2px 7px; font-size: 11px; font-family: monospace; color: #a7f3d0;">
+          ✓ ${escapeHtml(domain)}
+          <span onclick="removeDeviceExceptionFromModal('${escapeHtml(domain)}')" style="cursor: pointer; font-weight: bold; color: #ef4444; margin-left: 4px;" title="Revoke allowance">&times;</span>
+        </span>
       `).join('');
     }
 
+    async function loadAndRenderDeviceExceptions(machineName) {
+      try {
+        const res = await authFetch(`/api/devices/${encodeURIComponent(machineName)}/exceptions`);
+        if (res.ok) {
+          const exceptions = await res.json();
+          if (selectedModalDevice && selectedModalDevice.machineName === machineName) {
+            selectedModalDevice.webFilterAllowedExceptions = exceptions;
+            renderModalDeviceExceptions(selectedModalDevice);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load device exceptions", err);
+      }
+    }
+
+    async function addDeviceExceptionFromModal() {
+      if (!selectedModalDevice) return;
+      const input = document.getElementById('modalAddExceptionInput');
+      if (!input) return;
+      const domain = input.value.trim();
+      if (!domain) return;
+      const host = selectedModalDevice.machineName;
+
+      try {
+        const res = await authFetch(`/api/devices/${encodeURIComponent(host)}/exceptions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: domain })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          input.value = '';
+          if (selectedModalDevice && selectedModalDevice.machineName === host) {
+            selectedModalDevice.webFilterAllowedExceptions = data.exceptions;
+            renderModalDeviceExceptions(selectedModalDevice);
+          }
+          fetchData(); // Refresh background data
+        } else {
+          const err = await res.json();
+          alert(err.message || 'Failed to add allowed site');
+        }
+      } catch (err) {
+        alert('Error adding allowed site: ' + err.message);
+      }
+    }
+
+    async function removeDeviceExceptionFromModal(domain) {
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      if (!confirm(`Revoke allowed site '${domain}' for ${host}? It will be blocked again.`)) return;
+
+      try {
+        const res = await authFetch(`/api/devices/${encodeURIComponent(host)}/exceptions/${encodeURIComponent(domain)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (selectedModalDevice && selectedModalDevice.machineName === host) {
+            selectedModalDevice.webFilterAllowedExceptions = data.exceptions;
+            renderModalDeviceExceptions(selectedModalDevice);
+          }
+          fetchData(); // Refresh background data
+        } else {
+          const err = await res.json();
+          alert(err.message || 'Failed to remove allowed site');
+        }
+      } catch (err) {
+        alert('Error removing allowed site: ' + err.message);
+      }
+    }
+
+    function closeDeviceModal() {
+      document.getElementById('deviceManagementModal').classList.remove('active');
+      selectedModalDevice = null;
+    }
+
+    function handleModalPolicyToggle(policyType, enable) {
+      if (!selectedModalDevice) return;
+      togglePolicy(selectedModalDevice.machineName, selectedModalDevice.lastConnectionId, policyType, enable);
+    }
+
+    function triggerModalRemoteDesktop() {
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      closeDeviceModal();
+      openRemoteDesktopModal(host, host);
+    }
+
+    function triggerModalPowerShell() {
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      closeDeviceModal();
+      openTerminalModal(host, host);
+    }
+
+    function triggerModalAction(actionType, actionName) {
+      if (!selectedModalDevice) return;
+      sendRemoteAction(selectedModalDevice.machineName, selectedModalDevice.lastConnectionId, actionType, actionName);
+    }
+
+    function triggerModalMessage() {
+      if (!selectedModalDevice) return;
+      promptSendMessage(selectedModalDevice.machineName, selectedModalDevice.lastConnectionId);
+    }
+
+    async function removeCurrentModalDevice() {
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      await removeDevice(host);
+    }
+
+    async function removeDevice(machineName) {
+      if (!confirm(`Are you sure you want to permanently remove client '${machineName}' from the CyberShield MDM console?`)) {
+        return;
+      }
+      try {
+        const res = await authFetch(`/api/devices/${encodeURIComponent(machineName)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to remove device');
+        }
+        closeDeviceModal();
+        await fetchData();
+        alert(`Device '${machineName}' removed from MDM console.`);
+      } catch (err) {
+        alert("Failed to delete device: " + err.message);
+      }
+    }
+
+    function handleAuditSearchFilter() {
+      const searchBox = document.getElementById('auditSearchInput');
+      const query = (searchBox ? searchBox.value : '').toLowerCase().trim();
+
+      const filtered = allLoadedAuditLogs.filter(l => {
+        if (!query) return true;
+        const matchHost = (l.machineName || '').toLowerCase().includes(query);
+        const matchPolicy = (l.policyName || '').toLowerCase().includes(query);
+        const matchDetails = (l.details || '').toLowerCase().includes(query);
+        return matchHost || matchPolicy || matchDetails;
+      });
+
+      renderAuditTable(filtered);
+    }
+
     function renderAudit(logs) {
+      handleAuditSearchFilter();
+    }
+
+    function renderAuditTable(logs) {
       const tbody = document.getElementById('auditTableBody');
-      if (!logs || logs.length === 0) return;
+      if (!tbody) return;
+
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">No policy execution audit records found.</td></tr>';
+        return;
+      }
 
       tbody.innerHTML = logs.map(l => `
         <tr>
@@ -1224,7 +2353,7 @@
 
     async function togglePolicy(machineName, connectionId, policyType, enable) {
       try {
-        await authFetch(`/api/policies/dispatch`, {
+        const res = await authFetch(`/api/policies/dispatch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1234,16 +2363,21 @@
             enableRestriction: enable
           })
         });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Policy dispatch rejected by server.');
+        }
         setTimeout(fetchData, 800);
       } catch (err) {
-        alert("Failed to dispatch policy command: " + err);
+        alert("Policy update failed: " + err.message);
+        setTimeout(fetchData, 400);
       }
     }
 
     async function broadcastPolicy(policyType, enable) {
       if (!confirm(`Are you sure you want to enforce this policy fleetwide across ALL laptops?`)) return;
       try {
-        await authFetch(`/api/policies/dispatch`, {
+        const res = await authFetch(`/api/policies/dispatch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1252,16 +2386,20 @@
             enableRestriction: enable
           })
         });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Broadcast failed.');
+        }
         setTimeout(fetchData, 1000);
       } catch (err) {
-        alert("Broadcast failed: " + err);
+        alert("Broadcast failed: " + err.message);
       }
     }
 
     async function sendRemoteAction(machineName, connectionId, actionType, actionName) {
       if (!confirm(`Are you sure you want to execute [${actionName}] on ${machineName}?`)) return;
       try {
-        await authFetch('/api/policies/dispatch', {
+        const res = await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1271,9 +2409,14 @@
             enableRestriction: true
           })
         });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Server rejected action.');
+        }
+        alert(`✅ Command [${actionName}] sent to ${machineName} successfully!`);
         setTimeout(fetchData, 800);
       } catch (err) {
-        alert("Action failed: " + err);
+        alert("Action failed: " + err.message);
       }
     }
 
@@ -1281,7 +2424,7 @@
       const text = prompt(`Enter notification message to display on ${machineName}'s screen:`, "IT Security Notice: Please save your work and connect to company network.");
       if (!text) return;
       try {
-        await authFetch('/api/policies/dispatch', {
+        const res = await authFetch('/api/policies/dispatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1292,9 +2435,14 @@
             payload: text
           })
         });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Server rejected message.');
+        }
+        alert(`✅ IT Alert message sent to ${machineName}!`);
         setTimeout(fetchData, 800);
       } catch (err) {
-        alert("Message dispatch failed: " + err);
+        alert("Message dispatch failed: " + err.message);
       }
     }
 
@@ -1391,17 +2539,34 @@
         }
       });
 
+      let remoteFrameCount = 0;
+      let lastFpsTime = Date.now();
+
       hubConn.on('ReceiveScreenFrame', (base64) => {
         if (!isScreenStreaming) return;
         const overlay = document.getElementById('remoteWaitingOverlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
+
+        remoteFrameCount++;
+        const now = Date.now();
+        if (now - lastFpsTime >= 1000) {
+          const fps = Math.round((remoteFrameCount * 1000) / (now - lastFpsTime));
+          const badge = document.getElementById('remoteFpsBadge');
+          if (badge) badge.textContent = `Live Stream ~${fps} FPS`;
+          remoteFrameCount = 0;
+          lastFpsTime = now;
+        }
 
         const canvas = document.getElementById('remoteCanvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
         img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
+          if (canvas.width !== img.width || canvas.height !== img.height) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const resLabel = document.getElementById('remoteResLabel');
+            if (resLabel) resLabel.textContent = `${img.width}x${img.height} (Native)`;
+          }
           ctx.drawImage(img, 0, 0);
         };
         img.src = 'data:image/jpeg;base64,' + base64;
@@ -1493,6 +2658,57 @@
     }
 
     // --- Remote Desktop Functions ---
+    let currentViewMode = 'fit';
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const container = document.getElementById('canvasContainer');
+      const fitBtn = document.getElementById('btnModeFit');
+      const scrollBtn = document.getElementById('btnModeScroll');
+      const indicator = document.getElementById('remoteModeIndicator');
+
+      if (mode === 'fit') {
+        container.classList.remove('mode-scroll');
+        container.classList.add('mode-fit');
+        if (fitBtn) fitBtn.className = 'btn btn-primary';
+        if (scrollBtn) scrollBtn.className = 'btn';
+        if (indicator) indicator.textContent = '🖥️ Mode: Fit to Window (Whole screen visible, taskbar included)';
+      } else {
+        container.classList.remove('mode-fit');
+        container.classList.add('mode-scroll');
+        if (scrollBtn) scrollBtn.className = 'btn btn-primary';
+        if (fitBtn) fitBtn.className = 'btn';
+        if (indicator) indicator.textContent = '📜 Mode: 1:1 Scroll (Full resolution, use scrollbars)';
+      }
+    }
+
+    function toggleFullscreen() {
+      const modal = document.getElementById('remoteDesktopModal');
+      if (!document.fullscreenElement) {
+        if (modal.requestFullscreen) {
+          modal.requestFullscreen().catch(err => {
+            console.warn("Fullscreen request error:", err);
+            modal.classList.toggle('fullscreen-active');
+          });
+        } else {
+          modal.classList.toggle('fullscreen-active');
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(console.warn);
+        }
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const modal = document.getElementById('remoteDesktopModal');
+      if (document.fullscreenElement) {
+        modal.classList.add('fullscreen-active');
+      } else {
+        modal.classList.remove('fullscreen-active');
+      }
+    });
+
     async function openRemoteDesktopModal(machineName, connectionId) {
       if (!connectionId) {
         alert("This endpoint is not connected to the real-time gateway.");
@@ -1512,6 +2728,8 @@
           <span style="font-size: 11px; color: #94a3b8;">Ensure updated EndpointManager.Client is running on the client machine.</span>
         `;
       }
+      setViewMode('fit');
+      document.body.style.overflow = 'hidden';
       document.getElementById('remoteDesktopModal').classList.add('active');
 
       try {
@@ -1531,6 +2749,10 @@
     }
 
     function closeRemoteDesktopModal() {
+      document.body.style.overflow = '';
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
       if (hubConn && activeScreenConnId && hubConn.state === signalR.HubConnectionState.Connected) {
         hubConn.invoke('StopRemoteScreen', activeScreenConnId).catch(console.error);
       }
@@ -1551,7 +2773,8 @@
 
     function sendRemoteInput(eventType, nx, ny, button = 0, keyCode = 0, text = null) {
       if (!hubConn || !activeScreenConnId || !isScreenStreaming) return;
-      hubConn.invoke('SendRemoteInput', activeScreenConnId, {
+      // Use fire-and-forget send to avoid blocking UI on server round-trip ACK
+      hubConn.send('SendRemoteInput', activeScreenConnId, {
         EventType: eventType,
         NormalizedX: nx,
         NormalizedY: ny,
@@ -1564,7 +2787,20 @@
     function sendKeyToRemote(name, keyCode) {
       if (!activeScreenConnId) return;
       sendRemoteInput(6, 0, 0, 0, keyCode); // KeyDown
-      setTimeout(() => sendRemoteInput(7, 0, 0, 0, keyCode), 60); // KeyUp
+      setTimeout(() => sendRemoteInput(7, 0, 0, 0, keyCode), 50); // KeyUp
+    }
+
+    function sendTaskMgrShortcut() {
+      if (!activeScreenConnId) return;
+      // VK_CONTROL = 17, VK_SHIFT = 16, VK_ESCAPE = 27
+      sendRemoteInput(6, 0, 0, 0, 17); // Ctrl down
+      sendRemoteInput(6, 0, 0, 0, 16); // Shift down
+      sendRemoteInput(6, 0, 0, 0, 27); // Esc down
+      setTimeout(() => {
+        sendRemoteInput(7, 0, 0, 0, 27); // Esc up
+        sendRemoteInput(7, 0, 0, 0, 16); // Shift up
+        sendRemoteInput(7, 0, 0, 0, 17); // Ctrl up
+      }, 80);
     }
 
     function sendTextToRemote() {
@@ -1584,7 +2820,7 @@
 
       canvas.addEventListener('mousemove', (e) => {
         const now = Date.now();
-        if (now - lastMouseMoveSent > 60) { // Throttle mousemove to ~16 events/sec
+        if (now - lastMouseMoveSent > 45) { // ~22 events/sec for fluid cursor positioning
           lastMouseMoveSent = now;
           const { nx, ny } = getNormalizedCoords(e, canvas);
           sendRemoteInput(1, nx, ny);
@@ -1592,16 +2828,20 @@
       });
 
       canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        canvas.focus();
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(2, nx, ny, e.button);
       });
 
       canvas.addEventListener('mouseup', (e) => {
+        e.preventDefault();
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(3, nx, ny, e.button);
       });
 
       canvas.addEventListener('dblclick', (e) => {
+        e.preventDefault();
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(5, nx, ny, 0);
       });

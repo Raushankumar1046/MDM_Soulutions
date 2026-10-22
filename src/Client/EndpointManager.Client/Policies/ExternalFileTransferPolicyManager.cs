@@ -58,16 +58,11 @@ public class ExternalFileTransferPolicyManager
 
     public bool SetExternalFileTransferRestricted(bool restrict)
     {
-        if (!HasAdministrativePrivilege())
-        {
-            _logger.LogError("Access Denied: Administrative privileges required to configure file transfer policy.");
-            return false;
-        }
+        int flag = restrict ? 1 : 0;
 
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            int flag = restrict ? 1 : 0;
 
             // 1. Root Removable Storage Devices policy
             using (var rootKey = baseKey.CreateSubKey(BaseRemovablePolicyPath, writable: true))
@@ -96,12 +91,49 @@ public class ExternalFileTransferPolicyManager
                 }
             }
 
-            _logger.LogInformation("Successfully updated External File Transfer policy. Restricted={Restrict}", restrict);
+            _logger.LogInformation("Successfully updated External File Transfer policy via Registry API. Restricted={Restrict}", restrict);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to apply external file transfer policy.");
+            _logger.LogWarning("Direct removable storage policy write failed ({Msg}), attempting reg.exe fallback...", ex.Message);
+        }
+
+        // Native reg.exe fallback
+        bool reg1 = RunRegCommand($"add \"HKLM\\{BaseRemovablePolicyPath}\" /v Deny_Write /t REG_DWORD /d {flag} /f");
+        bool reg2 = RunRegCommand($"add \"HKLM\\{BaseRemovablePolicyPath}\\{WpdClassGuid}\" /v Deny_Write /t REG_DWORD /d {flag} /f");
+        bool reg3 = RunRegCommand($"add \"HKLM\\{BaseRemovablePolicyPath}\\{RemovableDisksGuid}\" /v Deny_Write /t REG_DWORD /d {flag} /f");
+
+        if (reg1)
+        {
+            _logger.LogInformation("Successfully updated External File Transfer policy via reg.exe. Restricted={Restrict}", restrict);
+            return true;
+        }
+
+        if (!HasAdministrativePrivilege())
+        {
+            _logger.LogError("Access Denied: Administrative privileges required to configure file transfer policy. Please run client as Administrator.");
+        }
+        return false;
+    }
+
+    private static bool RunRegCommand(string args)
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "reg.exe",
+                Arguments = args,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var proc = System.Diagnostics.Process.Start(psi);
+            proc?.WaitForExit(3000);
+            return proc != null && proc.ExitCode == 0;
+        }
+        catch
+        {
             return false;
         }
     }

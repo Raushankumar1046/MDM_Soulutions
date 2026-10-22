@@ -1,9 +1,56 @@
+using System.Runtime.InteropServices;
 using EndpointManager.Client;
 using EndpointManager.Client.Policies;
 using EndpointManager.Client.Services;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
-var builder = Host.CreateApplicationBuilder(args);
+// Ensure unhandled exceptions are logged to disk for debugging
+AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+{
+    try
+    {
+        var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "CyberShieldMDM");
+        Directory.CreateDirectory(logDir);
+        File.AppendAllText(Path.Combine(logDir, "client_crash.log"), $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC] FATAL: {e.ExceptionObject}\n");
+    }
+    catch { }
+};
+
+// Safe console logger (silently ignores if no console handle is attached)
+try { Console.Title = "CyberShield MDM - Endpoint Client Agent"; } catch { }
+SafeLog("==========================================================");
+SafeLog("       CyberShield MDM - Endpoint Client Agent");
+SafeLog("==========================================================");
+
+if (!UsbPolicyManager.HasAdministrativePrivilege())
+{
+    SafeLog("[INFO] Running in Standard User Mode. For system policy modifications, run as Administrator.", ConsoleColor.Yellow);
+}
+else
+{
+    SafeLog("[OK] Running with Full Administrative Privileges.", ConsoleColor.Green);
+}
+
+// Ensure process is fully DPI-aware so screen captures and cursor clicks operate on true physical screen pixels
+try
+{
+    SetProcessDPIAware();
+}
+catch { }
+
+// Always set working directory and content root to the executable's directory
+var baseDir = AppContext.BaseDirectory;
+try
+{
+    Directory.SetCurrentDirectory(baseDir);
+}
+catch { }
+
+var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+{
+    Args = args,
+    ContentRootPath = baseDir
+});
 
 // Configures the service lifetime to Windows Service Control Manager (SCM)
 builder.Services.AddWindowsService(options =>
@@ -15,6 +62,7 @@ builder.Services.AddWindowsService(options =>
 builder.Services.AddSingleton<UsbPolicyManager>();
 builder.Services.AddSingleton<SoftwareInstallPolicyManager>();
 builder.Services.AddSingleton<ExternalFileTransferPolicyManager>();
+builder.Services.AddSingleton<WebFilteringPolicyManager>();
 
 // Register UDP Auto-Discovery Client
 builder.Services.AddSingleton<UdpDiscoveryClient>();
@@ -31,3 +79,17 @@ builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
 host.Run();
+
+[DllImport("user32.dll")]
+static extern bool SetProcessDPIAware();
+
+static void SafeLog(string message, ConsoleColor? color = null)
+{
+    try
+    {
+        if (color.HasValue) Console.ForegroundColor = color.Value;
+        Console.WriteLine(message);
+        if (color.HasValue) Console.ResetColor();
+    }
+    catch { }
+}

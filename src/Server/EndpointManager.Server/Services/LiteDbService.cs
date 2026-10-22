@@ -14,6 +14,8 @@ public class EndpointDeviceRecord
     public bool UsbStorageBlocked { get; set; }
     public bool SoftwareInstallDisabled { get; set; }
     public bool ExternalFileTransferRestricted { get; set; }
+    public bool WebFilteringBlocked { get; set; }
+    public List<string> WebFilterAllowedExceptions { get; set; } = new();
     public string? City { get; set; }
     public string? Region { get; set; }
     public string? Country { get; set; }
@@ -37,12 +39,21 @@ public class PolicyAuditRecord
     public DateTime TimestampUtc { get; set; } = DateTime.UtcNow;
 }
 
+public class BlockedDomainRecord
+{
+    [BsonId]
+    public string Domain { get; set; } = string.Empty;
+    public string Category { get; set; } = "Custom";
+    public DateTime AddedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
 public class LiteDbService : IDisposable
 {
     private readonly LiteDatabase _db;
     public LiteDatabase Database => _db;
     private readonly ILiteCollection<EndpointDeviceRecord> _devices;
     private readonly ILiteCollection<PolicyAuditRecord> _auditLogs;
+    private readonly ILiteCollection<BlockedDomainRecord> _blockedDomains;
     private readonly ILogger<LiteDbService> _logger;
 
     public LiteDbService(ILogger<LiteDbService> logger)
@@ -59,8 +70,21 @@ public class LiteDbService : IDisposable
         _db = new LiteDatabase(connectionString);
         _devices = _db.GetCollection<EndpointDeviceRecord>("devices");
         _auditLogs = _db.GetCollection<PolicyAuditRecord>("audit_logs");
+        _blockedDomains = _db.GetCollection<BlockedDomainRecord>("blocked_domains");
         
         _devices.EnsureIndex(x => x.MachineName, unique: true);
+        _blockedDomains.EnsureIndex(x => x.Domain, unique: true);
+
+        // Seed default entertainment/social domains if collection is fresh
+        if (_blockedDomains.Count() == 0)
+        {
+            string[] defaultSeed = { "youtube.com", "facebook.com", "instagram.com", "twitter.com", "x.com", "tiktok.com", "netflix.com", "primevideo.com", "reddit.com", "twitch.tv" };
+            foreach (var d in defaultSeed)
+            {
+                _blockedDomains.Insert(new BlockedDomainRecord { Domain = d, Category = "Default" });
+            }
+        }
+
         _logger.LogInformation("LiteDB Initialized at {Path}", dbPath);
     }
 
@@ -81,6 +105,7 @@ public class LiteDbService : IDisposable
                     UsbStorageBlocked = heartbeat.UsbStorageBlocked,
                     SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled,
                     ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted,
+                    WebFilteringBlocked = heartbeat.WebFilteringBlocked,
                     City = heartbeat.City,
                     Region = heartbeat.Region,
                     Country = heartbeat.Country,
@@ -102,6 +127,7 @@ public class LiteDbService : IDisposable
                 existing.UsbStorageBlocked = heartbeat.UsbStorageBlocked;
                 existing.SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled;
                 existing.ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted;
+                existing.WebFilteringBlocked = heartbeat.WebFilteringBlocked;
                 existing.City = heartbeat.City ?? existing.City;
                 existing.Region = heartbeat.Region ?? existing.Region;
                 existing.Country = heartbeat.Country ?? existing.Country;
@@ -162,6 +188,19 @@ public class LiteDbService : IDisposable
         }
     }
 
+    public bool DeleteDevice(string machineName)
+    {
+        try
+        {
+            return _devices.Delete(machineName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete device {Host} from LiteDB.", machineName);
+            return false;
+        }
+    }
+
     public void LogAudit(string machineName, string policy, bool enforced, bool success, string details)
     {
         try
@@ -193,6 +232,146 @@ public class LiteDbService : IDisposable
             _logger.LogError(ex, "Failed to get audit logs from LiteDB.");
             return new List<PolicyAuditRecord>();
         }
+    }
+
+    public List<string> GetBlockedDomains()
+    {
+        try
+        {
+            return _blockedDomains.FindAll()
+                .OrderBy(d => d.Domain)
+                .Select(d => d.Domain)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get blocked domains from LiteDB.");
+            return new List<string> { "youtube.com", "facebook.com", "instagram.com", "netflix.com" };
+        }
+    }
+
+    public bool AddBlockedDomain(string domain, string category = "Custom")
+    {
+        try
+        {
+            domain = CleanDomain(domain);
+            if (string.IsNullOrWhiteSpace(domain)) return false;
+
+            var existing = _blockedDomains.FindById(domain);
+            if (existing != null) return true;
+
+            _blockedDomains.Insert(new BlockedDomainRecord
+            {
+                Domain = domain,
+                Category = category,
+                AddedAtUtc = DateTime.UtcNow
+            });
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add blocked domain '{Domain}' to LiteDB.", domain);
+            return false;
+        }
+    }
+
+    public bool RemoveBlockedDomain(string domain)
+    {
+        try
+        {
+            domain = CleanDomain(domain);
+            return _blockedDomains.Delete(domain);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete blocked domain '{Domain}' from LiteDB.", domain);
+            return false;
+        }
+    }
+
+    private static string CleanDomain(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+        var s = input.Trim().ToLowerInvariant();
+        if (s.StartsWith("https://")) s = s.Substring(8);
+        if (s.StartsWith("http://")) s = s.Substring(7);
+        if (s.StartsWith("www.")) s = s.Substring(4);
+        int slashIdx = s.IndexOf('/');
+        if (slashIdx >= 0) s = s.Substring(0, slashIdx);
+        int colonIdx = s.IndexOf(':');
+        if (colonIdx >= 0) s = s.Substring(0, colonIdx);
+        return s.Trim();
+    }
+
+    public List<string> GetDeviceAllowedExceptions(string machineName)
+    {
+        try
+        {
+            var device = _devices.FindById(machineName);
+            return device?.WebFilterAllowedExceptions ?? new List<string>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get allowed exceptions for {Machine}", machineName);
+            return new List<string>();
+        }
+    }
+
+    public bool AddDeviceAllowedException(string machineName, string domain)
+    {
+        try
+        {
+            domain = CleanDomain(domain);
+            if (string.IsNullOrWhiteSpace(domain)) return false;
+
+            var device = _devices.FindById(machineName);
+            if (device == null) return false;
+
+            device.WebFilterAllowedExceptions ??= new List<string>();
+            if (!device.WebFilterAllowedExceptions.Any(d => d.Equals(domain, StringComparison.OrdinalIgnoreCase)))
+            {
+                device.WebFilterAllowedExceptions.Add(domain);
+                _devices.Update(device);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add allowed exception for {Machine}", machineName);
+            return false;
+        }
+    }
+
+    public bool RemoveDeviceAllowedException(string machineName, string domain)
+    {
+        try
+        {
+            domain = CleanDomain(domain);
+            var device = _devices.FindById(machineName);
+            if (device == null || device.WebFilterAllowedExceptions == null) return false;
+
+            int removed = device.WebFilterAllowedExceptions.RemoveAll(d => d.Equals(domain, StringComparison.OrdinalIgnoreCase));
+            if (removed > 0)
+            {
+                _devices.Update(device);
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove allowed exception for {Machine}", machineName);
+            return false;
+        }
+    }
+
+    public List<string> GetEffectiveBlockedDomainsForDevice(string machineName)
+    {
+        var allBlocked = GetBlockedDomains();
+        var allowed = GetDeviceAllowedExceptions(machineName);
+        var allowedSet = new HashSet<string>(allowed, StringComparer.OrdinalIgnoreCase);
+
+        return allBlocked.Where(b => !allowedSet.Contains(b)).ToList();
     }
 
     public void Dispose()

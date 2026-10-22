@@ -15,6 +15,7 @@ public class Worker : BackgroundService
     private readonly UsbPolicyManager _usbPolicyManager;
     private readonly SoftwareInstallPolicyManager _softwarePolicyManager;
     private readonly ExternalFileTransferPolicyManager _fileTransferPolicyManager;
+    private readonly WebFilteringPolicyManager _webPolicyManager;
     private readonly UdpDiscoveryClient _udpDiscoveryClient;
     private readonly LocationService _locationService;
     private readonly RemoteTerminalService _terminalService;
@@ -29,6 +30,7 @@ public class Worker : BackgroundService
         UsbPolicyManager usbPolicyManager,
         SoftwareInstallPolicyManager softwarePolicyManager,
         ExternalFileTransferPolicyManager fileTransferPolicyManager,
+        WebFilteringPolicyManager webPolicyManager,
         UdpDiscoveryClient udpDiscoveryClient,
         LocationService locationService,
         RemoteTerminalService terminalService,
@@ -39,16 +41,45 @@ public class Worker : BackgroundService
         _usbPolicyManager = usbPolicyManager;
         _softwarePolicyManager = softwarePolicyManager;
         _fileTransferPolicyManager = fileTransferPolicyManager;
+        _webPolicyManager = webPolicyManager;
         _udpDiscoveryClient = udpDiscoveryClient;
         _locationService = locationService;
         _terminalService = terminalService;
         _screenService = screenService;
         _config = config;
+
+        _softwarePolicyManager.OnInstallerBlocked += (procName, reason) =>
+        {
+            _logger.LogWarning("Software installation blocked: {Proc} ({Reason})", procName, reason);
+            if (_hubConnection?.State == HubConnectionState.Connected)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var auditResult = new PolicyExecutionResult
+                        {
+                            CommandId = Guid.NewGuid(),
+                            Success = false,
+                            Message = $"BLOCKED INSTALLER: {procName} ({reason})"
+                        };
+                        await _hubConnection.InvokeAsync("ReportExecutionResult", auditResult);
+                    }
+                    catch { }
+                });
+            }
+        };
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Endpoint Agent Service started on host: {Host}", Environment.MachineName);
+
+        // Resume active installer interception if policy is active
+        if (_softwarePolicyManager.IsSoftwareInstallationDisabled())
+        {
+            _softwarePolicyManager.StartInstallerWatcher();
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -115,6 +146,7 @@ public class Worker : BackgroundService
                                 UsbStorageBlocked = _usbPolicyManager.IsUsbStorageBlocked(),
                                 SoftwareInstallDisabled = _softwarePolicyManager.IsSoftwareInstallationDisabled(),
                                 ExternalFileTransferRestricted = _fileTransferPolicyManager.IsExternalFileTransferRestricted(),
+                                WebFilteringBlocked = _webPolicyManager.IsWebFilteringBlocked(),
                                 City = loc?.City,
                                 Region = loc?.Region,
                                 Country = loc?.Country,
@@ -194,14 +226,61 @@ public class Worker : BackgroundService
                         : "Failed to update Removable Storage write protection policies.";
                     break;
 
-                case PolicyType.LockWorkstation:
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                case PolicyType.WebFilteringBlock:
+                    IEnumerable<string>? customDomains = null;
+                    IEnumerable<string>? allowedExceptions = null;
+
+                    if (!string.IsNullOrWhiteSpace(command.Payload))
                     {
-                        FileName = "rundll32.exe",
-                        Arguments = "user32.dll,LockWorkStation",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    });
+                        try
+                        {
+                            using var doc = System.Text.Json.JsonDocument.Parse(command.Payload);
+                            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+                            {
+                                if (doc.RootElement.TryGetProperty("Blocked", out var bProp) && bProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                {
+                                    customDomains = bProp.EnumerateArray()
+                                        .Select(x => x.GetString())
+                                        .Where(x => !string.IsNullOrEmpty(x))
+                                        .Select(x => x!)
+                                        .ToList();
+                                }
+                                if (doc.RootElement.TryGetProperty("Allowed", out var aProp) && aProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                {
+                                    allowedExceptions = aProp.EnumerateArray()
+                                        .Select(x => x.GetString())
+                                        .Where(x => !string.IsNullOrEmpty(x))
+                                        .Select(x => x!)
+                                        .ToList();
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Fallback to comma/delimiter separated list
+                            customDomains = command.Payload.Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        }
+                    }
+
+                    bool webSuccess = _webPolicyManager.SetWebFilteringBlocked(command.EnableRestriction, customDomains, allowedExceptions);
+                    result.Success = webSuccess;
+                    result.Message = webSuccess
+                        ? $"Web & Entertainment Filtering successfully {(command.EnableRestriction ? "ENFORCED (Domains Blocked)" : "RELAXED (Allowed)")}."
+                        : "Failed to update Web Filtering policies.";
+                    break;
+                case PolicyType.LockWorkstation:
+                    try { LockWorkStation(); } catch { }
+                    try
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "rundll32.exe",
+                            Arguments = "user32.dll,LockWorkStation",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        });
+                    }
+                    catch { }
                     result.Success = true;
                     result.Message = "Workstation screen locked successfully.";
                     break;
@@ -210,37 +289,28 @@ public class Worker : BackgroundService
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = "shutdown.exe",
-                        Arguments = "/r /t 10 /c \"IT Administrator has initiated a remote system restart.\"",
+                        Arguments = "/r /t 5 /f /c \"IT Administrator has initiated a remote system restart.\"",
                         UseShellExecute = false,
                         CreateNoWindow = true
                     });
                     result.Success = true;
-                    result.Message = "System restart scheduled with 10s countdown.";
+                    result.Message = "System restart scheduled with 5s countdown.";
                     break;
 
                 case PolicyType.SendNotification:
                     var messageText = string.IsNullOrWhiteSpace(command.Payload) ? "IT Security Notification from Administrator." : command.Payload;
-                    try
+                    _ = Task.Run(() =>
                     {
-                        var msgProc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        try
                         {
-                            FileName = "msg.exe",
-                            Arguments = $"* /TIME:60 \"{messageText.Replace("\"", "\\\"")}\"",
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                        msgProc?.WaitForExit(3000);
-                    }
-                    catch
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            // 0x00000040 (MB_ICONINFORMATION) | 0x00040000 (MB_TOPMOST) | 0x00010000 (MB_SETFOREGROUND)
+                            ShowMessageBox(IntPtr.Zero, messageText, "CyberShield IT Management Alert", 0x00000040 | 0x00040000 | 0x00010000);
+                        }
+                        catch (Exception ex)
                         {
-                            FileName = "powershell.exe",
-                            Arguments = $"-NoProfile -Command \"Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('{messageText.Replace("'", "''")}', 'CyberShield IT Management Alert')\"",
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                    }
+                            _logger.LogError(ex, "Failed to display MessageBox on client.");
+                        }
+                    });
                     result.Success = true;
                     result.Message = "Notification alert displayed on user screen.";
                     break;
@@ -275,7 +345,11 @@ public class Worker : BackgroundService
         // 1. If LocalServerUrl is explicitly configured with an IP, add it first
         if (!string.IsNullOrEmpty(configuredLocalUrl) && !configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
         {
-            candidates.Add(new ServerEndpointCandidate(configuredLocalUrl, "In Office", true));
+            var normalizedLocal = NormalizeHubUrl(configuredLocalUrl);
+            if (!string.IsNullOrEmpty(normalizedLocal))
+            {
+                candidates.Add(new ServerEndpointCandidate(normalizedLocal, "In Office", true));
+            }
         }
 
         // 2. Try fast UDP Auto-Discovery (Office Network broadcast)
@@ -284,9 +358,13 @@ public class Worker : BackgroundService
             try
             {
                 var discovered = await _udpDiscoveryClient.TryDiscoverServerUrlAsync(TimeSpan.FromSeconds(1.5), stoppingToken);
-                if (!string.IsNullOrEmpty(discovered) && !candidates.Any(c => c.Url.Equals(discovered, StringComparison.OrdinalIgnoreCase)))
+                if (!string.IsNullOrEmpty(discovered))
                 {
-                    candidates.Add(new ServerEndpointCandidate(discovered, "In Office", true));
+                    var normalizedDiscovered = NormalizeHubUrl(discovered);
+                    if (!candidates.Any(c => c.Url.Equals(normalizedDiscovered, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        candidates.Add(new ServerEndpointCandidate(normalizedDiscovered, "In Office", true));
+                    }
                 }
             }
             catch { }
@@ -295,17 +373,24 @@ public class Worker : BackgroundService
         // 3. Add Remote / Public Static IP or Cloudflare URL
         if (!string.IsNullOrEmpty(configuredRemoteUrl) && !configuredRemoteUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
         {
-            if (!candidates.Any(c => c.Url.Equals(configuredRemoteUrl, StringComparison.OrdinalIgnoreCase)))
+            var normalizedRemote = NormalizeHubUrl(configuredRemoteUrl);
+            if (!string.IsNullOrEmpty(normalizedRemote) && !candidates.Any(c => c.Url.Equals(normalizedRemote, StringComparison.OrdinalIgnoreCase)))
             {
-                candidates.Add(new ServerEndpointCandidate(configuredRemoteUrl, "Work From Home", false));
+                candidates.Add(new ServerEndpointCandidate(normalizedRemote, "Work From Home", false));
             }
         }
 
-        if (candidates.Count == 0)
+        // 4. Guaranteed Hardcoded Fallbacks (Ensures standalone executable NEVER fails even without config files)
+        const string DefaultRemoteUrl = "http://14.194.19.6:5000/hubs/endpoints";
+        const string DefaultOfficeLanUrl = "http://192.168.68.13:5000/hubs/endpoints";
+
+        if (!candidates.Any(c => c.Url.Equals(DefaultOfficeLanUrl, StringComparison.OrdinalIgnoreCase)))
         {
-            _logger.LogWarning("No specific server URL found, falling back to full UDP discovery...");
-            var autoUrl = await _udpDiscoveryClient.DiscoverServerUrlAsync(stoppingToken);
-            return (autoUrl, "In Office");
+            candidates.Add(new ServerEndpointCandidate(DefaultOfficeLanUrl, "In Office", true));
+        }
+        if (!candidates.Any(c => c.Url.Equals(DefaultRemoteUrl, StringComparison.OrdinalIgnoreCase)))
+        {
+            candidates.Add(new ServerEndpointCandidate(DefaultRemoteUrl, "Work From Home", false));
         }
 
         // Fast TCP probe to find the reachable endpoint without blocking
@@ -323,7 +408,7 @@ public class Worker : BackgroundService
             }
         }
 
-        // If none responded to quick TCP probe, return the first one to let SignalR try full HTTP negotiation
+        // If none responded to quick TCP probe, return the first remote candidate to let SignalR try full HTTP negotiation
         var defaultCandidate = candidates.FirstOrDefault(c => !c.IsLocal) ?? candidates[0];
         return (defaultCandidate.Url, defaultCandidate.LocationType);
     }
@@ -348,6 +433,12 @@ public class Worker : BackgroundService
         return false;
     }
 
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
+    private static extern bool LockWorkStation();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "MessageBoxW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    private static extern int ShowMessageBox(IntPtr hWnd, string text, string caption, uint type);
+
     private static string GetLocalIpAddress()
     {
         try
@@ -363,6 +454,19 @@ public class Worker : BackgroundService
         }
         catch { }
         return "127.0.0.1";
+    }
+
+    private static string NormalizeHubUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+        var s = url.Trim();
+        s = s.Replace("/hubs.endpoints", "/hubs/endpoints");
+        if (s.EndsWith("/")) s = s.TrimEnd('/');
+        if (!s.EndsWith("/hubs/endpoints", StringComparison.OrdinalIgnoreCase))
+        {
+            s += "/hubs/endpoints";
+        }
+        return s;
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

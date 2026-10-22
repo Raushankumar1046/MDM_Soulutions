@@ -80,8 +80,8 @@ public class EndpointHub : Hub<IEndpointClientContract>
         // Persist to LiteDB
         _dbService.UpsertHeartbeat(heartbeat, Context.ConnectionId);
 
-        _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Loc}) ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans}", 
-            heartbeat.MachineName, heartbeat.IpAddress, heartbeat.NetworkLocation, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted);
+        _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Loc}) ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans} | Web Filtered: {Web}", 
+            heartbeat.MachineName, heartbeat.IpAddress, heartbeat.NetworkLocation, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted, heartbeat.WebFilteringBlocked);
 
         return Task.CompletedTask;
     }

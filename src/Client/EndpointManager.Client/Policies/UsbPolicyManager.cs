@@ -44,33 +44,62 @@ public class UsbPolicyManager
 
     public bool SetUsbStorageBlockState(bool block)
     {
-        if (!HasAdministrativePrivilege())
-        {
-            _logger.LogError("Access Denied: Administrative privileges are required to modify USB storage policies.");
-            return false;
-        }
+        int targetValue = block ? 4 : 3;
 
+        // Try direct .NET Registry write
         try
         {
             using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
             using var key = baseKey.OpenSubKey(UsbStorRegistryPath, writable: true);
 
-            if (key == null)
+            if (key != null)
             {
-                _logger.LogError("Cannot apply policy: USBSTOR subkey not found at '{Path}'", UsbStorRegistryPath);
-                return false;
+                key.SetValue(ValueName, targetValue, RegistryValueKind.DWord);
+                _logger.LogInformation("Successfully updated USB policy via Registry API. Blocked={BlockStatus} (Start={Value})", block, targetValue);
+                return true;
             }
-
-            // 4 = Disabled (Blocked), 3 = Demand Start (Allowed)
-            int targetValue = block ? 4 : 3;
-            key.SetValue(ValueName, targetValue, RegistryValueKind.DWord);
-
-            _logger.LogInformation("Successfully updated USB policy. Blocked={BlockStatus} (Start={Value})", block, targetValue);
-            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to apply USB storage policy state.");
+            _logger.LogWarning("Direct registry write failed ({Msg}), attempting native reg.exe fallback...", ex.Message);
+        }
+
+        // Native reg.exe fallback
+        bool regOk = RunRegCommand($"add \"HKLM\\{UsbStorRegistryPath}\" /v {ValueName} /t REG_DWORD /d {targetValue} /f");
+        if (regOk)
+        {
+            _logger.LogInformation("Successfully updated USB policy via reg.exe. Blocked={BlockStatus} (Start={Value})", block, targetValue);
+            return true;
+        }
+
+        if (!HasAdministrativePrivilege())
+        {
+            _logger.LogError("Access Denied: Administrative privileges are required to modify USB storage policies. Please run client as Administrator.");
+        }
+        else
+        {
+            _logger.LogError("Failed to update USB policy via both Registry API and reg.exe.");
+        }
+        return false;
+    }
+
+    private static bool RunRegCommand(string args)
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "reg.exe",
+                Arguments = args,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var proc = System.Diagnostics.Process.Start(psi);
+            proc?.WaitForExit(3000);
+            return proc != null && proc.ExitCode == 0;
+        }
+        catch
+        {
             return false;
         }
     }

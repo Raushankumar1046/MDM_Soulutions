@@ -10,10 +10,14 @@ using Microsoft.AspNetCore.SignalR.Client;
 public class RemoteScreenService : IDisposable
 {
     private readonly ILogger<RemoteScreenService> _logger;
+    private readonly SemaphoreSlim _captureSignal = new SemaphoreSlim(0, 1);
     private CancellationTokenSource? _streamCts;
     private Task? _streamTask;
 
-    // Windows Native User32 APIs for Remote Mouse & Keyboard Input
+    // Windows Native User32 & GDI32 APIs for DPI-Aware Screen Capture & Precise Cursor
+    [DllImport("user32.dll")]
+    private static extern bool SetProcessDPIAware();
+
     [DllImport("user32.dll")]
     private static extern bool SetCursorPos(int X, int Y);
 
@@ -26,8 +30,19 @@ public class RemoteScreenService : IDisposable
     [DllImport("user32.dll")]
     private static extern int GetSystemMetrics(int nIndex);
 
+    [DllImport("gdi32.dll")]
+    private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetDC(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    private static extern int ReleaseDC(IntPtr hwnd, IntPtr hdc);
+
     private const int SM_CXSCREEN = 0;
     private const int SM_CYSCREEN = 1;
+    private const int DESKTOPHORZRES = 118;
+    private const int DESKTOPVERTRES = 117;
 
     private const uint MOUSEEVENTF_LEFTDOWN   = 0x0002;
     private const uint MOUSEEVENTF_LEFTUP     = 0x0004;
@@ -42,6 +57,31 @@ public class RemoteScreenService : IDisposable
     public RemoteScreenService(ILogger<RemoteScreenService> logger)
     {
         _logger = logger;
+        try { SetProcessDPIAware(); } catch { }
+    }
+
+    public static (int Width, int Height) GetPhysicalScreenSize()
+    {
+        try
+        {
+            SetProcessDPIAware();
+            IntPtr hdc = GetDC(IntPtr.Zero);
+            if (hdc != IntPtr.Zero)
+            {
+                int w = GetDeviceCaps(hdc, DESKTOPHORZRES);
+                int h = GetDeviceCaps(hdc, DESKTOPVERTRES);
+                ReleaseDC(IntPtr.Zero, hdc);
+                if (w > 0 && h > 0)
+                {
+                    return (w, h);
+                }
+            }
+        }
+        catch { }
+
+        int fallbackW = GetSystemMetrics(SM_CXSCREEN);
+        int fallbackH = GetSystemMetrics(SM_CYSCREEN);
+        return (fallbackW > 0 ? fallbackW : 1920, fallbackH > 0 ? fallbackH : 1080);
     }
 
     public void StartScreenStream(string targetAdminConnectionId, HubConnection hubConnection)
@@ -56,8 +96,8 @@ public class RemoteScreenService : IDisposable
         {
             var jpegCodec = GetJpegEncoder();
             var encoderParams = new EncoderParameters(1);
-            // 45% quality gives great visual clarity while keeping frame size ~20-35KB for ultra-fluid stream
-            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 45L);
+            // 50% quality provides crystal clear native desktop readability with low bandwidth
+            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 50L);
 
             _logger.LogInformation("Screen stream capture loop active -> Admin: {AdminId}", targetAdminConnectionId);
 
@@ -65,18 +105,8 @@ public class RemoteScreenService : IDisposable
             {
                 try
                 {
-                    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-                    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-                    if (screenWidth <= 0 || screenHeight <= 0)
-                    {
-                        screenWidth = 1920;
-                        screenHeight = 1080;
-                    }
-
-                    // 1024px max width is optimal for remote control bandwidth & fluidity
-                    int targetWidth = Math.Min(screenWidth, 1024);
-                    int targetHeight = (int)((double)targetWidth / screenWidth * screenHeight);
+                    // 100% Native Physical Screen Resolution (No clipping, no forced 1280 downscaling)
+                    var (screenWidth, screenHeight) = GetPhysicalScreenSize();
 
                     using var fullBmp = new Bitmap(screenWidth, screenHeight, PixelFormat.Format32bppArgb);
                     using (var g = Graphics.FromImage(fullBmp))
@@ -84,28 +114,22 @@ public class RemoteScreenService : IDisposable
                         g.CopyFromScreen(0, 0, 0, 0, new Size(screenWidth, screenHeight), CopyPixelOperation.SourceCopy);
                     }
 
-                    using var resizedBmp = new Bitmap(targetWidth, targetHeight, PixelFormat.Format24bppRgb);
-                    using (var gResize = Graphics.FromImage(resizedBmp))
-                    {
-                        gResize.InterpolationMode = InterpolationMode.Low;
-                        gResize.DrawImage(fullBmp, 0, 0, targetWidth, targetHeight);
-                    }
-
                     using var ms = new MemoryStream();
                     if (jpegCodec != null)
                     {
-                        resizedBmp.Save(ms, jpegCodec, encoderParams);
+                        fullBmp.Save(ms, jpegCodec, encoderParams);
                     }
                     else
                     {
-                        resizedBmp.Save(ms, ImageFormat.Jpeg);
+                        fullBmp.Save(ms, ImageFormat.Jpeg);
                     }
 
                     var base64Frame = Convert.ToBase64String(ms.ToArray());
-                    await hubConnection.InvokeAsync("SendScreenFrame", targetAdminConnectionId, base64Frame, token);
+                    // Non-blocking fire-and-forget frame dispatch
+                    await hubConnection.SendAsync("SendScreenFrame", targetAdminConnectionId, base64Frame, token);
 
-                    // ~8-10 Frames Per Second (120ms interval)
-                    await Task.Delay(120, token);
+                    // Wait 75ms for regular stream (~13 FPS), OR wake up immediately when user clicks or types!
+                    await _captureSignal.WaitAsync(75, token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -114,7 +138,7 @@ public class RemoteScreenService : IDisposable
                 catch (Exception ex)
                 {
                     _logger.LogWarning("Screen capture error: {Msg}", ex.Message);
-                    await Task.Delay(500, token);
+                    await Task.Delay(300, token);
                 }
             }
         }, token);
@@ -140,11 +164,14 @@ public class RemoteScreenService : IDisposable
     {
         try
         {
-            int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+            // Exact 100% physical hardware display coordinates
+            var (screenWidth, screenHeight) = GetPhysicalScreenSize();
 
-            int x = (int)(input.NormalizedX * screenWidth);
-            int y = (int)(input.NormalizedY * screenHeight);
+            int x = (int)Math.Round(input.NormalizedX * (screenWidth - 1));
+            int y = (int)Math.Round(input.NormalizedY * (screenHeight - 1));
+
+            x = Math.Max(0, Math.Min(screenWidth - 1, x));
+            y = Math.Max(0, Math.Min(screenHeight - 1, y));
 
             switch (input.EventType)
             {
@@ -216,10 +243,28 @@ public class RemoteScreenService : IDisposable
                     }
                     break;
             }
+
+            // Immediately capture and transmit frame if user interacted (clicked, pressed key, typed)
+            if (input.EventType != RemoteInputType.MouseMove)
+            {
+                TriggerImmediateCapture();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogDebug("Error simulating remote input: {Msg}", ex.Message);
+        }
+    }
+
+    private void TriggerImmediateCapture()
+    {
+        if (_captureSignal.CurrentCount == 0)
+        {
+            try
+            {
+                _captureSignal.Release();
+            }
+            catch (SemaphoreFullException) { }
         }
     }
 
@@ -239,5 +284,6 @@ public class RemoteScreenService : IDisposable
     public void Dispose()
     {
         StopScreenStream();
+        _captureSignal.Dispose();
     }
 }

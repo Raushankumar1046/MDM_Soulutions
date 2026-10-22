@@ -103,10 +103,40 @@ public class UdpDiscoveryServerService : BackgroundService
     {
         try
         {
+            // First priority: active physical adapter (Wi-Fi or Ethernet) with an active default gateway
+            var interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                .Where(n => n.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                            n.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback &&
+                            !n.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
+                            !n.Description.Contains("VirtualBox", StringComparison.OrdinalIgnoreCase) &&
+                            !n.Description.Contains("VMware", StringComparison.OrdinalIgnoreCase) &&
+                            !n.Name.Contains("Loopback", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var ni in interfaces)
+            {
+                var ipProps = ni.GetIPProperties();
+                if (ipProps.GatewayAddresses.Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(g.Address)))
+                {
+                    var unicast = ipProps.UnicastAddresses
+                        .FirstOrDefault(u => u.Address.AddressFamily == AddressFamily.InterNetwork && 
+                                             !IPAddress.IsLoopback(u.Address) &&
+                                             !u.Address.ToString().StartsWith("169.254.") &&
+                                             !u.Address.ToString().StartsWith("192.168.56."));
+                    if (unicast != null)
+                    {
+                        return unicast.Address.ToString();
+                    }
+                }
+            }
+
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip))
+                if (ip.AddressFamily == AddressFamily.InterNetwork && 
+                    !IPAddress.IsLoopback(ip) &&
+                    !ip.ToString().StartsWith("169.254.") &&
+                    !ip.ToString().StartsWith("192.168.56."))
                 {
                     return ip.ToString();
                 }
