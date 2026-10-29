@@ -87,18 +87,33 @@ public class UdpDiscoveryClient
             var discoverBytes = Encoding.UTF8.GetBytes(DiscoveryConstants.DiscoverMessage);
             var broadcastEndpoint = new IPEndPoint(IPAddress.Broadcast, DiscoveryConstants.UdpPort);
 
+            // Initial ping
             await udpClient.SendAsync(discoverBytes, discoverBytes.Length, broadcastEndpoint);
             
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeoutCts.CancelAfter(timeout);
 
-            var result = await udpClient.ReceiveAsync(timeoutCts.Token);
-            var message = Encoding.UTF8.GetString(result.Buffer);
-            if (message.StartsWith(DiscoveryConstants.AnnouncePrefix))
+            // Redundant burst ping after 120ms to guarantee delivery over busy Wi-Fi networks
+            _ = Task.Run(async () =>
             {
-                var serverUrl = message.Substring(DiscoveryConstants.AnnouncePrefix.Length).Trim();
-                _logger.LogInformation("UDP Discovery found local server: {Url}", serverUrl);
-                return serverUrl;
+                try
+                {
+                    await Task.Delay(120, timeoutCts.Token);
+                    await udpClient.SendAsync(discoverBytes, discoverBytes.Length, broadcastEndpoint);
+                }
+                catch { }
+            }, timeoutCts.Token);
+
+            while (!timeoutCts.IsCancellationRequested)
+            {
+                var result = await udpClient.ReceiveAsync(timeoutCts.Token);
+                var message = Encoding.UTF8.GetString(result.Buffer);
+                if (message.StartsWith(DiscoveryConstants.AnnouncePrefix))
+                {
+                    var serverUrl = message.Substring(DiscoveryConstants.AnnouncePrefix.Length).Trim();
+                    _logger.LogInformation("UDP Discovery found local server: {Url}", serverUrl);
+                    return serverUrl;
+                }
             }
         }
         catch

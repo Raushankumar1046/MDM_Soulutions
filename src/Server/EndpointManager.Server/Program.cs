@@ -53,8 +53,26 @@ if (args.Contains("--reset-admin"))
 }
 
 app.UseDefaultFiles();
-app.UseStaticFiles();
+
+var staticOptions = new StaticFileOptions();
+var fileProvider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+fileProvider.Mappings[".apk"] = "application/vnd.android.package-archive";
+staticOptions.ContentTypeProvider = fileProvider;
+app.UseStaticFiles(staticOptions);
+
 app.UseCors();
+
+// Direct APK download route with appropriate MIME headers
+app.MapGet("/downloads/{fileName}", (string fileName) =>
+{
+    var safeName = Path.GetFileName(fileName);
+    var filePath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "downloads", safeName);
+    if (!File.Exists(filePath))
+    {
+        return Results.NotFound(new { Message = $"File {safeName} not found." });
+    }
+    return Results.File(filePath, "application/vnd.android.package-archive", safeName);
+});
 
 // Map SignalR Hub Endpoint with large buffer (support both slash and dot notation)
 app.MapHub<EndpointHub>("/hubs/endpoints", options =>

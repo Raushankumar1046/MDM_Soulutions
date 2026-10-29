@@ -9,7 +9,8 @@ public enum RemoteInputType
     DoubleClick = 5,
     KeyDown = 6,
     KeyUp = 7,
-    TextInput = 8
+    TextInput = 8,
+    MouseWheel = 9
 }
 
 public class RemoteInputEvent
@@ -20,4 +21,5 @@ public class RemoteInputEvent
     public int Button { get; set; } // 0: Left, 1: Middle, 2: Right
     public int KeyCode { get; set; }
     public string? Text { get; set; }
+    public int WheelDelta { get; set; } // >0 = scroll up, <0 = scroll down
 }

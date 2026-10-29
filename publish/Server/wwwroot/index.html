@@ -724,6 +724,24 @@
       margin: auto;
     }
 
+    /* View Mode: Stretch Full (Fills entire screen without any black bars) */
+    .canvas-container.mode-stretch {
+      overflow: hidden !important;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .canvas-container.mode-stretch #remoteCanvas {
+      width: 100vw !important;
+      height: calc(100vh - 44px) !important;
+      max-width: 100vw !important;
+      max-height: calc(100vh - 44px) !important;
+      object-fit: fill !important;
+      display: block !important;
+      margin: auto;
+    }
+
     /* View Mode: 1:1 Scroll (Full native pixel resolution with horizontal and vertical scrollbars) */
     .canvas-container.mode-scroll {
       overflow: auto !important;
@@ -954,6 +972,12 @@
         </div>
         <div class="user-profile-bar">
           <span style="font-size: 13px; color: #93c5fd; font-weight: 600;">👤 <span id="headerUsername">admin</span></span>
+          <a href="/downloads/CyberShield-Windows-Client.zip" download="CyberShield-Windows-Client.zip" class="btn btn-sm btn-primary" style="text-decoration: none;" title="Download Windows Laptop Client Package (Auto-Start across restarts)">
+            💻 Download Windows Client
+          </a>
+          <a href="/downloads/CyberShield-MDM-Client.apk" download="CyberShield-MDM-Client.apk" class="btn btn-sm btn-success" style="text-decoration: none;" title="Download Android Mobile Client APK">
+            📱 Download Mobile APK
+          </a>
           <button class="btn btn-sm" onclick="openChangePasswordModal()" title="Change Admin Password">🔑 Password</button>
           <button class="btn btn-sm btn-danger" onclick="logout()" title="Logout">🚪 Logout</button>
         </div>
@@ -1164,6 +1188,15 @@
           </a>
         </div>
 
+        <!-- Android Enterprise Device Owner Status Banner -->
+        <div id="modalAndroidBanner" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #a7f3d0; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">🛡️</span>
+          <div>
+            <strong>Android Enterprise Device Owner Enforced</strong>
+            <div style="font-size: 11px; color: #6ee7b7;">Hardware Factory Reset blocked in Android Settings & Application Uninstall Disabled. Only Central MDM can authorize device wipes.</div>
+          </div>
+        </div>
+
         <!-- Policy Controls -->
         <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
           <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
@@ -1172,8 +1205,8 @@
           <div class="policy-group" style="padding-top: 0; border-top: none;">
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">USB Mass Storage Lock</span>
-                <span class="policy-sub">Blocks USB drives, pen drives & flash storage (HKLM USBSTOR)</span>
+                <span class="policy-title" id="modalUsbTitle">USB Mass Storage Lock</span>
+                <span class="policy-sub" id="modalUsbSub">Blocks USB drives, pen drives & flash storage (HKLM USBSTOR)</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="modalUsbSwitch" onchange="handleModalPolicyToggle(1, this.checked)">
@@ -1183,8 +1216,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">Software Installation Block</span>
-                <span class="policy-sub">Restricts unauthorized MSI installer & executable installations</span>
+                <span class="policy-title" id="modalSoftwareTitle">Software Installation Block</span>
+                <span class="policy-sub" id="modalSoftwareSub">Restricts unauthorized MSI installer & executable installations</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="modalSoftwareSwitch" onchange="handleModalPolicyToggle(2, this.checked)">
@@ -1194,8 +1227,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">External File Exfiltration Lock</span>
-                <span class="policy-sub">Read-only restriction on removable and portable storage devices</span>
+                <span class="policy-title" id="modalTransferTitle">External File Exfiltration Lock</span>
+                <span class="policy-sub" id="modalTransferSub">Read-only restriction on removable and portable storage devices</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="modalTransferSwitch" onchange="handleModalPolicyToggle(3, this.checked)">
@@ -1205,8 +1238,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">Web &amp; Entertainment Filtering</span>
-                <span class="policy-sub">Blocks YouTube, Facebook, Instagram &amp; Video Streaming (Hosts &amp; Browser URLBlocklist)</span>
+                <span class="policy-title" id="modalWebFilterTitle">Web &amp; Entertainment Filtering</span>
+                <span class="policy-sub" id="modalWebFilterSub">Blocks YouTube, Facebook, Instagram &amp; Video Streaming (Hosts &amp; Browser URLBlocklist)</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="modalWebFilterSwitch" onchange="handleModalPolicyToggle(4, this.checked)">
@@ -1345,20 +1378,27 @@
         <div style="display: flex; gap: 8px; align-items: center;">
           <!-- View Modes -->
           <div style="display: inline-flex; background: rgba(255,255,255,0.06); padding: 2px; border-radius: 6px; border: 1px solid var(--border);">
-            <button class="btn btn-primary" id="btnModeFit" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('fit')" title="Scale entire remote screen to fit view without scrolling (Taskbar always visible)">🔍 Fit Screen</button>
+            <button class="btn btn-primary" id="btnModeFit" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('fit')" title="Scale remote screen to fit view preserving aspect ratio">🔍 Fit Aspect</button>
+            <button class="btn" id="btnModeStretch" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('stretch')" title="Stretch screen to fill entire window (no black bars)">📐 Stretch Full</button>
             <button class="btn" id="btnModeScroll" style="padding: 3px 9px; font-size: 11px; border: none;" onclick="setViewMode('scroll')" title="Display 100% full original resolution with horizontal and vertical scrollbars">📜 1:1 Scroll</button>
           </div>
           <button class="btn" style="padding: 4px 9px; font-size: 11px;" onclick="toggleFullscreen()" title="Toggle Browser Fullscreen (F11 style)">⛶ Fullscreen</button>
           <span style="color: rgba(255,255,255,0.2);">|</span>
-          <!-- Remote Keys -->
-          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)" title="Send Windows Key">⊞ Win</button>
+          <!-- Remote Keys & Shortcuts -->
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)" title="Send Windows Key (Start Menu)">⊞ Win</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendRunDialogShortcut()" title="Open Windows Run Dialog on Remote (Win+R)">⚡ Run (Win+R)</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendShowDesktop()" title="Show Desktop (Win+D)">💻 Desktop</button>
           <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendTaskMgrShortcut()" title="Open Task Manager (Ctrl+Shift+Esc)">⚡ TaskMgr</button>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ESCAPE', 27)">Esc</button>
-          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)">Enter</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendLockWorkstation()" title="Lock Remote Workstation (Win+L / Secure Lock)">🔒 Lock Screen</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ESCAPE', 27)" title="Send Escape">Esc</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)" title="Send Enter">Enter</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('BACKSPACE', 8)" title="Send Backspace">⌫ Backspace</button>
+          <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendKeyToRemote('TAB', 9)" title="Send Tab">⇥ Tab</button>
           <span style="color: rgba(255,255,255,0.2);">|</span>
           <!-- Text Sender in Header -->
           <input type="text" id="remoteTextInput" placeholder="Type text to send to remote..." style="background: #090d16; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: #fff; font-size: 11px; width: 170px;" onkeydown="if(event.key==='Enter') sendTextToRemote()">
           <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="sendTextToRemote()">⌨️ Send</button>
+          <button class="btn btn-success" id="btnPasteRemote" style="padding: 4px 10px; font-size: 11px; font-weight: 600; background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.45); color: #86efac;" onclick="pasteLocalClipboardToRemote()" title="Paste text from your computer to remote laptop (or press Ctrl+V directly on screen)">📋 Paste (Ctrl+V)</button>
           <span style="color: rgba(255,255,255,0.2);">|</span>
           <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11px; font-weight: 600;" onclick="closeRemoteDesktopModal()">✕ Disconnect</button>
         </div>
@@ -1914,7 +1954,7 @@
           <tr onclick="openDeviceModal('${escapeHtml(d.machineName)}')">
             <td>
               <div class="table-host-cell">
-                <span style="font-size: 18px;">💻</span>
+                <span style="font-size: 18px;">${(d.osVersion && d.osVersion.toLowerCase().includes('android')) ? '📱' : '💻'}</span>
                 <div>
                   <div class="table-host-name">${escapeHtml(d.machineName)}</div>
                   <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml((d.osVersion || '').substring(0, 24))}</div>
@@ -1980,12 +2020,13 @@
         const isOffice = (d.networkLocation === 'In Office');
         const locLabel = isOffice ? '🏢 In Office' : '🏠 Work From Home';
         const locClass = isOffice ? 'office' : 'remote';
+        const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
 
         return `
         <div class="card" onclick="openDeviceModal('${escapeHtml(d.machineName)}')">
           <div class="card-header">
             <div class="host-title">
-              💻 <span>${escapeHtml(d.machineName)}</span>
+              <span>${isAndroid ? '📱' : '💻'}</span> <span>${escapeHtml(d.machineName)}</span>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
               <span class="badge-loc ${locClass}" title="Location: ${locLabel}">
@@ -2022,8 +2063,8 @@
           <div class="policy-group" onclick="event.stopPropagation()">
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">USB Mass Storage</span>
-                <span class="policy-sub">HKLM USBSTOR Driver Access</span>
+                <span class="policy-title">${isAndroid ? 'USB / MTP File Transfer' : 'USB Mass Storage'}</span>
+                <span class="policy-sub">${isAndroid ? 'Restrict Android File Exfiltration' : 'HKLM USBSTOR Driver Access'}</span>
               </div>
               <label class="switch">
                 <input type="checkbox" ${d.usbStorageBlocked ? 'checked' : ''} onchange="togglePolicy('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 1, this.checked)">
@@ -2033,8 +2074,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">Software Installation</span>
-                <span class="policy-sub">MSI Service & Group Policy</span>
+                <span class="policy-title">${isAndroid ? 'App Installation Lock' : 'Software Installation'}</span>
+                <span class="policy-sub">${isAndroid ? 'Block Unknown APKs & Installs' : 'MSI Service & Group Policy'}</span>
               </div>
               <label class="switch">
                 <input type="checkbox" ${d.softwareInstallDisabled ? 'checked' : ''} onchange="togglePolicy('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 2, this.checked)">
@@ -2044,8 +2085,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">External File Exfiltration</span>
-                <span class="policy-sub">WPD & Removable Storage Write Lock</span>
+                <span class="policy-title">${isAndroid ? 'Camera Hardware Sensor' : 'External File Exfiltration'}</span>
+                <span class="policy-sub">${isAndroid ? 'Disable Front & Rear Camera' : 'WPD & Removable Storage Write Lock'}</span>
               </div>
               <label class="switch">
                 <input type="checkbox" ${d.externalFileTransferRestricted ? 'checked' : ''} onchange="togglePolicy('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 3, this.checked)">
@@ -2055,8 +2096,8 @@
 
             <div class="policy-item">
               <div class="policy-info">
-                <span class="policy-title">Web &amp; Entertainment Filter</span>
-                <span class="policy-sub">Block YouTube, Social Media &amp; Streaming</span>
+                <span class="policy-title">${isAndroid ? 'DNS Web & App Filter' : 'Web &amp; Entertainment Filter'}</span>
+                <span class="policy-sub">${isAndroid ? 'Block YouTube, Adult & Gambling' : 'Block YouTube, Social Media &amp; Streaming'}</span>
               </div>
               <label class="switch">
                 <input type="checkbox" ${d.webFilteringBlocked ? 'checked' : ''} onchange="togglePolicy('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 4, this.checked)">
@@ -2072,7 +2113,7 @@
             <button class="btn" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="promptSendMessage('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}')">
               💬 Send Alert
             </button>
-            <button class="btn btn-danger" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 11, 'Restart Laptop')">
+            <button class="btn btn-danger" style="flex: 1; padding: 6px 8px; font-size: 11px; justify-content: center;" onclick="sendRemoteAction('${escapeHtml(d.machineName)}', '${escapeHtml(d.lastConnectionId)}', 11, '${isAndroid ? 'Reboot Phone' : 'Restart Laptop'}')">
               🔄 Reboot
             </button>
           </div>
@@ -2080,10 +2121,10 @@
           <!-- Remote Assist Gateway Actions -->
           <div style="display: flex; gap: 8px; margin-top: 8px;" onclick="event.stopPropagation()">
             <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.4); color: #7dd3fc;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openTerminalModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.machineName)}')">
-              💻 PowerShell
+              ${isAndroid ? '🤖 Android Shell' : '💻 PowerShell'}
             </button>
             <button class="btn" style="flex: 1; padding: 7px 10px; font-size: 12px; justify-content: center; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe;" ${!d.isOnline ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="openRemoteDesktopModal('${escapeHtml(d.machineName)}', '${escapeHtml(d.machineName)}')">
-              🖥️ Remote Desktop
+              ${isAndroid ? '📱 Mobile Screen' : '🖥️ Remote Desktop'}
             </button>
           </div>
         </div>
@@ -2137,6 +2178,40 @@
       document.getElementById('modalTransferSwitch').checked = !!d.externalFileTransferRestricted;
       document.getElementById('modalWebFilterSwitch').checked = !!d.webFilteringBlocked;
 
+      const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
+
+      const androidBanner = document.getElementById('modalAndroidBanner');
+      if (androidBanner) androidBanner.style.display = isAndroid ? 'flex' : 'none';
+
+      const usbTitle = document.getElementById('modalUsbTitle');
+      const usbSub = document.getElementById('modalUsbSub');
+      const softTitle = document.getElementById('modalSoftwareTitle');
+      const softSub = document.getElementById('modalSoftwareSub');
+      const transTitle = document.getElementById('modalTransferTitle');
+      const transSub = document.getElementById('modalTransferSub');
+      const webTitle = document.getElementById('modalWebFilterTitle');
+      const webSub = document.getElementById('modalWebFilterSub');
+
+      if (isAndroid) {
+        if (usbTitle) usbTitle.textContent = 'USB / MTP File Transfer Lock';
+        if (usbSub) usbSub.textContent = 'Restricts USB file transfers to PC & exfiltration';
+        if (softTitle) softTitle.textContent = 'App & Software Installation Lock';
+        if (softSub) softSub.textContent = 'Blocks sideloading APKs, unknown sources & new apps';
+        if (transTitle) transTitle.textContent = 'Camera Hardware Sensor Lock';
+        if (transSub) transSub.textContent = 'Disables front and back cameras on the device';
+        if (webTitle) webTitle.textContent = 'On-Device DNS Web & Content Filter';
+        if (webSub) webSub.textContent = 'Blocks YouTube, Social Media, Adult & Gambling domains';
+      } else {
+        if (usbTitle) usbTitle.textContent = 'USB Mass Storage Lock';
+        if (usbSub) usbSub.textContent = 'Blocks USB drives, pen drives & flash storage (HKLM USBSTOR)';
+        if (softTitle) softTitle.textContent = 'Software Installation Block';
+        if (softSub) softSub.textContent = 'Restricts unauthorized MSI installer & executable installations';
+        if (transTitle) transTitle.textContent = 'External File Exfiltration Lock';
+        if (transSub) transSub.textContent = 'Read-only restriction on removable and portable storage devices';
+        if (webTitle) webTitle.textContent = 'Web & Entertainment Filtering';
+        if (webSub) webSub.textContent = 'Blocks YouTube, Facebook, Instagram & Video Streaming (Hosts & Browser URLBlocklist)';
+      }
+
       // Online-only buttons
       const isOnline = !!d.isOnline;
       const btnRemote = document.getElementById('modalBtnRemote');
@@ -2145,7 +2220,29 @@
       const btnMsg = document.getElementById('modalBtnMsg');
       const btnRestart = document.getElementById('modalBtnRestart');
 
-      [btnRemote, btnPs, btnLock, btnMsg, btnRestart].forEach(b => {
+      if (btnRemote) btnRemote.innerHTML = isAndroid ? '📱 Live Mobile Screen' : '🖥️ Remote Desktop (AnyDesk)';
+      if (btnPs) btnPs.innerHTML = isAndroid ? '🤖 Android Shell Terminal' : '💻 Remote PowerShell';
+      if (btnLock) btnLock.innerHTML = isAndroid ? '🔒 Lock Mobile Screen' : '🔒 Lock Remote Screen';
+      if (btnRestart) btnRestart.innerHTML = isAndroid ? '🔄 Reboot Phone' : '🔄 Reboot Client Machine';
+
+      let btnWipe = document.getElementById('modalBtnMobileWipe');
+      if (!btnWipe) {
+        btnWipe = document.createElement('button');
+        btnWipe.id = 'modalBtnMobileWipe';
+        btnWipe.className = 'btn btn-danger';
+        btnWipe.style = 'grid-column: span 2; padding: 10px; font-size: 13px; justify-content: center; background: rgba(220, 38, 38, 0.15); border: 1px dashed #ef4444; color: #fca5a5;';
+        btnWipe.onclick = triggerAuthorizedMobileWipe;
+        if (btnRestart && btnRestart.parentNode) btnRestart.parentNode.appendChild(btnWipe);
+      }
+      if (btnWipe) {
+        btnWipe.style.display = isAndroid ? 'flex' : 'none';
+        btnWipe.disabled = !isOnline;
+        btnWipe.style.opacity = isOnline ? '1' : '0.5';
+        btnWipe.style.cursor = isOnline ? 'pointer' : 'not-allowed';
+        btnWipe.innerHTML = '⚠️ Authorized Remote Wipe / Format Phone';
+      }
+
+      [btnRemote, btnPs, btnLock, btnMsg, btnRestart, btnWipe].forEach(b => {
         if (!b) return;
         b.disabled = !isOnline;
         b.style.opacity = isOnline ? '1' : '0.5';
@@ -2155,6 +2252,37 @@
       renderModalDomainChips();
       renderModalDeviceExceptions(d);
       loadAndRenderDeviceExceptions(d.machineName);
+    }
+
+    async function triggerAuthorizedMobileWipe() {
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      const connId = selectedModalDevice.lastConnectionId;
+      const conf = prompt(`⚠️ CAUTION: You are about to initiate an Authorized Remote Factory Wipe on [${host}].\n\nAll photos, accounts, and data will be permanently erased and the device reset to factory settings.\n\nType 'CONFIRM_WIPE' to authorize:`);
+      if (conf !== 'CONFIRM_WIPE') {
+        alert('Action canceled. Phone format authorization was not granted.');
+        return;
+      }
+      try {
+        const res = await authFetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connectionId: connId,
+            machineName: host,
+            policy: 99,
+            enableRestriction: true,
+            payload: 'CONFIRM_WIPE'
+          })
+        });
+        if (res.ok) {
+          alert(`✅ Factory Wipe Authorization sent to ${host}! Device is formatting.`);
+        } else {
+          alert('Failed to authorize wipe: Server error.');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
     }
 
     function renderModalDeviceExceptions(d) {
@@ -2541,6 +2669,43 @@
 
       let remoteFrameCount = 0;
       let lastFpsTime = Date.now();
+      let pendingFrameBase64 = null;
+      let isRenderingFrame = false;
+
+      function renderNextFrame() {
+        if (!pendingFrameBase64 || !isScreenStreaming) {
+          isRenderingFrame = false;
+          return;
+        }
+        isRenderingFrame = true;
+        const b64 = pendingFrameBase64;
+        pendingFrameBase64 = null;
+
+        const canvas = document.getElementById('remoteCanvas');
+        if (!canvas) { isRenderingFrame = false; return; }
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        const img = new Image();
+        img.onload = () => {
+          if (canvas.width !== img.width || canvas.height !== img.height) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const resLabel = document.getElementById('remoteResLabel');
+            if (resLabel) {
+              resLabel.textContent = `Auto: ${img.width}x${img.height} (Client Display)`;
+              resLabel.title = `Auto-detected native display resolution of client ${activeScreenHost || ''}`;
+            }
+          }
+          ctx.drawImage(img, 0, 0);
+
+          if (pendingFrameBase64) {
+            requestAnimationFrame(renderNextFrame);
+          } else {
+            isRenderingFrame = false;
+          }
+        };
+        img.src = 'data:image/jpeg;base64,' + b64;
+      }
 
       hubConn.on('ReceiveScreenFrame', (base64) => {
         if (!isScreenStreaming) return;
@@ -2552,24 +2717,19 @@
         if (now - lastFpsTime >= 1000) {
           const fps = Math.round((remoteFrameCount * 1000) / (now - lastFpsTime));
           const badge = document.getElementById('remoteFpsBadge');
-          if (badge) badge.textContent = `Live Stream ~${fps} FPS`;
+          if (badge) {
+            badge.textContent = `LIVE STREAM ~${fps} FPS`;
+            badge.style.color = fps >= 18 ? '#4ade80' : '#facc15';
+          }
           remoteFrameCount = 0;
           lastFpsTime = now;
         }
 
-        const canvas = document.getElementById('remoteCanvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        img.onload = () => {
-          if (canvas.width !== img.width || canvas.height !== img.height) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const resLabel = document.getElementById('remoteResLabel');
-            if (resLabel) resLabel.textContent = `${img.width}x${img.height} (Native)`;
-          }
-          ctx.drawImage(img, 0, 0);
-        };
-        img.src = 'data:image/jpeg;base64,' + base64;
+        // Always prioritize the newest frame to prevent decode queues
+        pendingFrameBase64 = base64;
+        if (!isRenderingFrame) {
+          renderNextFrame();
+        }
       });
 
       return hubConn.start()
@@ -2590,9 +2750,47 @@
       activeTermHost = machineName;
       currentTermSessionId = 'term_' + Date.now();
 
-      document.getElementById('termTargetHost').textContent = machineName;
+      const dev = (selectedModalDevice && selectedModalDevice.machineName === machineName) 
+        ? selectedModalDevice 
+        : (allLoadedDevices.find(d => d.machineName === machineName) || {});
+      const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+
+      const titleEl = document.querySelector('#terminalModal .modal-title');
+      if (titleEl) {
+        titleEl.innerHTML = `<span>${isAndroid ? '🤖 Remote Android Shell:' : '💻 Remote PowerShell Gateway:'}</span> <span id="termTargetHost" style="color: #38bdf8; font-family: monospace;">${escapeHtml(machineName)}</span>`;
+      }
+
+      const quickCmdsContainer = document.querySelector('#terminalModal .terminal-body > div');
+      if (quickCmdsContainer) {
+        if (isAndroid) {
+          quickCmdsContainer.innerHTML = `
+            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Android Cmds:</span>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('dumpsys battery')">🔋 Battery</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('getprop ro.product.model')">📱 Model</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('pm list packages -3')">📦 User Apps</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('df -h')">💾 Storage</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('ip a')">🌐 Network IP</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('getprop ro.build.version.release')">ℹ️ OS Version</button>
+          `;
+        } else {
+          quickCmdsContainer.innerHTML = `
+            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Quick Cmds:</span>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Id,ProcessName,CPU,WorkingSet64')">Top CPU</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('ipconfig /all')">ipconfig</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('Get-Service | Where-Object Status -eq Running')">Services</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('whoami /priv')">Privileges</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('netstat -ano | Select-Object -First 20')">Netstat</button>
+            <button class="btn" style="padding: 3px 8px; font-size: 11px;" onclick="setAndRunCmd('systeminfo | Select-String \\\"OS Name\\\",\\\"Total Physical Memory\\\"')">System Info</button>
+          `;
+        }
+      }
+
       document.getElementById('terminalModal').classList.add('active');
-      document.getElementById('termInput').focus();
+      const termInput = document.getElementById('termInput');
+      if (termInput) {
+        termInput.placeholder = isAndroid ? 'Enter Android shell command... (e.g. dumpsys battery, pm list packages -3, df -h)' : 'Enter PowerShell command... (e.g. dir, Get-Process, sfc /scannow)';
+        termInput.focus();
+      }
 
       try {
         if (!hubConn || hubConn.state !== signalR.HubConnectionState.Connected) {
@@ -2623,10 +2821,15 @@
       const cmdText = input.value.trim();
       if (!cmdText || !activeTermConnId) return;
 
+      const dev = (selectedModalDevice && selectedModalDevice.machineName === activeTermHost) 
+        ? selectedModalDevice 
+        : (allLoadedDevices.find(d => d.machineName === activeTermHost) || {});
+      const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+
       const screen = document.getElementById('termScreen');
       const cmdLine = document.createElement('div');
       cmdLine.className = 'term-line-cmd';
-      cmdLine.textContent = `PS > ${cmdText}`;
+      cmdLine.textContent = isAndroid ? `Android $ > ${cmdText}` : `PS > ${cmdText}`;
       screen.appendChild(cmdLine);
       screen.scrollTop = screen.scrollHeight;
 
@@ -2664,21 +2867,30 @@
       currentViewMode = mode;
       const container = document.getElementById('canvasContainer');
       const fitBtn = document.getElementById('btnModeFit');
+      const stretchBtn = document.getElementById('btnModeStretch');
       const scrollBtn = document.getElementById('btnModeScroll');
       const indicator = document.getElementById('remoteModeIndicator');
 
+      container.classList.remove('mode-fit', 'mode-stretch', 'mode-scroll');
+
       if (mode === 'fit') {
-        container.classList.remove('mode-scroll');
         container.classList.add('mode-fit');
         if (fitBtn) fitBtn.className = 'btn btn-primary';
+        if (stretchBtn) stretchBtn.className = 'btn';
         if (scrollBtn) scrollBtn.className = 'btn';
-        if (indicator) indicator.textContent = '🖥️ Mode: Fit to Window (Whole screen visible, taskbar included)';
+        if (indicator) indicator.textContent = '🖥️ Mode: Fit to Window (Aspect Ratio Preserved)';
+      } else if (mode === 'stretch') {
+        container.classList.add('mode-stretch');
+        if (stretchBtn) stretchBtn.className = 'btn btn-primary';
+        if (fitBtn) fitBtn.className = 'btn';
+        if (scrollBtn) scrollBtn.className = 'btn';
+        if (indicator) indicator.textContent = '📐 Mode: Stretch Full (No black bars - fills entire window)';
       } else {
-        container.classList.remove('mode-fit');
         container.classList.add('mode-scroll');
         if (scrollBtn) scrollBtn.className = 'btn btn-primary';
         if (fitBtn) fitBtn.className = 'btn';
-        if (indicator) indicator.textContent = '📜 Mode: 1:1 Scroll (Full resolution, use scrollbars)';
+        if (stretchBtn) stretchBtn.className = 'btn';
+        if (indicator) indicator.textContent = '📜 Mode: 1:1 Scroll (Full original pixels, scrollable)';
       }
     }
 
@@ -2718,14 +2930,19 @@
       activeScreenHost = machineName;
       isScreenStreaming = true;
 
+      const dev = (selectedModalDevice && selectedModalDevice.machineName === machineName) 
+        ? selectedModalDevice 
+        : (allLoadedDevices.find(d => d.machineName === machineName) || {});
+      const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+
       document.getElementById('remoteTargetHost').textContent = machineName;
       const overlay = document.getElementById('remoteWaitingOverlay');
       if (overlay) {
         overlay.style.display = 'flex';
         overlay.innerHTML = `
-          <div style="font-size: 32px;">⚡</div>
-          <span id="remoteWaitStatus">Connecting to ${escapeHtml(machineName)} Screen...</span>
-          <span style="font-size: 11px; color: #94a3b8;">Ensure updated EndpointManager.Client is running on the client machine.</span>
+          <div style="font-size: 32px;">${isAndroid ? '📱' : '⚡'}</div>
+          <span id="remoteWaitStatus">Connecting to ${escapeHtml(machineName)} ${isAndroid ? 'Mobile Display' : 'Screen'}...</span>
+          <span style="font-size: 11px; color: #94a3b8;">Ensure ${isAndroid ? 'CyberShield MDM app' : 'EndpointManager.Client'} is connected to central server.</span>
         `;
       }
       setViewMode('fit');
@@ -2771,23 +2988,35 @@
       };
     }
 
-    function sendRemoteInput(eventType, nx, ny, button = 0, keyCode = 0, text = null) {
+    function sendRemoteInput(eventType, nx, ny, button = 0, keyCode = 0, text = null, wheelDelta = 0) {
       if (!hubConn || !activeScreenConnId || !isScreenStreaming) return;
-      // Use fire-and-forget send to avoid blocking UI on server round-trip ACK
+      // Fire-and-forget send to ensure real-time responsiveness without blocking UI
       hubConn.send('SendRemoteInput', activeScreenConnId, {
         EventType: eventType,
         NormalizedX: nx,
         NormalizedY: ny,
         Button: button,
         KeyCode: keyCode,
-        Text: text
+        Text: text,
+        WheelDelta: wheelDelta
       }).catch(console.error);
     }
 
     function sendKeyToRemote(name, keyCode) {
       if (!activeScreenConnId) return;
       sendRemoteInput(6, 0, 0, 0, keyCode); // KeyDown
-      setTimeout(() => sendRemoteInput(7, 0, 0, 0, keyCode), 50); // KeyUp
+      setTimeout(() => sendRemoteInput(7, 0, 0, 0, keyCode), 45); // KeyUp
+    }
+
+    function sendRunDialogShortcut() {
+      if (!activeScreenConnId) return;
+      // Win + R (VK_LWIN = 91, VK_R = 82)
+      sendRemoteInput(6, 0, 0, 0, 91); // Win down
+      sendRemoteInput(6, 0, 0, 0, 82); // R down
+      setTimeout(() => {
+        sendRemoteInput(7, 0, 0, 0, 82); // R up
+        sendRemoteInput(7, 0, 0, 0, 91); // Win up
+      }, 60);
     }
 
     function sendTaskMgrShortcut() {
@@ -2800,7 +3029,43 @@
         sendRemoteInput(7, 0, 0, 0, 27); // Esc up
         sendRemoteInput(7, 0, 0, 0, 16); // Shift up
         sendRemoteInput(7, 0, 0, 0, 17); // Ctrl up
-      }, 80);
+      }, 70);
+    }
+
+    function sendShowDesktop() {
+      if (!activeScreenConnId) return;
+      // Win + D (VK_LWIN = 91, VK_D = 68)
+      sendRemoteInput(6, 0, 0, 0, 91); // Win down
+      sendRemoteInput(6, 0, 0, 0, 68); // D down
+      setTimeout(() => {
+        sendRemoteInput(7, 0, 0, 0, 68); // D up
+        sendRemoteInput(7, 0, 0, 0, 91); // Win up
+      }, 60);
+    }
+
+    function sendLockWorkstation() {
+      if (!activeScreenConnId) return;
+      // 1. Dispatch lock policy to the machine via API for guaranteed workstation lock
+      authFetch('/api/policies/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          connectionId: activeScreenConnId,
+          machineName: activeScreenHost || activeScreenConnId,
+          policy: 10, // PolicyType.LockWorkstation
+          enableRestriction: true
+        })
+      }).catch(err => {
+        console.warn("Policy lock dispatch error:", err);
+      });
+
+      // 2. Also simulate Win+L keystroke remotely
+      sendRemoteInput(6, 0, 0, 0, 91); // Win down
+      sendRemoteInput(6, 0, 0, 0, 76); // L down
+      setTimeout(() => {
+        sendRemoteInput(7, 0, 0, 0, 76); // L up
+        sendRemoteInput(7, 0, 0, 0, 91); // Win up
+      }, 60);
     }
 
     function sendTextToRemote() {
@@ -2811,51 +3076,166 @@
       input.value = '';
     }
 
+    let lastPasteTimestamp = 0;
+    function sendClipboardTextToRemote(text) {
+      if (!text || !activeScreenConnId) return;
+      const now = Date.now();
+      if (now - lastPasteTimestamp < 250) return; // Prevent double-execution from keydown + paste event
+      lastPasteTimestamp = now;
+      sendRemoteInput(8, 0, 0, 0, 0, text);
+    }
+
+    async function pasteLocalClipboardToRemote() {
+      if (!activeScreenConnId) return;
+      let text = '';
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        try {
+          text = await navigator.clipboard.readText();
+        } catch (e) {
+          console.warn('Clipboard readText restricted in this context (HTTP/permission):', e);
+        }
+      }
+      if (text) {
+        sendClipboardTextToRemote(text);
+      } else {
+        const userInput = prompt('Paste text from your computer to send to remote laptop:');
+        if (userInput) {
+          sendClipboardTextToRemote(userInput);
+        }
+      }
+    }
+
     let canvasEventsConfigured = false;
+    let isCanvasMouseDown = false;
+    let lastMouseDownButton = 0;
+
     function setupCanvasEvents() {
       if (canvasEventsConfigured) return;
       const canvas = document.getElementById('remoteCanvas');
       if (!canvas) return;
       canvasEventsConfigured = true;
 
+      // Mouse Move & Dragging
       canvas.addEventListener('mousemove', (e) => {
         const now = Date.now();
-        if (now - lastMouseMoveSent > 45) { // ~22 events/sec for fluid cursor positioning
+        // ~33 events/sec for fluid cursor positioning and dragging
+        if (now - lastMouseMoveSent > 30) {
           lastMouseMoveSent = now;
           const { nx, ny } = getNormalizedCoords(e, canvas);
-          sendRemoteInput(1, nx, ny);
+          sendRemoteInput(1, nx, ny, isCanvasMouseDown ? lastMouseDownButton : 0);
         }
       });
 
+      // Mouse Down
       canvas.addEventListener('mousedown', (e) => {
         e.preventDefault();
         canvas.focus();
+        isCanvasMouseDown = true;
+        lastMouseDownButton = e.button;
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(2, nx, ny, e.button);
       });
 
+      // Mouse Up
       canvas.addEventListener('mouseup', (e) => {
         e.preventDefault();
+        isCanvasMouseDown = false;
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(3, nx, ny, e.button);
       });
 
+      // Window-wide Mouse Up to catch release outside canvas while dragging
+      window.addEventListener('mouseup', (e) => {
+        if (isCanvasMouseDown) {
+          isCanvasMouseDown = false;
+          const { nx, ny } = getNormalizedCoords(e, canvas);
+          sendRemoteInput(3, nx, ny, lastMouseDownButton);
+        }
+      });
+
+      // Double Click
       canvas.addEventListener('dblclick', (e) => {
         e.preventDefault();
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(5, nx, ny, 0);
       });
 
+      // Mouse Wheel Scroll (up/down)
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 120 : -120;
+        const { nx, ny } = getNormalizedCoords(e, canvas);
+        sendRemoteInput(9, nx, ny, 0, 0, null, delta);
+      }, { passive: false });
+
+      // Disable browser context menu on remote canvas so right click goes to remote
       canvas.addEventListener('contextmenu', (e) => {
         e.preventDefault();
       });
 
+      // Paste listener on canvas
+      canvas.addEventListener('paste', (e) => {
+        e.preventDefault();
+        let pastedText = '';
+        if (e.clipboardData && e.clipboardData.getData) {
+          pastedText = e.clipboardData.getData('text/plain');
+        }
+        if (pastedText) {
+          sendClipboardTextToRemote(pastedText);
+        }
+      });
+
+      // Window-level paste listener when remote modal is active
+      window.addEventListener('paste', (e) => {
+        const modal = document.getElementById('remoteDesktopModal');
+        if (modal && modal.style.display !== 'none' && isScreenStreaming) {
+          if (document.activeElement && document.activeElement.id === 'remoteTextInput') {
+            return;
+          }
+          e.preventDefault();
+          let pastedText = '';
+          if (e.clipboardData && e.clipboardData.getData) {
+            pastedText = e.clipboardData.getData('text/plain');
+          }
+          if (pastedText) {
+            sendClipboardTextToRemote(pastedText);
+          }
+        }
+      });
+
+      // Keyboard Down
       canvas.addEventListener('keydown', (e) => {
-        if (e.keyCode === 9) e.preventDefault(); // prevent Tab from defocusing canvas
+        // 1. Intercept Ctrl+V or Meta+V (Paste)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V' || e.keyCode === 86)) {
+          e.preventDefault();
+          pasteLocalClipboardToRemote();
+          return;
+        }
+
+        // 2. Prevent local browser actions for keys meant for the remote machine
+        if ([9, 8, 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 116].includes(e.keyCode)) {
+          e.preventDefault();
+        }
+
+        // 3. For single printable text characters (a-z, 0-9, space, punctuation):
+        // When not holding Ctrl, Alt, or Meta, send as Unicode TextInput (EventType 8).
+        // This ensures the Windows Run dialog, Search, CMD, Notepad etc. receive the exact character cleanly!
+        if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key && e.key.length === 1) {
+          e.preventDefault();
+          sendRemoteInput(8, 0, 0, 0, 0, e.key);
+          return;
+        }
+
+        // 4. Non-printable or control shortcut keys (Enter, Backspace, Arrows, Esc, Tab, Ctrl+C, Ctrl+A, etc.)
         sendRemoteInput(6, 0, 0, 0, e.keyCode);
       });
 
+      // Keyboard Up
       canvas.addEventListener('keyup', (e) => {
+        // Skip printable characters because they were dispatched via Unicode TextInput
+        if (!e.ctrlKey && !e.altKey && !e.metaKey && e.key && e.key.length === 1) {
+          return;
+        }
         sendRemoteInput(7, 0, 0, 0, e.keyCode);
       });
     }

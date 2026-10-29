@@ -8,6 +8,17 @@ echo Checking and clearing any previous running server instances...
 taskkill /f /im EndpointManager.Server.exe >nul 2>&1
 timeout /t 1 /nobreak >nul
 
+:: Ensure .NET 8 Runtime is found (Auto-detect .NET 8 runtime paths)
+if not exist "%ProgramFiles%\dotnet\shared\Microsoft.AspNetCore.App\8.*" (
+    if exist "%USERPROFILE%\.dotnet\shared\Microsoft.AspNetCore.App\8.*" (
+        set "DOTNET_ROOT=%USERPROFILE%\.dotnet"
+        set "PATH=%USERPROFILE%\.dotnet;%PATH%"
+    ) else if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Community\dotnet\net8.0\runtime" (
+        set "DOTNET_ROOT=%ProgramFiles%\Microsoft Visual Studio\2022\Community\dotnet\net8.0\runtime"
+        set "PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Community\dotnet\net8.0\runtime;%PATH%"
+    )
+)
+
 echo Starting Central Server & UDP Auto-Discovery Service...
 echo.
 

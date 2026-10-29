@@ -91,18 +91,12 @@ public class Worker : BackgroundService
                 _currentLocationType = locationType;
 
                 _logger.LogInformation("Connecting to Central Server at: {Url} (Location Mode: {Location})", _currentServerUrl, _currentLocationType);
+                Program.LogRuntime($"[CONNECT] Connecting to Central Server at: {_currentServerUrl} ({_currentLocationType})");
 
-                // 2. Setup Hub Connection
+                // 2. Setup Hub Connection with Infinite Auto-Reconnect (Never drops permanently)
                 _hubConnection = new HubConnectionBuilder()
                     .WithUrl(_currentServerUrl!)
-                    .WithAutomaticReconnect(new[] 
-                    {
-                        TimeSpan.FromSeconds(0),
-                        TimeSpan.FromSeconds(2),
-                        TimeSpan.FromSeconds(5),
-                        TimeSpan.FromSeconds(10),
-                        TimeSpan.FromSeconds(20)
-                    })
+                    .WithAutomaticReconnect(new InfiniteRetryPolicy())
                     .Build();
 
                 _hubConnection.On<PolicyCommand>(nameof(IEndpointClientContract.ExecutePolicy), HandlePolicyCommandAsync);
@@ -114,18 +108,21 @@ public class Worker : BackgroundService
                 _hubConnection.Reconnecting += error =>
                 {
                     _logger.LogWarning("Connection interrupted: {Error}. Reconnecting automatically...", error?.Message);
+                    Program.LogRuntime($"[RECONNECTING] Connection interrupted: {error?.Message}. Reconnecting automatically...");
                     return Task.CompletedTask;
                 };
 
                 _hubConnection.Reconnected += connectionId =>
                 {
                     _logger.LogInformation("Connection re-established! ConnectionId: {Id}", connectionId);
+                    Program.LogRuntime($"[RECONNECTED] Connection re-established. ConnectionId: {connectionId}");
                     return Task.CompletedTask;
                 };
 
                 // Connect with retry
                 await _hubConnection.StartAsync(stoppingToken);
                 _logger.LogInformation("Successfully connected to Central Management Server via {Location}!", _currentLocationType);
+                Program.LogRuntime($"[ONLINE] Successfully connected to Central Management Server at {_currentServerUrl} ({_currentLocationType})!");
 
                 // 3. Heartbeat loop while connected
                 while (!stoppingToken.IsCancellationRequested && _hubConnection.State != HubConnectionState.Disconnected)
@@ -175,6 +172,7 @@ public class Worker : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogWarning("Connection failed: {Message}. Re-attempting in 5 seconds...", ex.Message);
+                Program.LogRuntime($"[RETRY] Connection failed: {ex.Message}. Re-attempting in 5 seconds...");
                 await Task.Delay(5000, stoppingToken);
             }
             finally
@@ -269,23 +267,84 @@ public class Worker : BackgroundService
                         : "Failed to update Web Filtering policies.";
                     break;
                 case PolicyType.LockWorkstation:
-                    try { LockWorkStation(); } catch { }
+                    Program.LogRuntime("[ACTION] Remote lock workstation command received from Admin.");
+                    bool locked = false;
+
+                    // 1. Native user32 LockWorkStation (locks interactive desktop screen immediately)
                     try
                     {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        if (LockWorkStation())
                         {
-                            FileName = "rundll32.exe",
-                            Arguments = "user32.dll,LockWorkStation",
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
+                            locked = true;
+                            Program.LogRuntime("[ACTION] LockWorkStation() succeeded.");
+                        }
                     }
-                    catch { }
-                    result.Success = true;
-                    result.Message = "Workstation screen locked successfully.";
+                    catch (Exception ex)
+                    {
+                        Program.LogRuntime($"[WARN] LockWorkStation error: {ex.Message}");
+                    }
+
+                    // 2. rundll32 user32.dll,LockWorkStation fallback
+                    if (!locked)
+                    {
+                        try
+                        {
+                            var proc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "rundll32.exe",
+                                Arguments = "user32.dll,LockWorkStation",
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            });
+                            proc?.WaitForExit(1000);
+                            locked = true;
+                            Program.LogRuntime("[ACTION] rundll32 LockWorkStation invoked.");
+                        }
+                        catch { }
+                    }
+
+                    // 3. Native tsdiscon.exe console session lock/disconnect
+                    if (!locked)
+                    {
+                        try
+                        {
+                            var tsProc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "tsdiscon.exe",
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            });
+                            tsProc?.WaitForExit(1000);
+                            locked = true;
+                            Program.LogRuntime("[ACTION] tsdiscon invoked.");
+                        }
+                        catch { }
+                    }
+
+                    // 4. Session 0 Windows Service disconnect fallback
+                    if (!locked)
+                    {
+                        try
+                        {
+                            int activeSession = WTSGetActiveConsoleSessionId();
+                            if (activeSession >= 0 && activeSession != -1 && activeSession != 0xFFFFFFFF)
+                            {
+                                locked = WTSDisconnectSession(IntPtr.Zero, activeSession, false);
+                                Program.LogRuntime($"[ACTION] WTSDisconnectSession on session {activeSession} result: {locked}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Program.LogRuntime($"[WARN] WTSDisconnectSession error: {ex.Message}");
+                        }
+                    }
+
+                    result.Success = locked;
+                    result.Message = locked ? "Workstation screen locked successfully." : "Failed to lock workstation.";
                     break;
 
                 case PolicyType.RestartLaptop:
+                    Program.LogRuntime("[ACTION] Remote restart command initiated by IT Administrator. Scheduling shutdown.exe /r /t 5 /f...");
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = "shutdown.exe",
@@ -299,16 +358,54 @@ public class Worker : BackgroundService
 
                 case PolicyType.SendNotification:
                     var messageText = string.IsNullOrWhiteSpace(command.Payload) ? "IT Security Notification from Administrator." : command.Payload;
+                    Program.LogRuntime($"[ALERT] Notification message received from Admin: {messageText}");
                     _ = Task.Run(() =>
                     {
+                        bool shown = false;
+                        // 1. WTSSendMessage directly to active user desktop session
                         try
                         {
-                            // 0x00000040 (MB_ICONINFORMATION) | 0x00040000 (MB_TOPMOST) | 0x00010000 (MB_SETFOREGROUND)
-                            ShowMessageBox(IntPtr.Zero, messageText, "CyberShield IT Management Alert", 0x00000040 | 0x00040000 | 0x00010000);
+                            int activeSession = WTSGetActiveConsoleSessionId();
+                            if (activeSession >= 0)
+                            {
+                                const string title = "CyberShield IT Management Alert";
+                                shown = WTSSendMessage(
+                                    IntPtr.Zero,
+                                    activeSession,
+                                    title,
+                                    title.Length * 2,
+                                    messageText,
+                                    messageText.Length * 2,
+                                    0x00000040 | 0x00040000 | 0x00010000, // MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND
+                                    0,
+                                    out _,
+                                    false);
+                            }
                         }
-                        catch (Exception ex)
+                        catch { }
+
+                        // 2. Fallback to MessageBoxW with MB_SERVICE_NOTIFICATION (0x00200000) so it routes to active desktop
+                        try
                         {
-                            _logger.LogError(ex, "Failed to display MessageBox on client.");
+                            ShowMessageBox(IntPtr.Zero, messageText, "CyberShield IT Management Alert", 0x00000040 | 0x00040000 | 0x00010000 | 0x00200000);
+                            shown = true;
+                        }
+                        catch { }
+
+                        // 3. Fallback to msg.exe *
+                        if (!shown)
+                        {
+                            try
+                            {
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = "msg.exe",
+                                    Arguments = $"* /time:120 \"{messageText}\"",
+                                    UseShellExecute = false,
+                                    CreateNoWindow = true
+                                });
+                            }
+                            catch { }
                         }
                     });
                     result.Success = true;
@@ -340,77 +437,81 @@ public class Worker : BackgroundService
         var configuredRemoteUrl = _config.GetValue<string>("ServerUrl")?.Trim();
         var configuredLocalUrl = _config.GetValue<string>("LocalServerUrl")?.Trim();
 
-        var candidates = new List<ServerEndpointCandidate>();
-
-        // 1. If LocalServerUrl is explicitly configured with an IP, add it first
-        if (!string.IsNullOrEmpty(configuredLocalUrl) && !configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
-        {
-            var normalizedLocal = NormalizeHubUrl(configuredLocalUrl);
-            if (!string.IsNullOrEmpty(normalizedLocal))
-            {
-                candidates.Add(new ServerEndpointCandidate(normalizedLocal, "In Office", true));
-            }
-        }
-
-        // 2. Try fast UDP Auto-Discovery (Office Network broadcast)
-        if (string.IsNullOrEmpty(configuredLocalUrl) || configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        // 1. Fast UDP Auto-Discovery (Office Network broadcast)
+        // If LocalServerUrl is "auto" or empty, always probe local network first
+        bool isLocalAuto = string.IsNullOrEmpty(configuredLocalUrl) || configuredLocalUrl.Equals("auto", StringComparison.OrdinalIgnoreCase);
+        if (isLocalAuto)
         {
             try
             {
-                var discovered = await _udpDiscoveryClient.TryDiscoverServerUrlAsync(TimeSpan.FromSeconds(1.5), stoppingToken);
+                var discovered = await _udpDiscoveryClient.TryDiscoverServerUrlAsync(TimeSpan.FromSeconds(1.2), stoppingToken);
                 if (!string.IsNullOrEmpty(discovered))
                 {
                     var normalizedDiscovered = NormalizeHubUrl(discovered);
-                    if (!candidates.Any(c => c.Url.Equals(normalizedDiscovered, StringComparison.OrdinalIgnoreCase)))
+                    if (!string.IsNullOrEmpty(normalizedDiscovered))
                     {
-                        candidates.Add(new ServerEndpointCandidate(normalizedDiscovered, "In Office", true));
+                        _logger.LogInformation("Testing reachability for discovered local office server: {Url}...", normalizedDiscovered);
+                        if (await IsTcpReachableAsync(normalizedDiscovered, TimeSpan.FromSeconds(1.0)))
+                        {
+                            _logger.LogInformation("Discovered local office server is reachable: {Url} (In Office)", normalizedDiscovered);
+                            Program.LogRuntime($"[RESOLVED] Local office server discovered & reachable: {normalizedDiscovered} (In Office)");
+                            return (normalizedDiscovered, "In Office");
+                        }
                     }
                 }
             }
             catch { }
         }
-
-        // 3. Add Remote / Public Static IP or Cloudflare URL
-        if (!string.IsNullOrEmpty(configuredRemoteUrl) && !configuredRemoteUrl.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        else
         {
-            var normalizedRemote = NormalizeHubUrl(configuredRemoteUrl);
-            if (!string.IsNullOrEmpty(normalizedRemote) && !candidates.Any(c => c.Url.Equals(normalizedRemote, StringComparison.OrdinalIgnoreCase)))
+            // If LocalServerUrl was explicitly configured with an IP, test it directly
+            var normalizedLocal = NormalizeHubUrl(configuredLocalUrl);
+            if (!string.IsNullOrEmpty(normalizedLocal) && await IsTcpReachableAsync(normalizedLocal, TimeSpan.FromSeconds(1.0)))
             {
-                candidates.Add(new ServerEndpointCandidate(normalizedRemote, "Work From Home", false));
+                _logger.LogInformation("Explicit local office server is reachable: {Url} (In Office)", normalizedLocal);
+                Program.LogRuntime($"[RESOLVED] Explicit local server is reachable: {normalizedLocal} (In Office)");
+                return (normalizedLocal, "In Office");
             }
         }
 
-        // 4. Guaranteed Hardcoded Fallbacks (Ensures standalone executable NEVER fails even without config files)
+        // 2. Resolve Remote / Public Static IP (for Mobile Hotspot / Work From Home)
         const string DefaultRemoteUrl = "http://14.194.19.6:5000/hubs/endpoints";
+        string remoteUrlToUse = !string.IsNullOrEmpty(configuredRemoteUrl) && !configuredRemoteUrl.Equals("auto", StringComparison.OrdinalIgnoreCase)
+            ? configuredRemoteUrl
+            : DefaultRemoteUrl;
+        var normalizedRemote = NormalizeHubUrl(remoteUrlToUse);
+
+        // 3. Known Office LAN Fallback (if UDP broadcast was blocked by office router/switch)
         const string DefaultOfficeLanUrl = "http://192.168.68.13:5000/hubs/endpoints";
+        const string DefaultLocalhostUrl = "http://127.0.0.1:5000/hubs/endpoints";
 
-        if (!candidates.Any(c => c.Url.Equals(DefaultOfficeLanUrl, StringComparison.OrdinalIgnoreCase)))
+        // 4. Test Remote Endpoint first (Fast connection for Mobile Hotspot / WFH)
+        _logger.LogInformation("Testing reachability for remote server: {Url}...", normalizedRemote);
+        if (await IsTcpReachableAsync(normalizedRemote, TimeSpan.FromSeconds(2.0)))
         {
-            candidates.Add(new ServerEndpointCandidate(DefaultOfficeLanUrl, "In Office", true));
-        }
-        if (!candidates.Any(c => c.Url.Equals(DefaultRemoteUrl, StringComparison.OrdinalIgnoreCase)))
-        {
-            candidates.Add(new ServerEndpointCandidate(DefaultRemoteUrl, "Work From Home", false));
-        }
-
-        // Fast TCP probe to find the reachable endpoint without blocking
-        foreach (var candidate in candidates)
-        {
-            _logger.LogInformation("Testing reachability for [{Location}] server: {Url}...", candidate.LocationType, candidate.Url);
-            if (await IsTcpReachableAsync(candidate.Url, TimeSpan.FromSeconds(1.5)))
-            {
-                _logger.LogInformation("Endpoint is reachable: {Url} ({Location})", candidate.Url, candidate.LocationType);
-                return (candidate.Url, candidate.LocationType);
-            }
-            else
-            {
-                _logger.LogWarning("Endpoint not responding: {Url}. Checking next candidate...", candidate.Url);
-            }
+            _logger.LogInformation("Remote server is reachable: {Url} (Work From Home)", normalizedRemote);
+            Program.LogRuntime($"[RESOLVED] Remote server is reachable: {normalizedRemote} (Work From Home)");
+            return (normalizedRemote, "Work From Home");
         }
 
-        // If none responded to quick TCP probe, return the first remote candidate to let SignalR try full HTTP negotiation
-        var defaultCandidate = candidates.FirstOrDefault(c => !c.IsLocal) ?? candidates[0];
-        return (defaultCandidate.Url, defaultCandidate.LocationType);
+        // 5. Test Office LAN Fallback (for In Office when UDP was blocked)
+        _logger.LogInformation("Testing reachability for Office LAN fallback: {Url}...", DefaultOfficeLanUrl);
+        if (await IsTcpReachableAsync(DefaultOfficeLanUrl, TimeSpan.FromSeconds(1.0)))
+        {
+            _logger.LogInformation("Office LAN fallback is reachable: {Url} (In Office)", DefaultOfficeLanUrl);
+            Program.LogRuntime($"[RESOLVED] Office LAN fallback is reachable: {DefaultOfficeLanUrl} (In Office)");
+            return (DefaultOfficeLanUrl, "In Office");
+        }
+
+        // 6. Test Localhost fallback (if testing directly on server)
+        if (await IsTcpReachableAsync(DefaultLocalhostUrl, TimeSpan.FromSeconds(0.5)))
+        {
+            return (DefaultLocalhostUrl, "Localhost");
+        }
+
+        // Fallback: Default to Remote URL so SignalR can attempt HTTP/WebSocket handshake
+        _logger.LogWarning("TCP probe didn't resolve an immediate endpoint. Falling back to remote: {Url}", normalizedRemote);
+        return (normalizedRemote, "Work From Home");
     }
 
     private static async Task<bool> IsTcpReachableAsync(string url, TimeSpan timeout)
@@ -418,20 +519,35 @@ public class Worker : BackgroundService
         try
         {
             var uri = new Uri(url);
+            using var cts = new CancellationTokenSource(timeout);
             using var tcp = new TcpClient();
-            var connectTask = tcp.ConnectAsync(uri.Host, uri.Port);
-            var completed = await Task.WhenAny(connectTask, Task.Delay(timeout));
-            if (completed == connectTask && tcp.Connected)
-            {
-                return true;
-            }
+            await tcp.ConnectAsync(uri.Host, uri.Port, cts.Token);
+            return tcp.Connected;
         }
         catch
         {
-            // TCP connect failed or timed out
+            return false;
         }
-        return false;
     }
+
+    [System.Runtime.InteropServices.DllImport("wtsapi32.dll", SetLastError = true)]
+    private static extern bool WTSDisconnectSession(IntPtr hServer, int sessionId, bool bWait);
+
+    [System.Runtime.InteropServices.DllImport("wtsapi32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern bool WTSSendMessage(
+        IntPtr hServer,
+        int SessionId,
+        string pTitle,
+        int TitleLength,
+        string pMessage,
+        int MessageLength,
+        int Style,
+        int Timeout,
+        out int pResponse,
+        bool bWait);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern int WTSGetActiveConsoleSessionId();
 
     [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
     private static extern bool LockWorkStation();
@@ -476,5 +592,22 @@ public class Worker : BackgroundService
             await _hubConnection.DisposeAsync();
         }
         await base.StopAsync(cancellationToken);
+    }
+}
+
+public class InfiniteRetryPolicy : IRetryPolicy
+{
+    public TimeSpan? NextRetryDelay(RetryContext retryContext)
+    {
+        // Immediate first retry, then 2s, then 4s for momentary Wi-Fi blips
+        if (retryContext.PreviousRetryCount == 0) return TimeSpan.FromSeconds(0);
+        if (retryContext.PreviousRetryCount == 1) return TimeSpan.FromSeconds(2);
+        if (retryContext.PreviousRetryCount == 2) return TimeSpan.FromSeconds(4);
+
+        // After 3 failed reconnect attempts (~8-10 seconds total), return null so the connection
+        // cleanly resets to Disconnected. This allows the Worker loop to re-run
+        // ResolveActiveServerEndpointAsync, enabling automatic seamless switching
+        // between Office Wi-Fi and Mobile Hotspot without requiring any manual restart!
+        return null;
     }
 }

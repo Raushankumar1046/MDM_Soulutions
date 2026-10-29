@@ -105,7 +105,15 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // Helper to resolve active connectionId even if machine name or reconnected ID was passed
     private string ResolveTargetConnectionId(string targetId)
     {
-        // If targetId matches machineName, find freshest connection
+        if (string.IsNullOrWhiteSpace(targetId)) return targetId;
+
+        // 1. Direct match in active memory
+        if (ConnectedClients.ContainsKey(targetId))
+        {
+            return targetId;
+        }
+
+        // 2. Direct match by MachineName in active memory
         var byHost = ConnectedClients
             .Where(c => c.Value.MachineName.Equals(targetId, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(c => c.Value.TimestampUtc)
@@ -116,10 +124,27 @@ public class EndpointHub : Hub<IEndpointClientContract>
             return byHost.Key;
         }
 
-        if (ConnectedClients.ContainsKey(targetId))
+        // 3. Fallback: Lookup in LiteDB to find the machine name from a stale connection ID, then find active socket
+        try
         {
-            return targetId;
+            var dbDevice = _dbService.GetAllDevices().FirstOrDefault(d => 
+                d.LastConnectionId == targetId || 
+                d.MachineName.Equals(targetId, StringComparison.OrdinalIgnoreCase));
+
+            if (dbDevice != null)
+            {
+                var activeMatch = ConnectedClients
+                    .Where(c => c.Value.MachineName.Equals(dbDevice.MachineName, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(c => c.Value.TimestampUtc)
+                    .FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(activeMatch.Key))
+                {
+                    return activeMatch.Key;
+                }
+            }
         }
+        catch { }
 
         return targetId;
     }
