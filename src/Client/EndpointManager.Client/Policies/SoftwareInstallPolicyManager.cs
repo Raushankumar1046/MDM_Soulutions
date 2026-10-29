@@ -39,12 +39,13 @@ public class SoftwareInstallPolicyManager : IDisposable
         "taskmgr", "RuntimeBroker", "dwm", "ctfmon", "System", "Idle", "EndpointManager.Client",
         "EndpointManager.Server", "powershell", "cmd", "conhost", "devenv", "code", "SearchHost",
         "StartMenuExperienceHost", "ShellExperienceHost", "ApplicationFrameHost", "sihost",
-        "fontdrvhost", "spoolsv", "audiodg", "wlanext", "dasHost", "smartscreen", "TrustedInstaller", "TiWorker"
+        "fontdrvhost", "spoolsv", "audiodg", "wlanext", "dasHost", "smartscreen", "TrustedInstaller", "TiWorker",
+        "updater", "GoogleUpdate", "MicrosoftEdgeUpdate", "OneDriveStandaloneUpdater", "DiscordUpdate"
     };
 
-    // Regex pattern for installer process names
+    // Regex pattern for installer process names (standalone new application setups/installers)
     private static readonly Regex InstallerNamePattern = new(
-        @"(setup|install|installer|uninst|msiexec|patcher|updater|update-win|vlc-.*win|chrome_installer|zoom_installer|7z\d+|winrar|teamviewer_setup|anydesk)",
+        @"(setup|install|installer|uninst|msiexec|patcher|vlc-.*win|chrome_installer|zoom_installer|7z\d+|winrar|teamviewer_setup|anydesk)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public SoftwareInstallPolicyManager(ILogger<SoftwareInstallPolicyManager> logger)
@@ -384,28 +385,10 @@ public class SoftwareInstallPolicyManager : IDisposable
                     RunRegCommand($"taskkill /f /t /pid {processId}");
                 }
 
-                _logger.LogInformation("✅ Installer terminated: {ProcessName} (PID: {Pid})", processName, processId);
+                _logger.LogInformation("✅ Installer silently terminated: {ProcessName} (PID: {Pid})", processName, processId);
 
-                // Notify server audit trail
+                // Notify server audit trail silently (No intrusive popup on client screen)
                 OnInstallerBlocked?.Invoke(processName, reason);
-
-                // Display Topmost System Modal Warning Dialog on Client Laptop
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        string message = $"🚨 CyberShield MDM - Security Enforcement\n\n" +
-                                         $"Unauthorized Software Installation Blocked!\n\n" +
-                                         $"File / Process: {processName}\n" +
-                                         $"Reason: {reason}\n\n" +
-                                         $"Company IT policy restricts installing third-party applications.\n" +
-                                         $"Please contact your IT Administrator for approved software requests.";
-
-                        ShowMessageBox(IntPtr.Zero, message, "CyberShield MDM - Policy Restriction", 
-                            0x00000010 | 0x00040000 | 0x00010000); // MB_ICONSTOP | MB_TOPMOST | MB_SETFOREGROUND
-                    }
-                    catch { }
-                });
 
                 return true;
             }
