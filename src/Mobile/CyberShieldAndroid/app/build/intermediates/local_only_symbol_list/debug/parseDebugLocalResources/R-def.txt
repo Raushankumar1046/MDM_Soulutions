@@ -1,0 +1,33 @@
+R_DEF: Internal format may change without notice
+local
+color accent
+color accent_green
+color accent_red
+color card_bg
+color input_bg
+color primary
+color primary_dark
+color text_main
+color text_muted
+drawable ic_launcher
+id btnActivateAdmin
+id btnRunInBackground
+id btnSaveServerUrl
+id etServerUrl
+id tvAdminStatus
+id tvCameraStatus
+id tvDeviceIp
+id tvDeviceModel
+id tvOsVersion
+id tvServerStatus
+layout activity_main
+string activate_admin
+string admin_active
+string admin_inactive
+string app_name
+string device_admin_description
+string server_url_hint
+string status_connected
+string status_disconnected
+style Theme.CyberShieldMDM
+xml device_admin_receiver

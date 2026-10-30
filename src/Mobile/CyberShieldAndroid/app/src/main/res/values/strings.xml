@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">CyberShield MDM</string>
+    <string name="device_admin_description">Enterprise security agent for CyberShield MDM centralized endpoint management and compliance.</string>
+    <string name="server_url_hint">Server Hub URL (e.g. http://14.194.19.6:5000/hubs/endpoints)</string>
+    <string name="status_connected">Connected to Central Server</string>
+    <string name="status_disconnected">Disconnected / Reconnecting...</string>
+    <string name="activate_admin">Activate Device Administrator</string>
+    <string name="admin_active">Device Administrator: ACTIVE</string>
+    <string name="admin_inactive">Device Administrator: NOT ACTIVE</string>
+</resources>
