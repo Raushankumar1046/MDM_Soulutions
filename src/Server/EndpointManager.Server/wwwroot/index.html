@@ -899,7 +899,19 @@
       font-size: 12px;
       border-radius: 6px;
     }
+
+    .qr-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      margin: 12px auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
   </style>
+  <script src="/qrcode.min.js"></script>
 </head>
 <body>
   <!-- Login Screen -->
@@ -914,32 +926,143 @@
 
       <div id="loginError" class="login-error"></div>
 
-      <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
-        <div class="form-group">
-          <label class="form-label">Admin Username</label>
-          <input type="text" class="form-input" id="loginUsername" placeholder="e.g. admin" required autocomplete="username" autofocus>
-        </div>
+      <!-- Step 1: Standard Username & Password Input -->
+      <div id="loginStepCredentials">
+        <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+          <div class="form-group">
+            <label class="form-label">Admin Username</label>
+            <input type="text" class="form-input" id="loginUsername" placeholder="e.g. admin" required autocomplete="username" autofocus>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
-        </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+          </div>
 
-        <button type="submit" class="login-btn" id="loginBtn">
-          <span>🔐 Sign In to Console</span>
-        </button>
-      </form>
+          <button type="submit" class="login-btn" id="loginBtn">
+            <span>🔐 Sign In to Console</span>
+          </button>
+        </form>
 
-      <div class="login-hint">
-        <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-          <span>⚡ Default Temporary Setup Credentials:</span>
-        </div>
-        <div>Username: <strong style="color: #fff;">admin</strong></div>
-        <div>Password: <strong style="color: #fff;">admin123</strong></div>
-        <div style="margin-top: 6px; font-size: 11px; color: #94a3b8;">
-          Saved securely in server LiteDB. You can update this password anytime via the header key icon after signing in.
+        <div class="login-hint">
+          <div style="font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span>⚡ Default Admin Credentials:</span>
+          </div>
+          <div>Username: <strong style="color: #fff;">admin</strong> | Password: <strong style="color: #fff;">admin123</strong></div>
+          <div style="margin-top: 6px; font-size: 11px; color: #94a3b8;">
+            Protected with PBKDF2 cryptography and optional TOTP Two-Factor Authentication.
+          </div>
         </div>
       </div>
+
+      <!-- Step 2: 2FA Authenticator Code Input -->
+      <div id="loginStep2Fa" style="display: none;">
+        <div style="text-align: center; margin-bottom: 18px;">
+          <div style="font-size: 36px; margin-bottom: 6px;">🔐</div>
+          <h3 style="color: #fff; margin: 0 0 6px 0; font-size: 16px;">Two-Factor Authentication</h3>
+          <p style="color: #94a3b8; font-size: 12px; margin: 0; line-height: 1.5;">
+            Open your Authenticator app (Google Authenticator, Microsoft Authenticator, Authy) and enter the 6-digit code.
+          </p>
+        </div>
+
+        <form id="form2Fa" onsubmit="event.preventDefault(); submit2FaCode();">
+          <div class="form-group">
+            <label class="form-label" style="text-align: center;">6-Digit Security Code</label>
+            <input type="text" class="form-input" id="login2FaCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" style="text-align: center; font-size: 26px; letter-spacing: 8px; font-weight: 700; color: #38bdf8; padding: 10px;" required>
+          </div>
+
+          <button type="submit" class="login-btn" id="btnVerify2Fa">
+            <span>Verify &amp; Sign In</span>
+          </button>
+
+          <div style="text-align: center; margin-top: 14px;">
+            <a href="javascript:void(0)" onclick="cancel2FaLogin()" style="color: #94a3b8; font-size: 12px; text-decoration: underline;">&larr; Back to Username &amp; Password</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Account Activation & 2FA Setup Screen (Opened via email invite link #/activate?token=...) -->
+  <div id="activationView" class="login-wrapper" style="display: none;">
+    <div class="login-card" style="width: 520px; max-width: 95vw;">
+      <div class="login-header">
+        <div class="login-logo">
+          🛡️ CyberShield MDM
+        </div>
+        <p class="login-sub">Employee Account Setup &amp; Two-Factor Authentication</p>
+      </div>
+
+      <div id="activationAlert" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <div id="activationLoading" style="text-align: center; padding: 30px; color: #94a3b8;">
+        <div style="font-size: 28px; margin-bottom: 10px;">⏳</div>
+        <div>Verifying invitation token...</div>
+      </div>
+
+      <div id="activationContent" style="display: none;">
+        <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+          <div style="font-size: 14px; font-weight: 600; color: #fff;" id="actFullName">Employee Name</div>
+          <div style="font-size: 12px; color: #94a3b8;">Username: <strong style="color: #38bdf8;" id="actUsername">user</strong> | Email: <span id="actEmail">user@example.com</span></div>
+        </div>
+
+        <form id="activationForm" onsubmit="event.preventDefault(); submitActivation();">
+          <!-- Step 1: Set Password -->
+          <div style="font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>1️⃣ Set Your Strong Password</span>
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-input" id="actNewPassword" placeholder="Create new password (min 6 characters)" required minlength="6">
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-input" id="actConfirmPassword" placeholder="Confirm new password" required minlength="6">
+          </div>
+
+          <!-- Step 2: QR Code Scan -->
+          <div style="font-size: 13px; font-weight: 700; color: #f8fafc; margin: 18px 0 8px 0; display: flex; align-items: center; gap: 6px;">
+            <span>2️⃣ Scan with Authenticator App</span>
+          </div>
+          <p style="font-size: 12px; color: #94a3b8; margin: 0 0 10px 0;">
+            Open <strong>Google Authenticator</strong>, <strong>Microsoft Authenticator</strong>, or <strong>Authy</strong> on your mobile phone and scan this QR code:
+          </p>
+
+          <div class="qr-box">
+            <div id="actQrCodeCanvas"></div>
+          </div>
+
+          <div style="text-align: center; margin-bottom: 18px;">
+            <span style="font-size: 11px; color: #94a3b8;">Can't scan? Use manual setup key:</span><br>
+            <code style="color: #38bdf8; font-size: 13px; font-weight: 700; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 4px;" id="actSecretKey">JBSWY3DPEHPK3PXP</code>
+            <button type="button" class="btn btn-sm" style="margin-left: 6px; padding: 2px 8px; font-size: 11px;" onclick="copySecretKey()">📋 Copy</button>
+          </div>
+
+          <!-- Step 3: Verification Code -->
+          <div style="font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>3️⃣ Cross-Verification Code</span>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-input" id="actVerifyCode" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required style="text-align: center; font-size: 22px; letter-spacing: 6px; font-weight: 700; color: #10b981;">
+            <div style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 4px;">Enter the 6 digits generated in your phone app to confirm setup.</div>
+          </div>
+
+          <button type="submit" class="login-btn" id="btnCompleteActivation" style="margin-top: 10px;">
+            <span>✅ Complete Activation &amp; Enable 2FA</span>
+          </button>
+        </form>
+      </div>
+
+      <div id="activationSuccess" style="display: none; text-align: center; padding: 20px 10px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+        <h3 style="color: #10b981; margin: 0 0 8px 0;">Account Activated!</h3>
+        <p style="color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+          Your password has been saved and Two-Factor Authentication is securely linked with your Authenticator app.
+        </p>
+        <button class="login-btn" onclick="goToLoginPage()" style="margin-top: 16px;">
+          <span>🚀 Sign In to Dashboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
     </div>
   </div>
 
@@ -997,6 +1120,9 @@
       <button class="nav-tab" id="tabBtnWebFilter" onclick="switchMainTab('webfilter')">
         <span>🌐 Web Filter Blacklist</span>
         <span class="status-badge" id="tabWebFilterCount" style="padding: 2px 7px; font-size: 11px; background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3);">0</span>
+      </button>
+      <button class="nav-tab" id="tabBtnUsers" onclick="switchMainTab('users')">
+        <span>👥 Console Users &amp; 2FA</span>
       </button>
     </div>
 
@@ -1148,6 +1274,55 @@
 
         <div id="fullBlockedDomainsContainer" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 400px; overflow-y: auto; padding: 4px;">
           <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: User Management & 2FA Access Control (Dedicated Tab View) -->
+    <div id="usersSection" style="display: none;">
+      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 18px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; margin: 0 0 4px 0;">
+              <span>👥 Console Users &amp; Two-Factor Authentication (2FA)</span>
+            </h3>
+            <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+              Manage employee portal access, invite users via email or direct link, and enforce Google/Microsoft Authenticator 2FA.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openInviteUserModal()">
+              <span>➕ Invite New User</span>
+            </button>
+            <button class="btn" onclick="openSmtpModal()" style="border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+              <span>⚙️ Email (SMTP) Settings</span>
+            </button>
+            <button class="btn" onclick="fetchUsersList()" title="Refresh Users List">
+              <span>🔄 Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div style="overflow-x: auto;">
+          <table class="device-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Employee / User</th>
+                <th>Username</th>
+                <th>Email Address</th>
+                <th>Role</th>
+                <th>2FA Security Status</th>
+                <th>Last Login</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading users...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1447,6 +1622,161 @@
     </div>
   </div>
 
+  <!-- Modal: Invite New User -->
+  <div class="modal-backdrop" id="inviteUserModal">
+    <div class="modal-window" style="width: 480px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>➕ Invite Console User</span>
+        </div>
+        <button class="modal-close" onclick="closeInviteUserModal()">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <div id="inviteAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+        
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="inviteFullName" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="inviteEmail" placeholder="employee@company.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="inviteUsername" placeholder="e.g. rahul.s" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-input" id="inviteRole" style="background: var(--input-bg); color: var(--text);">
+            <option value="Admin">Admin (Full Control)</option>
+            <option value="Manager">Manager (View &amp; Policies)</option>
+            <option value="Viewer">Viewer (Read-Only)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin: 16px 0 20px 0;">
+          <input type="checkbox" id="inviteSendEmail" checked style="accent-color: #38bdf8; width: 16px; height: 16px; cursor: pointer;">
+          <label for="inviteSendEmail" style="font-size: 13px; color: var(--text); cursor: pointer;">Send invitation link via Email (requires SMTP)</label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn" onclick="closeInviteUserModal()">Cancel</button>
+          <button class="btn btn-primary" id="btnSubmitInvite" onclick="submitInviteUser()">
+            <span>Generate Invite &amp; Send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Invite Generated Success -->
+  <div class="modal-backdrop" id="inviteSuccessModal">
+    <div class="modal-window" style="width: 520px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🎉 User Invitation Generated!</span>
+        </div>
+        <button class="modal-close" onclick="closeInviteSuccessModal()">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <div id="inviteEmailStatusBanner" style="padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 10px 0;">
+          Share this direct activation link with the employee (via Email, WhatsApp, Slack, or Teams). They will open it to set their password and scan their 2FA QR code:
+        </p>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <input type="text" class="form-input" id="successInviteLinkInput" readonly style="font-family: monospace; font-size: 12px; color: #38bdf8;">
+          <button class="btn btn-primary" onclick="copyInviteLink()" id="btnCopyInviteLink" style="white-space: nowrap;">
+            <span>📋 Copy Link</span>
+          </button>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div>⏰ <strong>Link Expiry:</strong> 48 hours</div>
+          <div style="margin-top: 4px;">🛡️ <strong>Security:</strong> Single-use activation token. Account will enforce 2FA immediately upon activation.</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+          <button class="btn btn-primary" onclick="closeInviteSuccessModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: SMTP Email Settings -->
+  <div class="modal-backdrop" id="smtpSettingsModal">
+    <div class="modal-window" style="width: 500px; max-width: 95vw;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⚙️ Email (SMTP) Server Configuration</span>
+        </div>
+        <button class="modal-close" onclick="closeSmtpModal()">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <div id="smtpAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 16px 0;">
+          Configure your outbound SMTP mail server to automatically deliver invitation links and security alerts to employees.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">SMTP Host / Server</label>
+            <input type="text" class="form-input" id="smtpHost" placeholder="e.g. smtp.gmail.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Port</label>
+            <input type="number" class="form-input" id="smtpPort" placeholder="587" value="587">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Sender Email</label>
+            <input type="email" class="form-input" id="smtpSenderEmail" placeholder="admin@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sender Display Name</label>
+            <input type="text" class="form-input" id="smtpSenderName" placeholder="CyberShield MDM" value="CyberShield MDM">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">SMTP Username</label>
+            <input type="text" class="form-input" id="smtpUsername" placeholder="e.g. admin@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password / App Password</label>
+            <input type="password" class="form-input" id="smtpPassword" placeholder="••••••••">
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0 16px 0;">
+          <input type="checkbox" id="smtpEnableSsl" checked style="accent-color: #38bdf8; width: 16px; height: 16px; cursor: pointer;">
+          <label for="smtpEnableSsl" style="font-size: 13px; color: var(--text); cursor: pointer;">Enable SSL / TLS Encryption (Recommended)</label>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <button class="btn" type="button" onclick="sendTestEmail()" id="btnSendTestEmail" style="font-size: 12px;">
+            <span>📨 Send Test Email</span>
+          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="closeSmtpModal()">Close</button>
+            <button class="btn btn-primary" onclick="saveSmtpSettings()" id="btnSaveSmtp">
+              <span>Save Settings</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/signalr.min.js"></script>
   <script>
     const TOKEN_KEY = 'cybershield_admin_token';
@@ -1481,7 +1811,10 @@
 
     function showLogin(reason) {
       document.getElementById('dashboardView').style.display = 'none';
+      const actView = document.getElementById('activationView');
+      if (actView) actView.style.display = 'none';
       document.getElementById('loginView').style.display = 'flex';
+      cancel2FaLogin();
       if (pollIntervalId) {
         clearInterval(pollIntervalId);
         pollIntervalId = null;
@@ -1497,6 +1830,8 @@
 
     function showDashboard(username) {
       document.getElementById('loginView').style.display = 'none';
+      const actView = document.getElementById('activationView');
+      if (actView) actView.style.display = 'none';
       document.getElementById('dashboardView').style.display = 'block';
       const userEl = document.getElementById('headerUsername');
       if (userEl) userEl.textContent = username || localStorage.getItem(USER_KEY) || 'admin';
@@ -1506,6 +1841,8 @@
         pollIntervalId = setInterval(fetchData, 3000);
       }
     }
+
+    let current2FaTempToken = null;
 
     async function handleLogin() {
       const usernameInput = document.getElementById('loginUsername');
@@ -1532,6 +1869,16 @@
           throw new Error(data.error || 'Authentication failed');
         }
 
+        if (data.requires2FA) {
+          current2FaTempToken = data.tempToken;
+          document.getElementById('loginStepCredentials').style.display = 'none';
+          document.getElementById('loginStep2Fa').style.display = 'block';
+          const codeInput = document.getElementById('login2FaCode');
+          codeInput.value = '';
+          codeInput.focus();
+          return;
+        }
+
         localStorage.setItem(TOKEN_KEY, data.token);
         localStorage.setItem(USER_KEY, data.username);
         passwordInput.value = '';
@@ -1544,6 +1891,63 @@
         btn.disabled = false;
         btn.innerHTML = '<span>🔐 Sign In to Console</span>';
       }
+    }
+
+    async function submit2FaCode() {
+      const codeInput = document.getElementById('login2FaCode');
+      const code = codeInput.value.trim();
+      const errBox = document.getElementById('loginError');
+      const btn = document.getElementById('btnVerify2Fa');
+
+      if (!/^\d{6}$/.test(code)) {
+        errBox.textContent = 'Please enter a valid 6-digit code.';
+        errBox.style.display = 'flex';
+        return;
+      }
+
+      errBox.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Verifying Code...</span>';
+
+      try {
+        const res = await fetch('/api/auth/verify-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tempToken: current2FaTempToken,
+            totpCode: code,
+            code: code
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Invalid 2FA code. Please check your Authenticator app.');
+        }
+
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, data.username);
+        codeInput.value = '';
+        current2FaTempToken = null;
+        showDashboard(data.username);
+        initSignalR();
+      } catch (err) {
+        errBox.textContent = '❌ ' + (err.message || 'Verification failed');
+        errBox.style.display = 'flex';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Verify &amp; Sign In</span>';
+      }
+    }
+
+    function cancel2FaLogin() {
+      current2FaTempToken = null;
+      const codeInput = document.getElementById('login2FaCode');
+      if (codeInput) codeInput.value = '';
+      const s1 = document.getElementById('loginStepCredentials');
+      const s2 = document.getElementById('loginStep2Fa');
+      if (s1) s1.style.display = 'block';
+      if (s2) s2.style.display = 'none';
     }
 
     async function logout(dueToExpiry = false) {
@@ -1683,18 +2087,329 @@
       const tabEndpoints = document.getElementById('tabBtnEndpoints');
       const tabAudit = document.getElementById('tabBtnAudit');
       const tabWebFilter = document.getElementById('tabBtnWebFilter');
+      const tabUsers = document.getElementById('tabBtnUsers');
       const endpointsSec = document.getElementById('endpointsSection');
       const auditSec = document.getElementById('auditSection');
       const webfilterSec = document.getElementById('webfilterSection');
+      const usersSec = document.getElementById('usersSection');
 
       if (tabEndpoints) tabEndpoints.classList.toggle('active', tab === 'endpoints');
       if (tabAudit) tabAudit.classList.toggle('active', tab === 'audit');
       if (tabWebFilter) tabWebFilter.classList.toggle('active', tab === 'webfilter');
+      if (tabUsers) tabUsers.classList.toggle('active', tab === 'users');
+
       if (endpointsSec) endpointsSec.style.display = (tab === 'endpoints') ? 'block' : 'none';
       if (auditSec) auditSec.style.display = (tab === 'audit') ? 'block' : 'none';
       if (webfilterSec) {
         webfilterSec.style.display = (tab === 'webfilter') ? 'block' : 'none';
         if (tab === 'webfilter') fetchBlockedDomains();
+      }
+      if (usersSec) {
+        usersSec.style.display = (tab === 'users') ? 'block' : 'none';
+        if (tab === 'users') fetchUsersList();
+      }
+    }
+
+    // --- User Management & 2FA Console Administration ---
+    async function fetchUsersList() {
+      const tbody = document.getElementById('usersTableBody');
+      try {
+        const res = await authFetch('/api/users');
+        if (!res.ok) throw new Error('Failed to load users');
+        const users = await res.json();
+        renderUsersTable(users);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#fca5a5; padding:20px;">❌ Error loading users: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('usersTableBody');
+      if (!users || users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No users found. Click "+ Invite New User" to get started.</td></tr>`;
+        return;
+      }
+
+      const currentLoggedUser = localStorage.getItem(USER_KEY) || '';
+
+      tbody.innerHTML = users.map(u => {
+        let statusBadge = '';
+        if (u.is2FaEnabled) {
+          statusBadge = `<span class="badge" style="background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">🔒 Active (TOTP 2FA)</span>`;
+        } else if (u.inviteToken) {
+          statusBadge = `<span class="badge" style="background:rgba(245,158,11,0.15); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">⏳ Pending Activation</span>`;
+        } else {
+          statusBadge = `<span class="badge" style="background:rgba(148,163,184,0.15); color:#cbd5e1; border:1px solid rgba(148,163,184,0.3); padding:3px 8px; border-radius:6px; font-size:11px;">⚠️ Disabled</span>`;
+        }
+
+        const lastLogin = u.lastLoginUtc ? new Date(u.lastLoginUtc).toLocaleString() : 'Never';
+        const roleBadge = `<span style="font-weight:600; color:${u.role==='Admin'?'#38bdf8':'#cbd5e1'}; font-size:12px;">${escapeHtml(u.role || 'Admin')}</span>`;
+
+        const isSelf = (u.username || '').toLowerCase() === currentLoggedUser.toLowerCase();
+        const isMasterAdmin = (u.username || '').toLowerCase() === 'admin';
+
+        let actionBtns = '';
+        if (u.is2FaEnabled) {
+          actionBtns += `<button class="btn btn-sm" onclick="resetUser2Fa('${escapeHtml(u.username)}')" style="border-color:rgba(245,158,11,0.4); color:#fcd34d; font-size:11px; padding:3px 8px;" title="Reset 2FA key for user">🔄 Reset 2FA</button> `;
+        }
+        if (!isSelf && !isMasterAdmin) {
+          actionBtns += `<button class="btn btn-sm btn-danger" onclick="deleteUser('${escapeHtml(u.username)}')" style="font-size:11px; padding:3px 8px;" title="Delete User">🗑️ Delete</button>`;
+        } else if (isSelf) {
+          actionBtns += `<span style="font-size:11px; color:var(--text-muted);">(Current User)</span>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:600; color:#f8fafc;">${escapeHtml(u.fullName || u.username)}</div>
+              ${u.isActive ? '' : '<span style="color:#f87171; font-size:10px;">[Inactive]</span>'}
+            </td>
+            <td><code style="color:#38bdf8;">${escapeHtml(u.username)}</code></td>
+            <td style="color:var(--text-muted); font-size:12px;">${escapeHtml(u.email || '—')}</td>
+            <td>${roleBadge}</td>
+            <td>${statusBadge}</td>
+            <td style="color:var(--text-muted); font-size:11px;">${lastLogin}</td>
+            <td style="text-align:right; white-space:nowrap;">${actionBtns}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openInviteUserModal() {
+      document.getElementById('inviteFullName').value = '';
+      document.getElementById('inviteEmail').value = '';
+      document.getElementById('inviteUsername').value = '';
+      document.getElementById('inviteRole').value = 'Admin';
+      document.getElementById('inviteSendEmail').checked = true;
+      document.getElementById('inviteAlert').style.display = 'none';
+      document.getElementById('inviteUserModal').classList.add('active');
+    }
+
+    function closeInviteUserModal() {
+      document.getElementById('inviteUserModal').classList.remove('active');
+    }
+
+    function closeInviteSuccessModal() {
+      document.getElementById('inviteSuccessModal').classList.remove('active');
+    }
+
+    async function submitInviteUser() {
+      const fullName = document.getElementById('inviteFullName').value.trim();
+      const email = document.getElementById('inviteEmail').value.trim();
+      const username = document.getElementById('inviteUsername').value.trim();
+      const role = document.getElementById('inviteRole').value;
+      const sendEmail = document.getElementById('inviteSendEmail').checked;
+      const alertBox = document.getElementById('inviteAlert');
+      const btn = document.getElementById('btnSubmitInvite');
+
+      alertBox.style.display = 'none';
+
+      if (!username || !email || !fullName) {
+        alertBox.textContent = 'Please enter Full Name, Email, and Username.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Creating Invite...</span>';
+
+      try {
+        const res = await authFetch('/api/users/invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName, email, username, role, sendEmail })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to create user invitation');
+        }
+
+        closeInviteUserModal();
+        fetchUsersList();
+
+        const banner = document.getElementById('inviteEmailStatusBanner');
+        if (data.emailSent) {
+          banner.textContent = `✅ Invitation email was sent successfully to ${email}!`;
+          banner.style.background = 'rgba(16,185,129,0.15)';
+          banner.style.color = '#6ee7b7';
+          banner.style.border = '1px solid rgba(16,185,129,0.3)';
+        } else {
+          banner.textContent = data.emailError 
+            ? `⚠️ Note: Email could not be sent (${data.emailError}). Please share the link manually below:`
+            : `ℹ️ Email sending was skipped or SMTP not configured. Share the link manually below:`;
+          banner.style.background = 'rgba(245,158,11,0.15)';
+          banner.style.color = '#fcd34d';
+          banner.style.border = '1px solid rgba(245,158,11,0.3)';
+        }
+
+        const fullLink = `${window.location.origin}/#/activate?token=${data.inviteToken}`;
+        document.getElementById('successInviteLinkInput').value = fullLink;
+        document.getElementById('inviteSuccessModal').classList.add('active');
+      } catch (err) {
+        alertBox.textContent = '❌ ' + (err.message || 'Invitation failed');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Generate Invite &amp; Send</span>';
+      }
+    }
+
+    function copyInviteLink() {
+      const input = document.getElementById('successInviteLinkInput');
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = document.getElementById('btnCopyInviteLink');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.innerHTML = '<span>📋 Copy Link</span>'; }, 1500);
+      }).catch(() => {
+        prompt('Copy activation link:', input.value);
+      });
+    }
+
+    async function resetUser2Fa(username) {
+      if (!confirm(`Are you sure you want to reset 2FA for "${username}"? They will need to scan a new QR code on their next login or re-invite.`)) return;
+
+      try {
+        const res = await authFetch('/api/users/reset-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to reset 2FA');
+        alert(`✅ 2FA has been reset for "${username}".`);
+        fetchUsersList();
+      } catch (err) {
+        alert(`❌ Error: ${err.message}`);
+      }
+    }
+
+    async function deleteUser(username) {
+      if (!confirm(`Are you sure you want to permanently delete user "${username}"? This cannot be undone.`)) return;
+
+      try {
+        const res = await authFetch('/api/users/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to delete user');
+        alert(`✅ User "${username}" deleted.`);
+        fetchUsersList();
+      } catch (err) {
+        alert(`❌ Error: ${err.message}`);
+      }
+    }
+
+    // --- SMTP Settings Administration ---
+    async function openSmtpModal() {
+      const alertBox = document.getElementById('smtpAlert');
+      alertBox.style.display = 'none';
+      document.getElementById('smtpSettingsModal').classList.add('active');
+
+      try {
+        const res = await authFetch('/api/settings/smtp');
+        if (res.ok) {
+          const cfg = await res.json();
+          document.getElementById('smtpHost').value = cfg.host || '';
+          document.getElementById('smtpPort').value = cfg.port || 587;
+          document.getElementById('smtpSenderEmail').value = cfg.senderEmail || '';
+          document.getElementById('smtpSenderName').value = cfg.senderName || 'CyberShield MDM';
+          document.getElementById('smtpUsername').value = cfg.username || '';
+          document.getElementById('smtpPassword').value = cfg.hasPassword ? '••••••••' : '';
+          document.getElementById('smtpEnableSsl').checked = (cfg.enableSsl !== false);
+        }
+      } catch (err) {
+        console.warn('Could not load SMTP settings:', err);
+      }
+    }
+
+    function closeSmtpModal() {
+      document.getElementById('smtpSettingsModal').classList.remove('active');
+    }
+
+    async function saveSmtpSettings() {
+      const host = document.getElementById('smtpHost').value.trim();
+      const port = parseInt(document.getElementById('smtpPort').value) || 587;
+      const senderEmail = document.getElementById('smtpSenderEmail').value.trim();
+      const senderName = document.getElementById('smtpSenderName').value.trim();
+      const username = document.getElementById('smtpUsername').value.trim();
+      const password = document.getElementById('smtpPassword').value;
+      const enableSsl = document.getElementById('smtpEnableSsl').checked;
+      const alertBox = document.getElementById('smtpAlert');
+      const btn = document.getElementById('btnSaveSmtp');
+
+      alertBox.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const payload = { host, port, senderEmail, senderName, username, enableSsl };
+        if (password && password !== '••••••••') {
+          payload.password = password;
+        }
+
+        const res = await authFetch('/api/settings/smtp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save settings');
+
+        alertBox.textContent = '✅ SMTP settings saved successfully!';
+        alertBox.style.background = 'rgba(16,185,129,0.2)';
+        alertBox.style.color = '#6ee7b7';
+        alertBox.style.display = 'block';
+        setTimeout(() => { closeSmtpModal(); }, 1200);
+      } catch (err) {
+        alertBox.textContent = '❌ ' + (err.message || 'Failed to save');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Settings';
+      }
+    }
+
+    async function sendTestEmail() {
+      const recipient = prompt('Enter recipient email address to send test email:');
+      if (!recipient || !recipient.trim()) return;
+
+      const btn = document.getElementById('btnSendTestEmail');
+      const alertBox = document.getElementById('smtpAlert');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Sending...</span>';
+
+      try {
+        const res = await authFetch('/api/settings/smtp/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipientEmail: recipient.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to send test email');
+        }
+        alertBox.textContent = `✅ Test email sent successfully to ${recipient.trim()}!`;
+        alertBox.style.background = 'rgba(16,185,129,0.2)';
+        alertBox.style.color = '#6ee7b7';
+        alertBox.style.display = 'block';
+      } catch (err) {
+        alertBox.textContent = '❌ ' + (err.message || 'Test email failed');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📨 Send Test Email</span>';
       }
     }
 
@@ -3240,8 +3955,175 @@
       });
     }
 
-    // Verify authentication and initialize console
-    checkAuthAndInit();
+    // --- Employee 2FA Activation Route Controller ---
+    let currentActivationToken = null;
+    let currentActivationSecret = null;
+    let currentActivationUri = null;
+
+    async function showActivationView(token) {
+      currentActivationToken = token;
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'none';
+      const actView = document.getElementById('activationView');
+      actView.style.display = 'flex';
+
+      const loading = document.getElementById('activationLoading');
+      const content = document.getElementById('activationContent');
+      const success = document.getElementById('activationSuccess');
+      const alertBox = document.getElementById('activationAlert');
+
+      loading.style.display = 'block';
+      content.style.display = 'none';
+      success.style.display = 'none';
+      alertBox.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/auth/activate/verify?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        const isValid = data.valid || data.success;
+        if (!res.ok || !isValid) {
+          throw new Error(data.error || data.message || 'This activation link is invalid or has expired.');
+        }
+
+        const userObj = data.user || data;
+        const secret = userObj.secret || userObj.totpSecret;
+        const uri = userObj.otpAuthUri || userObj.qrUri;
+
+        currentActivationSecret = secret;
+        currentActivationUri = uri;
+
+        document.getElementById('actFullName').textContent = userObj.fullName || userObj.username;
+        document.getElementById('actUsername').textContent = userObj.username;
+        document.getElementById('actEmail').textContent = userObj.email || 'N/A';
+        document.getElementById('actSecretKey').textContent = secret;
+
+        // Render QR Code using client-side QRCode library
+        const qrContainer = document.getElementById('actQrCodeCanvas');
+        qrContainer.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrContainer, {
+            text: data.otpAuthUri,
+            width: 180,
+            height: 180,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        } else {
+          qrContainer.innerHTML = '<div style="color:#000; padding:10px; font-size:12px;">QR library loaded fallback</div>';
+        }
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+      } catch (err) {
+        loading.style.display = 'none';
+        alertBox.textContent = '❌ ' + (err.message || 'Verification failed');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      }
+    }
+
+    function copySecretKey() {
+      const secret = document.getElementById('actSecretKey').textContent;
+      navigator.clipboard.writeText(secret).then(() => {
+        alert('Secret key copied to clipboard! Paste it into your Authenticator app.');
+      }).catch(() => {
+        prompt('Copy your secret key:', secret);
+      });
+    }
+
+    async function submitActivation() {
+      const p1 = document.getElementById('actNewPassword').value;
+      const p2 = document.getElementById('actConfirmPassword').value;
+      const code = document.getElementById('actVerifyCode').value.trim();
+      const alertBox = document.getElementById('activationAlert');
+      const btn = document.getElementById('btnCompleteActivation');
+
+      alertBox.style.display = 'none';
+
+      if (!p1 || p1.length < 6) {
+        alertBox.textContent = 'Password must be at least 6 characters.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+      if (p1 !== p2) {
+        alertBox.textContent = 'Passwords do not match.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+      if (!/^\d{6}$/.test(code)) {
+        alertBox.textContent = 'Please enter a valid 6-digit code from your Authenticator app.';
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Activating Account...</span>';
+
+      try {
+        const res = await fetch('/api/auth/activate/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: currentActivationToken,
+            newPassword: p1,
+            totpCode: code
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to complete activation');
+        }
+
+        document.getElementById('activationContent').style.display = 'none';
+        document.getElementById('activationSuccess').style.display = 'block';
+      } catch (err) {
+        alertBox.textContent = '❌ ' + (err.message || 'Activation failed');
+        alertBox.style.background = 'rgba(239,68,68,0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>✅ Complete Activation &amp; Enable 2FA</span>';
+      }
+    }
+
+    function goToLoginPage() {
+      window.location.hash = '';
+      document.getElementById('activationView').style.display = 'none';
+      showLogin('Account activated successfully! Please sign in with your username, password, and Authenticator 2FA.');
+    }
+
+    function checkActivationRoute() {
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#/activate')) {
+        const queryIdx = hash.indexOf('?');
+        if (queryIdx !== -1) {
+          const params = new URLSearchParams(hash.substring(queryIdx + 1));
+          const token = params.get('token');
+          if (token) {
+            showActivationView(token);
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    window.addEventListener('hashchange', checkActivationRoute);
+
+    // Verify authentication and initialize console or route to activation
+    if (!checkActivationRoute()) {
+      checkAuthAndInit();
+    }
   </script>
 </body>
 </html>

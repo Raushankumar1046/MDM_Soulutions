@@ -21,6 +21,12 @@ builder.WebHost.UseUrls("http://0.0.0.0:5000");
 // Register Embedded LiteDB Service
 builder.Services.AddSingleton<LiteDbService>();
 
+// Register TOTP 2FA Service
+builder.Services.AddSingleton<TotpService>();
+
+// Register SMTP Email Notification Service
+builder.Services.AddSingleton<EmailService>();
+
 // Register Authentication & Session Service
 builder.Services.AddSingleton<AuthService>();
 
@@ -86,15 +92,50 @@ app.MapHub<EndpointHub>("/hubs.endpoints", options =>
     options.TransportMaxBufferSize = 10 * 1024 * 1024;
 });
 
-// === Authentication Endpoints ===
+// === Authentication & 2FA Endpoints ===
 app.MapPost("/api/auth/login", (LoginRequest req, AuthService auth) =>
 {
-    var (success, token, message) = auth.Login(req.Username, req.Password);
+    var (success, requires2Fa, token, tempToken, username, message) = auth.Login(req.Username, req.Password, req.TotpCode);
+    if (requires2Fa)
+    {
+        return Results.Ok(new
+        {
+            Success = false,
+            Requires2FA = true,
+            TempToken = tempToken,
+            Username = username,
+            Message = message
+        });
+    }
     if (!success)
     {
         return Results.Json(new { Success = false, Message = message }, statusCode: 401);
     }
-    return Results.Ok(new { Success = true, Token = token, Username = req.Username.Trim().ToLowerInvariant(), ExpiresInHours = 24 });
+    return Results.Ok(new
+    {
+        Success = true,
+        Requires2FA = false,
+        Token = token,
+        Username = username,
+        ExpiresInHours = 24
+    });
+});
+
+app.MapPost("/api/auth/verify-2fa", (Verify2FaRequest req, AuthService auth) =>
+{
+    var (success, token, username, role, message) = auth.Verify2Fa(req.TempToken, req.TotpCode);
+    if (!success)
+    {
+        return Results.Json(new { Success = false, Message = message }, statusCode: 401);
+    }
+    return Results.Ok(new
+    {
+        Success = true,
+        Token = token,
+        Username = username,
+        Role = role,
+        ExpiresInHours = 24
+    });
 });
 
 app.MapGet("/api/auth/verify", (HttpRequest req, AuthService auth) =>
@@ -122,6 +163,207 @@ app.MapPost("/api/auth/change-password", (ChangePasswordRequest req, HttpRequest
         return Results.Unauthorized();
     }
     var (success, message) = auth.ChangePassword(username, req.CurrentPassword, req.NewPassword);
+    return success ? Results.Ok(new { Success = true, Message = message }) : Results.BadRequest(new { Success = false, Message = message });
+});
+
+// === Account Activation & 2FA Setup Flow (Public link accessed via Email/WhatsApp) ===
+app.MapGet("/api/auth/activate/verify", (string token, AuthService auth) =>
+{
+    var (success, message, userInfo) = auth.VerifyInviteToken(token);
+    if (!success || userInfo == null)
+    {
+        return Results.BadRequest(new { Success = false, Valid = false, Error = message, Message = message });
+    }
+    dynamic u = userInfo;
+    return Results.Ok(new
+    {
+        Success = true,
+        Valid = true,
+        Username = (string)u.Username,
+        FullName = (string)u.FullName,
+        Email = (string)u.Email,
+        Role = (string)u.Role,
+        Secret = (string)u.TotpSecret,
+        TotpSecret = (string)u.TotpSecret,
+        OtpAuthUri = (string)u.QrUri,
+        QrUri = (string)u.QrUri,
+        User = userInfo
+    });
+});
+
+app.MapPost("/api/auth/activate/complete", (CompleteActivationRequest req, AuthService auth) =>
+{
+    var (success, message) = auth.CompleteActivation(req.Token, req.NewPassword, req.TotpCode);
+    if (!success)
+    {
+        return Results.BadRequest(new { Success = false, Error = message, Message = message });
+    }
+    return Results.Ok(new { Success = true, Message = message });
+});
+
+// === User Management Endpoints (Requires Admin Bearer Token) ===
+app.MapGet("/api/users", (HttpRequest httpReq, AuthService auth) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    return Results.Ok(auth.GetAllUsers());
+});
+
+app.MapPost("/api/users/invite", async (InviteUserRequest req, HttpRequest httpReq, AuthService auth, EmailService emailService) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out var adminUser)) return Results.Unauthorized();
+
+    var (success, message, inviteToken, totpSecret, qrUri) = auth.CreateUserInvite(
+        req.FullName, req.Email, req.Username, req.Role);
+
+    if (!success)
+    {
+        return Results.BadRequest(new { Success = false, Message = message });
+    }
+
+    // Build the user activation URL based on the current request host
+    var scheme = httpReq.Scheme;
+    var host = httpReq.Host.Value;
+    var inviteUrl = $"{scheme}://{host}/#/activate?token={inviteToken}";
+
+    bool emailSent = false;
+    string emailError = "";
+
+    if (req.SendEmail)
+    {
+        var emailResult = await emailService.SendInviteEmailAsync(req.Email, req.FullName, inviteUrl);
+        emailSent = emailResult.Success;
+        if (!emailResult.Success)
+        {
+            emailError = emailResult.Message;
+        }
+    }
+
+    return Results.Ok(new
+    {
+        Success = true,
+        Message = emailSent 
+            ? "Invitation sent via email successfully!" 
+            : "User created and activation link generated.",
+        InviteToken = inviteToken,
+        InviteUrl = inviteUrl,
+        QrUri = qrUri,
+        TotpSecret = totpSecret,
+        EmailSent = emailSent,
+        EmailError = emailError
+    });
+});
+
+app.MapPost("/api/users/reset-2fa", async (Reset2FaRequest req, HttpRequest httpReq, AuthService auth, EmailService emailService) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    var (success, message, inviteToken, qrUri, secret) = auth.ResetUser2Fa(req.Username);
+    if (!success)
+    {
+        return Results.BadRequest(new { Success = false, Message = message });
+    }
+
+    var scheme = httpReq.Scheme;
+    var host = httpReq.Host.Value;
+    var inviteUrl = $"{scheme}://{host}/#/activate?token={inviteToken}";
+
+    bool emailSent = false;
+    string emailError = "";
+
+    var allUsers = auth.GetAllUsers();
+    var targetUser = allUsers.FirstOrDefault(u => (string)((dynamic)u).Username == req.Username.Trim().ToLowerInvariant());
+    if (req.SendEmail && targetUser != null)
+    {
+        string? email = (string?)((dynamic)targetUser).Email;
+        string? fullName = (string?)((dynamic)targetUser).FullName;
+        if (!string.IsNullOrEmpty(email))
+        {
+            var emailResult = await emailService.SendInviteEmailAsync(email, fullName ?? req.Username, inviteUrl);
+            emailSent = emailResult.Success;
+            if (!emailResult.Success) emailError = emailResult.Message;
+        }
+    }
+
+    return Results.Ok(new
+    {
+        Success = true,
+        Message = "2FA reset successfully. A new activation link is ready.",
+        InviteToken = inviteToken,
+        InviteUrl = inviteUrl,
+        QrUri = qrUri,
+        TotpSecret = secret,
+        EmailSent = emailSent,
+        EmailError = emailError
+    });
+});
+
+app.MapPost("/api/users/delete", (DeleteUserRequest req, HttpRequest httpReq, AuthService auth) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    var (success, message) = auth.DeleteUser(req.Username);
+    return success ? Results.Ok(new { Success = true, Message = message }) : Results.BadRequest(new { Success = false, Message = message });
+});
+
+// === SMTP Email Configuration APIs (Requires Admin Bearer Token) ===
+app.MapGet("/api/settings/smtp", (HttpRequest httpReq, AuthService auth, EmailService emailService) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    var s = emailService.GetSettings();
+    return Results.Ok(new
+    {
+        s.Host,
+        s.Port,
+        s.EnableSsl,
+        s.FromEmail,
+        s.SenderName,
+        s.Username,
+        HasPassword = !string.IsNullOrEmpty(s.Password),
+        s.UpdatedAtUtc
+    });
+});
+
+app.MapPost("/api/settings/smtp", (SmtpSettingsDto req, HttpRequest httpReq, AuthService auth, EmailService emailService) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    var existing = emailService.GetSettings();
+    var toSave = new SmtpSettingsRecord
+    {
+        Id = "default",
+        Host = req.Host?.Trim() ?? "",
+        Port = req.Port > 0 ? req.Port : 587,
+        EnableSsl = req.EnableSsl,
+        FromEmail = req.FromEmail?.Trim() ?? "",
+        SenderName = string.IsNullOrWhiteSpace(req.SenderName) ? "CyberShield MDM" : req.SenderName.Trim(),
+        Username = req.Username?.Trim() ?? "",
+        Password = !string.IsNullOrEmpty(req.Password) ? req.Password : existing.Password, // Preserve existing password if blank
+        UpdatedAtUtc = DateTime.UtcNow
+    };
+
+    emailService.SaveSettings(toSave);
+    return Results.Ok(new { Success = true, Message = "SMTP settings saved successfully." });
+});
+
+app.MapPost("/api/settings/smtp/test", async (TestEmailRequest req, HttpRequest httpReq, AuthService auth, EmailService emailService) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    if (string.IsNullOrWhiteSpace(req.ToEmail))
+    {
+        return Results.BadRequest(new { Success = false, Message = "Recipient test email address is required." });
+    }
+
+    var (success, message) = await emailService.SendTestEmailAsync(req.ToEmail.Trim());
     return success ? Results.Ok(new { Success = true, Message = message }) : Results.BadRequest(new { Success = false, Message = message });
 });
 
@@ -488,6 +730,66 @@ public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string? TotpCode { get; set; }
+}
+
+public class Verify2FaRequest
+{
+    public string TempToken { get; set; } = string.Empty;
+    public string TotpCode { get; set; } = string.Empty;
+    public string Code
+    {
+        get => TotpCode;
+        set { if (!string.IsNullOrEmpty(value)) TotpCode = value; }
+    }
+}
+
+public class InviteUserRequest
+{
+    public string FullName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
+    public string Role { get; set; } = "Admin";
+    public bool SendEmail { get; set; } = true;
+}
+
+public class CompleteActivationRequest
+{
+    public string Token { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+    public string TotpCode { get; set; } = string.Empty;
+    public string Code
+    {
+        get => TotpCode;
+        set { if (!string.IsNullOrEmpty(value)) TotpCode = value; }
+    }
+}
+
+public class Reset2FaRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public bool SendEmail { get; set; } = true;
+}
+
+public class DeleteUserRequest
+{
+    public string Username { get; set; } = string.Empty;
+}
+
+public class SmtpSettingsDto
+{
+    public string Host { get; set; } = string.Empty;
+    public int Port { get; set; } = 587;
+    public bool EnableSsl { get; set; } = true;
+    public string FromEmail { get; set; } = string.Empty;
+    public string SenderName { get; set; } = "CyberShield MDM";
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public class TestEmailRequest
+{
+    public string ToEmail { get; set; } = string.Empty;
 }
 
 public class ChangePasswordRequest
