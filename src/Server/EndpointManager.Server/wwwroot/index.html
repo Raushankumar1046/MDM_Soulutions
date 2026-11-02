@@ -2317,8 +2317,8 @@
         const res = await authFetch('/api/settings/smtp');
         if (res.ok) {
           const cfg = await res.json();
-          document.getElementById('smtpHost').value = cfg.host || '';
-          document.getElementById('smtpPort').value = cfg.port || 587;
+          document.getElementById('smtpHost').value = cfg.host || 'smtp.gmail.com';
+          document.getElementById('smtpPort').value = (cfg.port && cfg.port !== 465) ? cfg.port : 587;
           document.getElementById('smtpSenderEmail').value = cfg.senderEmail || '';
           document.getElementById('smtpSenderName').value = cfg.senderName || 'CyberShield MDM';
           document.getElementById('smtpUsername').value = cfg.username || '';
@@ -2336,21 +2336,44 @@
 
     async function saveSmtpSettings() {
       const host = document.getElementById('smtpHost').value.trim();
-      const port = parseInt(document.getElementById('smtpPort').value) || 587;
+      let port = parseInt(document.getElementById('smtpPort').value) || 587;
       const senderEmail = document.getElementById('smtpSenderEmail').value.trim();
       const senderName = document.getElementById('smtpSenderName').value.trim();
       const username = document.getElementById('smtpUsername').value.trim();
-      const password = document.getElementById('smtpPassword').value;
+      let password = document.getElementById('smtpPassword').value;
       const enableSsl = document.getElementById('smtpEnableSsl').checked;
       const alertBox = document.getElementById('smtpAlert');
       const btn = document.getElementById('btnSaveSmtp');
 
       alertBox.style.display = 'none';
+
+      if (port === 465) {
+        port = 587;
+        document.getElementById('smtpPort').value = '587';
+        alert('ℹ️ Port has been switched to standard 587 (Port 465 uses Implicit SSL which blocks STARTTLS).');
+      }
+
+      if (password) {
+        const cleaned = password.replace(/\s+/g, '');
+        if (cleaned.length === 16) {
+          password = cleaned;
+          document.getElementById('smtpPassword').value = cleaned;
+        }
+      }
+
       btn.disabled = true;
       btn.textContent = 'Saving...';
 
       try {
-        const payload = { host, port, senderEmail, senderName, username, enableSsl };
+        const payload = {
+          host,
+          port,
+          fromEmail: senderEmail,
+          senderEmail: senderEmail,
+          senderName,
+          username,
+          enableSsl
+        };
         if (password && password !== '••••••••') {
           payload.password = password;
         }
@@ -2361,7 +2384,7 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to save settings');
+        if (!res.ok) throw new Error(data.message || data.error || 'Failed to save settings');
 
         alertBox.textContent = '✅ SMTP settings saved successfully!';
         alertBox.style.background = 'rgba(16,185,129,0.2)';
@@ -2380,25 +2403,99 @@
     }
 
     async function sendTestEmail() {
-      const recipient = prompt('Enter recipient email address to send test email:');
+      const host = document.getElementById('smtpHost').value.trim();
+      let port = parseInt(document.getElementById('smtpPort').value) || 587;
+      const senderEmail = document.getElementById('smtpSenderEmail').value.trim();
+      const senderName = document.getElementById('smtpSenderName').value.trim();
+      const username = document.getElementById('smtpUsername').value.trim();
+      let password = document.getElementById('smtpPassword').value;
+      const enableSsl = document.getElementById('smtpEnableSsl').checked;
+      const alertBox = document.getElementById('smtpAlert');
+
+      alertBox.style.display = 'none';
+
+      if (!host) {
+        alert('Please enter SMTP Host / Server (e.g. smtp.gmail.com).');
+        document.getElementById('smtpHost').focus();
+        return;
+      }
+      if (!senderEmail) {
+        alert('Please enter Sender Email.');
+        document.getElementById('smtpSenderEmail').focus();
+        return;
+      }
+      if (!username) {
+        alert('Please enter SMTP Username.');
+        document.getElementById('smtpUsername').focus();
+        return;
+      }
+
+      // Check for Port 465
+      if (port === 465) {
+        port = 587;
+        document.getElementById('smtpPort').value = '587';
+        alert('ℹ️ Port has been switched to standard 587 (Port 465 uses Implicit SSL which blocks STARTTLS on Gmail).');
+      }
+
+      // Automatically strip spaces if 16-char app password was pasted
+      if (password) {
+        const cleaned = password.replace(/\s+/g, '');
+        if (cleaned.length === 16) {
+          password = cleaned;
+          document.getElementById('smtpPassword').value = cleaned;
+        }
+      }
+
+      const defaultRecipient = senderEmail || '';
+      const recipient = prompt('Enter recipient email address to receive test email:', defaultRecipient);
       if (!recipient || !recipient.trim()) return;
 
       const btn = document.getElementById('btnSendTestEmail');
-      const alertBox = document.getElementById('smtpAlert');
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳ Sending...</span>';
+      btn.innerHTML = '<span>⏳ Saving &amp; Testing...</span>';
 
       try {
+        // Auto-save settings first so the database is always in sync
+        const savePayload = {
+          host,
+          port,
+          fromEmail: senderEmail,
+          senderEmail: senderEmail,
+          senderName,
+          username,
+          enableSsl
+        };
+        if (password && password !== '••••••••') {
+          savePayload.password = password;
+        }
+        await authFetch('/api/settings/smtp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(savePayload)
+        });
+
+        // Trigger test email
         const res = await authFetch('/api/settings/smtp/test', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recipientEmail: recipient.trim() })
+          body: JSON.stringify({
+            toEmail: recipient.trim(),
+            recipientEmail: recipient.trim(),
+            host: host,
+            port: port,
+            senderEmail: senderEmail,
+            fromEmail: senderEmail,
+            senderName: senderName,
+            username: username,
+            password: password,
+            enableSsl: enableSsl
+          })
         });
         const data = await res.json();
         if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Failed to send test email');
+          throw new Error(data.message || data.error || 'Failed to send test email');
         }
-        alertBox.textContent = `✅ Test email sent successfully to ${recipient.trim()}!`;
+        alertBox.textContent = `✅ Test email sent successfully to ${recipient.trim()}! Please check your inbox / spam folder.`;
         alertBox.style.background = 'rgba(16,185,129,0.2)';
         alertBox.style.color = '#6ee7b7';
         alertBox.style.display = 'block';

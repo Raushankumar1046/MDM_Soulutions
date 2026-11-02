@@ -64,6 +64,15 @@ var staticOptions = new StaticFileOptions();
 var fileProvider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
 fileProvider.Mappings[".apk"] = "application/vnd.android.package-archive";
 staticOptions.ContentTypeProvider = fileProvider;
+staticOptions.OnPrepareResponse = ctx =>
+{
+    if (ctx.File.Name.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+    {
+        ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+        ctx.Context.Response.Headers.Pragma = "no-cache";
+        ctx.Context.Response.Headers.Expires = "0";
+    }
+};
 app.UseStaticFiles(staticOptions);
 
 app.UseCors();
@@ -323,6 +332,7 @@ app.MapGet("/api/settings/smtp", (HttpRequest httpReq, AuthService auth, EmailSe
         s.Port,
         s.EnableSsl,
         s.FromEmail,
+        SenderEmail = s.FromEmail,
         s.SenderName,
         s.Username,
         HasPassword = !string.IsNullOrEmpty(s.Password),
@@ -336,13 +346,15 @@ app.MapPost("/api/settings/smtp", (SmtpSettingsDto req, HttpRequest httpReq, Aut
     if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
 
     var existing = emailService.GetSettings();
+    var fromEmail = !string.IsNullOrWhiteSpace(req.FromEmail) ? req.FromEmail.Trim() : req.SenderEmail?.Trim() ?? "";
+
     var toSave = new SmtpSettingsRecord
     {
         Id = "default",
         Host = req.Host?.Trim() ?? "",
         Port = req.Port > 0 ? req.Port : 587,
         EnableSsl = req.EnableSsl,
-        FromEmail = req.FromEmail?.Trim() ?? "",
+        FromEmail = fromEmail,
         SenderName = string.IsNullOrWhiteSpace(req.SenderName) ? "CyberShield MDM" : req.SenderName.Trim(),
         Username = req.Username?.Trim() ?? "",
         Password = !string.IsNullOrEmpty(req.Password) ? req.Password : existing.Password, // Preserve existing password if blank
@@ -358,13 +370,37 @@ app.MapPost("/api/settings/smtp/test", async (TestEmailRequest req, HttpRequest 
     var token = AuthService.ExtractBearerToken(httpReq);
     if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
 
-    if (string.IsNullOrWhiteSpace(req.ToEmail))
+    var toEmail = !string.IsNullOrWhiteSpace(req.ToEmail) ? req.ToEmail.Trim() : req.RecipientEmail?.Trim();
+    if (string.IsNullOrWhiteSpace(toEmail))
     {
-        return Results.BadRequest(new { Success = false, Message = "Recipient test email address is required." });
+        return Results.BadRequest(new { Success = false, Error = "Recipient test email address is required.", Message = "Recipient test email address is required." });
     }
 
-    var (success, message) = await emailService.SendTestEmailAsync(req.ToEmail.Trim());
-    return success ? Results.Ok(new { Success = true, Message = message }) : Results.BadRequest(new { Success = false, Message = message });
+    SmtpSettingsRecord? liveSettings = null;
+    if (!string.IsNullOrWhiteSpace(req.Host))
+    {
+        var existing = emailService.GetSettings();
+        var pass = !string.IsNullOrWhiteSpace(req.Password) && req.Password != "••••••••"
+            ? req.Password
+            : existing.Password;
+
+        liveSettings = new SmtpSettingsRecord
+        {
+            Id = "default",
+            Host = req.Host.Trim(),
+            Port = req.Port.HasValue && req.Port.Value > 0 ? req.Port.Value : 587,
+            EnableSsl = req.EnableSsl ?? true,
+            FromEmail = (!string.IsNullOrWhiteSpace(req.FromEmail) ? req.FromEmail : req.SenderEmail)?.Trim() ?? existing.FromEmail,
+            SenderName = !string.IsNullOrWhiteSpace(req.SenderName) ? req.SenderName.Trim() : "CyberShield MDM",
+            Username = !string.IsNullOrWhiteSpace(req.Username) ? req.Username.Trim() : existing.Username,
+            Password = pass
+        };
+    }
+
+    var (success, message) = await emailService.SendTestEmailAsync(toEmail, liveSettings);
+    return success 
+        ? Results.Ok(new { Success = true, Message = message }) 
+        : Results.BadRequest(new { Success = false, Error = message, Message = message });
 });
 
 // === Protected Management APIs (Requires Bearer Token) ===
@@ -782,6 +818,11 @@ public class SmtpSettingsDto
     public int Port { get; set; } = 587;
     public bool EnableSsl { get; set; } = true;
     public string FromEmail { get; set; } = string.Empty;
+    public string SenderEmail
+    {
+        get => FromEmail;
+        set { if (!string.IsNullOrEmpty(value)) FromEmail = value; }
+    }
     public string SenderName { get; set; } = "CyberShield MDM";
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
@@ -790,6 +831,23 @@ public class SmtpSettingsDto
 public class TestEmailRequest
 {
     public string ToEmail { get; set; } = string.Empty;
+    public string RecipientEmail
+    {
+        get => ToEmail;
+        set { if (!string.IsNullOrEmpty(value)) ToEmail = value; }
+    }
+    public string? Host { get; set; }
+    public int? Port { get; set; }
+    public bool? EnableSsl { get; set; }
+    public string? FromEmail { get; set; }
+    public string? SenderEmail
+    {
+        get => FromEmail;
+        set { if (!string.IsNullOrEmpty(value)) FromEmail = value; }
+    }
+    public string? SenderName { get; set; }
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }
 
 public class ChangePasswordRequest

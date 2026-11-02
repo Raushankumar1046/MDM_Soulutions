@@ -117,8 +117,9 @@ public class EmailService
         return await SendHtmlEmailAsync(toEmail, subject, body);
     }
 
-    public async Task<(bool Success, string Message)> SendTestEmailAsync(string toEmail)
+    public async Task<(bool Success, string Message)> SendTestEmailAsync(string toEmail, SmtpSettingsRecord? customSettings = null)
     {
+        var activeSettings = customSettings ?? GetSettings();
         string subject = "✅ CyberShield MDM - SMTP Configuration Test Successful";
         string body = $@"
 <!DOCTYPE html>
@@ -126,21 +127,29 @@ public class EmailService
 <body style=""font-family: sans-serif; background-color: #0b0f19; color: #e2e8f0; padding: 20px;"">
   <div style=""max-width: 500px; margin: 0 auto; background: #131b2e; border: 1px solid #10b981; border-radius: 10px; padding: 24px;"">
     <h2 style=""color: #10b981; margin-top: 0;"">✅ SMTP Test Succeeded!</h2>
-    <p style=""color: #94a3b8;"">This email confirms that your CyberShield MDM server can successfully send automated emails through your SMTP mail server.</p>
+    <p style=""color: #94a3b8;"">This email confirms that your CyberShield MDM server can successfully send automated emails through your SMTP server ({WebUtility.HtmlEncode(activeSettings.Host)}:{activeSettings.Port}).</p>
     <p style=""font-size: 12px; color: #64748b;"">Timestamp: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC</p>
   </div>
 </body>
 </html>";
 
-        return await SendHtmlEmailAsync(toEmail, subject, body);
+        return await SendHtmlEmailAsync(toEmail, subject, body, customSettings);
     }
 
-    private async Task<(bool Success, string Message)> SendHtmlEmailAsync(string toEmail, string subject, string htmlBody)
+    private async Task<(bool Success, string Message)> SendHtmlEmailAsync(string toEmail, string subject, string htmlBody, SmtpSettingsRecord? customSettings = null)
     {
-        var settings = GetSettings();
+        var settings = customSettings ?? GetSettings();
         if (string.IsNullOrWhiteSpace(settings.Host))
         {
-            return (false, "SMTP Host is missing.");
+            return (false, "SMTP Host is missing. Please enter your SMTP server (e.g. smtp.gmail.com).");
+        }
+        if (string.IsNullOrWhiteSpace(settings.FromEmail))
+        {
+            return (false, "Sender Email is missing. Please enter your email address.");
+        }
+        if (settings.Port == 465)
+        {
+            return (false, "Port 465 uses Implicit SSL which is unsupported by STARTTLS. Please change Port to 587 (with SSL/TLS enabled) for Gmail/Office365.");
         }
 
         try
@@ -148,12 +157,18 @@ public class EmailService
             using var client = new SmtpClient(settings.Host, settings.Port)
             {
                 EnableSsl = settings.EnableSsl,
-                Timeout = 10000 // 10 seconds timeout
+                Timeout = 12000 // 12 seconds timeout
             };
 
             if (!string.IsNullOrWhiteSpace(settings.Username) && !string.IsNullOrWhiteSpace(settings.Password))
             {
-                client.Credentials = new NetworkCredential(settings.Username, settings.Password);
+                var pass = settings.Password.Trim();
+                var cleanedPass = pass.Replace(" ", "");
+                if (cleanedPass.Length == 16 && cleanedPass.All(char.IsLetterOrDigit))
+                {
+                    pass = cleanedPass;
+                }
+                client.Credentials = new NetworkCredential(settings.Username.Trim(), pass);
             }
 
             var fromAddress = new MailAddress(settings.FromEmail, settings.SenderName ?? "CyberShield MDM");
@@ -170,6 +185,18 @@ public class EmailService
             _logger.LogInformation("Email sent successfully to {To} with subject '{Subject}'", toEmail, subject);
             return (true, "Email sent successfully.");
         }
+        catch (SmtpException smtpEx)
+        {
+            _logger.LogError(smtpEx, "SMTP Error sending to {To}: {Error}", toEmail, smtpEx.Message);
+            var innerMsg = smtpEx.InnerException?.Message;
+            var details = !string.IsNullOrEmpty(innerMsg) ? $"{smtpEx.Message} ({innerMsg})" : smtpEx.Message;
+
+            if (details.Contains("5.7.8") || details.Contains("Username and Password not accepted") || details.Contains("Authentication failed") || details.Contains("BadCredentials"))
+            {
+                return (false, "Google/SMTP Authentication Failed. Make sure you are using a 16-character Google 'App Password' instead of your regular account password.");
+            }
+            return (false, $"SMTP Error: {details}");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send email to {To}: {Error}", toEmail, ex.Message);
@@ -177,3 +204,4 @@ public class EmailService
         }
     }
 }
+
