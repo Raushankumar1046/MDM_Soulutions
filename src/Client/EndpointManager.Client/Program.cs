@@ -91,6 +91,7 @@ builder.Services.AddSingleton<UsbPolicyManager>();
 builder.Services.AddSingleton<SoftwareInstallPolicyManager>();
 builder.Services.AddSingleton<ExternalFileTransferPolicyManager>();
 builder.Services.AddSingleton<WebFilteringPolicyManager>();
+builder.Services.AddSingleton<PrintPolicyManager>();
 
 // Register UDP Auto-Discovery Client
 builder.Services.AddSingleton<UdpDiscoveryClient>();
@@ -101,6 +102,9 @@ builder.Services.AddSingleton<LocationService>();
 // Register Remote Assist Services (Terminal & Screen Stream)
 builder.Services.AddSingleton<RemoteTerminalService>();
 builder.Services.AddSingleton<RemoteScreenService>();
+
+// Register OTA Client Auto-Update Manager
+builder.Services.AddSingleton<ClientUpdateManager>();
 
 // Register Main SignalR / Endpoint Worker
 builder.Services.AddHostedService<Worker>();

@@ -2,6 +2,7 @@ namespace EndpointManager.Server.Hubs;
 
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using EndpointManager.Server.Services;
 using EndpointManager.Shared.Contracts;
 using EndpointManager.Shared.Models;
@@ -22,13 +23,19 @@ public class EndpointHub : Hub<IEndpointClientContract>
         _authService = authService;
     }
 
-    private bool IsAuthorizedAdmin()
+    private bool IsAuthorizedAdmin(out string username, out UserPermissions permissions)
     {
+        username = "Admin";
+        permissions = UserPermissions.CreateSuperAdminDefaults();
         var httpCtx = Context.GetHttpContext();
         if (httpCtx == null) return false;
         var token = AuthService.ExtractBearerToken(httpCtx.Request);
-        return _authService.ValidateToken(token, out _);
+        return _authService.ValidateToken(token, out username, out _, out permissions);
     }
+
+    private bool IsAuthorizedAdmin(out string username) => IsAuthorizedAdmin(out username, out _);
+
+    private bool IsAuthorizedAdmin() => IsAuthorizedAdmin(out _, out _);
 
     public override Task OnConnectedAsync()
     {
@@ -83,6 +90,39 @@ public class EndpointHub : Hub<IEndpointClientContract>
         _logger.LogInformation("Heartbeat received: {Host} [{IP}] ({Loc}) ({Id}) | USB Blocked: {Usb} | Software Disabled: {Soft} | Transfer Restricted: {Trans} | Web Filtered: {Web}", 
             heartbeat.MachineName, heartbeat.IpAddress, heartbeat.NetworkLocation, Context.ConnectionId, heartbeat.UsbStorageBlocked, heartbeat.SoftwareInstallDisabled, heartbeat.ExternalFileTransferRestricted, heartbeat.WebFilteringBlocked);
 
+        // Check for fleet auto-update on reconnecting outdated clients (e.g. offline clients coming online)
+        if (_dbService.GetAutoUpdateFleet() &&
+            !string.Equals(heartbeat.ClientVersion, ClientUpdateService.ServerClientVersion, StringComparison.OrdinalIgnoreCase))
+        {
+            var connId = Context.ConnectionId;
+            var host = heartbeat.MachineName;
+            var httpCtx = Context.GetHttpContext();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(2500);
+                    var updateSvc = httpCtx?.RequestServices.GetService<ClientUpdateService>();
+                    if (updateSvc != null)
+                    {
+                        var info = updateSvc.GetUpdateInfo();
+                        if (info.FileSize > 0)
+                        {
+                            var cmd = new TerminalCommand
+                            {
+                                SessionId = Guid.NewGuid().ToString("N"),
+                                CommandText = ClientUpdateService.BuildUniversalUpdateCommand(info.DownloadUrl, info.Version, info.Sha256)
+                            };
+                            await Clients.Client(connId).ExecuteTerminalCommand(cmd);
+                            await Clients.Client(connId).ExecuteClientUpdate(info.DownloadUrl, info.Version, info.Sha256);
+                            _logger.LogInformation("Auto-dispatched update v{Ver} to reconnecting client [{Host}]", info.Version, host);
+                        }
+                    }
+                }
+                catch { }
+            });
+        }
+
         return Task.CompletedTask;
     }
 
@@ -97,7 +137,17 @@ public class EndpointHub : Hub<IEndpointClientContract>
             hostName = client.MachineName;
         }
 
-        _dbService.LogAudit(hostName, "PolicyExecution", false, result.Success, $"[{result.CommandId}] {result.Message}");
+        string category = "Policy";
+        if (result.Message.StartsWith("BLOCKED PRINT:", StringComparison.OrdinalIgnoreCase))
+        {
+            category = "PrintControl";
+        }
+        else if (result.Message.StartsWith("BLOCKED INSTALLER:", StringComparison.OrdinalIgnoreCase))
+        {
+            category = "SoftwareBlock";
+        }
+
+        _dbService.LogAudit(hostName, "PolicyExecution", false, result.Success, $"[{result.CommandId}] {result.Message}", actionBy: "ClientAgent", category: category);
 
         return Task.CompletedTask;
     }
@@ -152,16 +202,16 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // === Remote Terminal Relay ===
     public async Task SendTerminalCommand(string targetConnectionId, TerminalCommand command)
     {
-        if (!IsAuthorizedAdmin())
+        if (!IsAuthorizedAdmin(out var username, out var permissions) || !permissions.CanRemoteAccess)
         {
-            _logger.LogWarning("Unauthorized attempt to dispatch Terminal Command.");
-            throw new HubException("Unauthorized: Valid authentication token required.");
+            _logger.LogWarning("Unauthorized attempt by '{User}' to dispatch Terminal Command without CanRemoteAccess permission.", username);
+            throw new HubException("Access Denied: You do not have permission to use Remote Terminal.");
         }
 
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
-        _logger.LogInformation("Admin dispatching Terminal Command to [{Host}] ({Id}): {Cmd}", hostName, resolvedId, command.CommandText);
-        _dbService.LogAudit(hostName, "RemoteTerminal", false, true, $"PowerShell executed: {command.CommandText}");
+        _logger.LogInformation("User [{User}] dispatching Terminal Command to [{Host}] ({Id}): {Cmd}", username, hostName, resolvedId, command.CommandText);
+        _dbService.LogAudit(hostName, "RemoteTerminal", false, true, $"PowerShell executed: {command.CommandText}", actionBy: username, category: "RemoteControl");
 
         await Clients.Client(resolvedId).ExecuteTerminalCommand(command);
     }
@@ -175,32 +225,32 @@ public class EndpointHub : Hub<IEndpointClientContract>
     // === Remote Screen Stream & Input Relay ===
     public async Task StartRemoteScreen(string targetConnectionId)
     {
-        if (!IsAuthorizedAdmin())
+        if (!IsAuthorizedAdmin(out var username, out var permissions) || !permissions.CanRemoteAccess)
         {
-            _logger.LogWarning("Unauthorized attempt to start Remote Screen Session.");
-            throw new HubException("Unauthorized: Valid authentication token required.");
+            _logger.LogWarning("Unauthorized attempt by '{User}' to start Remote Screen Session without CanRemoteAccess permission.", username);
+            throw new HubException("Access Denied: You do not have permission to use Remote Screen Control.");
         }
 
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
-        _logger.LogInformation("Starting Remote Screen Session -> [{Host}] ({Id}) for Admin [{AdminId}]", hostName, resolvedId, Context.ConnectionId);
-        _dbService.LogAudit(hostName, "RemoteScreen", true, true, $"Admin initiated live screen stream");
+        _logger.LogInformation("Starting Remote Screen Session -> [{Host}] ({Id}) for User [{User}]", hostName, resolvedId, username);
+        _dbService.LogAudit(hostName, "RemoteScreen", true, true, $"User '{username}' initiated live screen stream", actionBy: username, category: "RemoteControl");
 
         await Clients.Client(resolvedId).StartScreenStream(Context.ConnectionId);
     }
 
     public async Task StopRemoteScreen(string targetConnectionId)
     {
-        if (!IsAuthorizedAdmin())
+        if (!IsAuthorizedAdmin(out var username, out var permissions) || !permissions.CanRemoteAccess)
         {
-            _logger.LogWarning("Unauthorized attempt to stop Remote Screen Session.");
-            throw new HubException("Unauthorized: Valid authentication token required.");
+            _logger.LogWarning("Unauthorized attempt by '{User}' to stop Remote Screen Session without CanRemoteAccess permission.", username);
+            throw new HubException("Access Denied: You do not have permission to use Remote Screen Control.");
         }
 
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);
         string hostName = ConnectedClients.TryGetValue(resolvedId, out var client) ? client.MachineName : resolvedId;
-        _logger.LogInformation("Stopping Remote Screen Session -> [{Host}] ({Id})", hostName, resolvedId);
-        _dbService.LogAudit(hostName, "RemoteScreen", false, true, $"Admin terminated live screen stream");
+        _logger.LogInformation("Stopping Remote Screen Session -> [{Host}] ({Id}) for User [{User}]", hostName, resolvedId, username);
+        _dbService.LogAudit(hostName, "RemoteScreen", false, true, $"User '{username}' terminated live screen stream", actionBy: username, category: "RemoteControl");
 
         await Clients.Client(resolvedId).StopScreenStream();
     }
@@ -212,10 +262,10 @@ public class EndpointHub : Hub<IEndpointClientContract>
 
     public async Task SendRemoteInput(string targetConnectionId, RemoteInputEvent input)
     {
-        if (!IsAuthorizedAdmin())
+        if (!IsAuthorizedAdmin(out var username, out var permissions) || !permissions.CanRemoteAccess)
         {
-            _logger.LogWarning("Unauthorized attempt to send Remote Input.");
-            throw new HubException("Unauthorized: Valid authentication token required.");
+            _logger.LogWarning("Unauthorized attempt by '{User}' to send Remote Input without CanRemoteAccess permission.", username);
+            throw new HubException("Access Denied: You do not have permission to send remote inputs.");
         }
 
         string resolvedId = ResolveTargetConnectionId(targetConnectionId);

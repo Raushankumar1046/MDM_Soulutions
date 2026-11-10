@@ -15,6 +15,8 @@ public class EndpointDeviceRecord
     public bool SoftwareInstallDisabled { get; set; }
     public bool ExternalFileTransferRestricted { get; set; }
     public bool WebFilteringBlocked { get; set; }
+    public bool SelectivePrintRestricted { get; set; }
+    public string ClientVersion { get; set; } = "1.0.0";
     public List<string> WebFilterAllowedExceptions { get; set; } = new();
     public string? City { get; set; }
     public string? Region { get; set; }
@@ -33,6 +35,8 @@ public class PolicyAuditRecord
     public Guid Id { get; set; } = Guid.NewGuid();
     public string MachineName { get; set; } = string.Empty;
     public string PolicyName { get; set; } = string.Empty;
+    public string ActionBy { get; set; } = "System";
+    public string Category { get; set; } = "Policy"; // Policy, Auth, WebFilter, UserManagement, Device, RemoteControl
     public bool Enforced { get; set; }
     public bool Success { get; set; }
     public string Details { get; set; } = string.Empty;
@@ -106,6 +110,8 @@ public class LiteDbService : IDisposable
                     SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled,
                     ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted,
                     WebFilteringBlocked = heartbeat.WebFilteringBlocked,
+                    SelectivePrintRestricted = heartbeat.SelectivePrintRestricted,
+                    ClientVersion = heartbeat.ClientVersion ?? "1.0.0",
                     City = heartbeat.City,
                     Region = heartbeat.Region,
                     Country = heartbeat.Country,
@@ -128,6 +134,8 @@ public class LiteDbService : IDisposable
                 existing.SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled;
                 existing.ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted;
                 existing.WebFilteringBlocked = heartbeat.WebFilteringBlocked;
+                existing.SelectivePrintRestricted = heartbeat.SelectivePrintRestricted;
+                existing.ClientVersion = heartbeat.ClientVersion ?? existing.ClientVersion;
                 existing.City = heartbeat.City ?? existing.City;
                 existing.Region = heartbeat.Region ?? existing.Region;
                 existing.Country = heartbeat.Country ?? existing.Country;
@@ -201,7 +209,14 @@ public class LiteDbService : IDisposable
         }
     }
 
-    public void LogAudit(string machineName, string policy, bool enforced, bool success, string details)
+    public void LogAudit(
+        string machineName, 
+        string policy, 
+        bool enforced, 
+        bool success, 
+        string details,
+        string actionBy = "System",
+        string category = "Policy")
     {
         try
         {
@@ -212,6 +227,8 @@ public class LiteDbService : IDisposable
                 Enforced = enforced,
                 Success = success,
                 Details = details,
+                ActionBy = string.IsNullOrWhiteSpace(actionBy) ? "System" : actionBy.Trim(),
+                Category = string.IsNullOrWhiteSpace(category) ? "Policy" : category.Trim(),
                 TimestampUtc = DateTime.UtcNow
             });
         }
@@ -221,7 +238,7 @@ public class LiteDbService : IDisposable
         }
     }
 
-    public List<PolicyAuditRecord> GetRecentAuditLogs(int count = 50)
+    public List<PolicyAuditRecord> GetRecentAuditLogs(int count = 100)
     {
         try
         {
@@ -230,6 +247,19 @@ public class LiteDbService : IDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get audit logs from LiteDB.");
+            return new List<PolicyAuditRecord>();
+        }
+    }
+
+    public List<PolicyAuditRecord> GetAllAuditLogs(int maxRecords = 2000)
+    {
+        try
+        {
+            return _auditLogs.FindAll().OrderByDescending(a => a.TimestampUtc).Take(maxRecords).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get all audit logs from LiteDB.");
             return new List<PolicyAuditRecord>();
         }
     }
@@ -372,6 +402,39 @@ public class LiteDbService : IDisposable
         var allowedSet = new HashSet<string>(allowed, StringComparer.OrdinalIgnoreCase);
 
         return allBlocked.Where(b => !allowedSet.Contains(b)).ToList();
+    }
+
+    public bool GetAutoUpdateFleet()
+    {
+        try
+        {
+            var col = _db.GetCollection<BsonDocument>("system_settings");
+            var doc = col.FindById("auto_update_fleet");
+            return doc != null && doc.ContainsKey("value") && doc["value"].AsBoolean;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public void SetAutoUpdateFleet(bool enabled)
+    {
+        try
+        {
+            var col = _db.GetCollection<BsonDocument>("system_settings");
+            var doc = new BsonDocument
+            {
+                ["_id"] = "auto_update_fleet",
+                ["value"] = enabled,
+                ["updatedAt"] = DateTime.UtcNow
+            };
+            col.Upsert(doc);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set auto_update_fleet setting in LiteDB.");
+        }
     }
 
     public void Dispose()

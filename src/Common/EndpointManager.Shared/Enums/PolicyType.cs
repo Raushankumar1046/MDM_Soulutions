@@ -6,6 +6,7 @@ public enum PolicyType
     DisableSoftwareInstallation = 2,
     RestrictExternalFileTransfer = 3,
     WebFilteringBlock = 4,
+    SelectivePrintRestriction = 5,
     LockWorkstation = 10,
     RestartLaptop = 11,
     SendNotification = 12

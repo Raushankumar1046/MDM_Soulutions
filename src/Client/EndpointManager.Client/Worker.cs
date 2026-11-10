@@ -16,6 +16,8 @@ public class Worker : BackgroundService
     private readonly SoftwareInstallPolicyManager _softwarePolicyManager;
     private readonly ExternalFileTransferPolicyManager _fileTransferPolicyManager;
     private readonly WebFilteringPolicyManager _webPolicyManager;
+    private readonly PrintPolicyManager _printPolicyManager;
+    private readonly ClientUpdateManager _updateManager;
     private readonly UdpDiscoveryClient _udpDiscoveryClient;
     private readonly LocationService _locationService;
     private readonly RemoteTerminalService _terminalService;
@@ -31,6 +33,8 @@ public class Worker : BackgroundService
         SoftwareInstallPolicyManager softwarePolicyManager,
         ExternalFileTransferPolicyManager fileTransferPolicyManager,
         WebFilteringPolicyManager webPolicyManager,
+        PrintPolicyManager printPolicyManager,
+        ClientUpdateManager updateManager,
         UdpDiscoveryClient udpDiscoveryClient,
         LocationService locationService,
         RemoteTerminalService terminalService,
@@ -42,6 +46,8 @@ public class Worker : BackgroundService
         _softwarePolicyManager = softwarePolicyManager;
         _fileTransferPolicyManager = fileTransferPolicyManager;
         _webPolicyManager = webPolicyManager;
+        _printPolicyManager = printPolicyManager;
+        _updateManager = updateManager;
         _udpDiscoveryClient = udpDiscoveryClient;
         _locationService = locationService;
         _terminalService = terminalService;
@@ -69,6 +75,28 @@ public class Worker : BackgroundService
                 });
             }
         };
+
+        _printPolicyManager.OnPrintBlocked += (appName, reason) =>
+        {
+            _logger.LogWarning("Print attempt blocked from PDF viewer: {App} ({Reason})", appName, reason);
+            if (_hubConnection?.State == HubConnectionState.Connected)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var auditResult = new PolicyExecutionResult
+                        {
+                            CommandId = Guid.NewGuid(),
+                            Success = false,
+                            Message = $"BLOCKED PRINT: {appName} ({reason})"
+                        };
+                        await _hubConnection.InvokeAsync("ReportExecutionResult", auditResult);
+                    }
+                    catch { }
+                });
+            }
+        };
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -79,6 +107,12 @@ public class Worker : BackgroundService
         if (_softwarePolicyManager.IsSoftwareInstallationDisabled())
         {
             _softwarePolicyManager.StartInstallerWatcher();
+        }
+
+        // Resume active print guard if policy is active
+        if (_printPolicyManager.IsPrintRestrictionEnforced())
+        {
+            _printPolicyManager.StartPrintGuard();
         }
 
         while (!stoppingToken.IsCancellationRequested)
@@ -104,6 +138,7 @@ public class Worker : BackgroundService
                 _hubConnection.On<string>(nameof(IEndpointClientContract.StartScreenStream), adminId => _screenService.StartScreenStream(adminId, _hubConnection));
                 _hubConnection.On(nameof(IEndpointClientContract.StopScreenStream), () => _screenService.StopScreenStream());
                 _hubConnection.On<RemoteInputEvent>(nameof(IEndpointClientContract.ProcessRemoteInput), input => _screenService.ProcessRemoteInput(input));
+                _hubConnection.On<string, string, string>(nameof(IEndpointClientContract.ExecuteClientUpdate), (url, ver, sha) => _ = _updateManager.ApplyUpdateAsync(url, ver, sha, _currentServerUrl));
 
                 _hubConnection.Reconnecting += error =>
                 {
@@ -123,6 +158,9 @@ public class Worker : BackgroundService
                 await _hubConnection.StartAsync(stoppingToken);
                 _logger.LogInformation("Successfully connected to Central Management Server via {Location}!", _currentLocationType);
                 Program.LogRuntime($"[ONLINE] Successfully connected to Central Management Server at {_currentServerUrl} ({_currentLocationType})!");
+
+                // Check for automatic fleet update in background
+                _ = _updateManager.CheckForAutomaticUpdateAsync(_currentServerUrl, stoppingToken);
 
                 // 3. Heartbeat loop while connected
                 while (!stoppingToken.IsCancellationRequested && _hubConnection.State != HubConnectionState.Disconnected)
@@ -144,6 +182,8 @@ public class Worker : BackgroundService
                                 SoftwareInstallDisabled = _softwarePolicyManager.IsSoftwareInstallationDisabled(),
                                 ExternalFileTransferRestricted = _fileTransferPolicyManager.IsExternalFileTransferRestricted(),
                                 WebFilteringBlocked = _webPolicyManager.IsWebFilteringBlocked(),
+                                SelectivePrintRestricted = _printPolicyManager.IsPrintRestrictionEnforced(),
+                                ClientVersion = ClientUpdateManager.CurrentVersion,
                                 City = loc?.City,
                                 Region = loc?.Region,
                                 Country = loc?.Country,
@@ -265,6 +305,14 @@ public class Worker : BackgroundService
                     result.Message = webSuccess
                         ? $"Web & Entertainment Filtering successfully {(command.EnableRestriction ? "ENFORCED (Domains Blocked)" : "RELAXED (Allowed)")}."
                         : "Failed to update Web Filtering policies.";
+                    break;
+
+                case PolicyType.SelectivePrintRestriction:
+                    bool printSuccess = _printPolicyManager.SetPrintRestriction(command.EnableRestriction);
+                    result.Success = printSuccess;
+                    result.Message = printSuccess
+                        ? $"Selective Print Guard successfully {(command.EnableRestriction ? "ENFORCED (PDF Readers Blocked, Browsers Allowed)" : "RELAXED (All Printing Allowed)")}."
+                        : "Failed to update Print Security policies.";
                     break;
                 case PolicyType.LockWorkstation:
                     Program.LogRuntime("[ACTION] Remote lock workstation command received from Admin.");

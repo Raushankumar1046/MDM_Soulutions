@@ -9,6 +9,7 @@ public interface IEndpointClientContract
     Task StartScreenStream(string targetAdminConnectionId);
     Task StopScreenStream();
     Task ProcessRemoteInput(RemoteInputEvent input);
+    Task ExecuteClientUpdate(string downloadUrl, string targetVersion, string expectedSha256);
 
     // Callbacks for Web Admin Browser
     Task ReceiveTerminalOutput(TerminalOutput output);

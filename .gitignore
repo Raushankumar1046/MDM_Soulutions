@@ -16,3 +16,11 @@ endpoints_data.db
 *.log
 .vs/
 .idea/
+ 
+# Scratch
+scratch/
+
+ 
+publish/Server/EndpointManager.Client.exe
+publish/Server/wwwroot/downloads/EndpointManager.Client.exe
+
