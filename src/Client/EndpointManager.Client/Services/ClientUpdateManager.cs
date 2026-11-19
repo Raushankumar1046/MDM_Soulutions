@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 public class ClientUpdateManager
 {
-    public const string CurrentVersion = "1.2.0";
+    public const string CurrentVersion = "1.3.0";
     private readonly ILogger<ClientUpdateManager> _logger;
     private static readonly string UpdatesDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
@@ -73,10 +73,6 @@ public class ClientUpdateManager
                 {
                     candidateUrls.Add($"{curBase}/api/updates/client/download");
                 }
-            }
-            if (!candidateUrls.Contains("http://192.168.68.13:5000/api/updates/client/download"))
-            {
-                candidateUrls.Add("http://192.168.68.13:5000/api/updates/client/download");
             }
             if (!candidateUrls.Contains("http://14.194.19.6:5000/api/updates/client/download"))
             {

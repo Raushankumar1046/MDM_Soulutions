@@ -30,9 +30,13 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_ENABLE_ADMIN = 101;
     private static final int REQUEST_CODE_PERMISSIONS = 102;
+    private static final String IT_ADMIN_PIN = "9876";
+
+    private boolean isUnlockedByAdmin = false;
 
     private TextView tvServerStatus;
     private EditText etServerUrl;
+    private EditText etLocalServerUrl;
     private Button btnSaveServerUrl;
     private TextView tvAdminStatus;
     private TextView tvCameraStatus;
@@ -66,23 +70,87 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
         loadSavedServerUrl();
+
+        if (getIntent() != null) {
+            String incomingUrl = getIntent().getStringExtra("server_url");
+            String incomingLocalUrl = getIntent().getStringExtra("local_server_url");
+            if (incomingUrl != null || incomingLocalUrl != null) {
+                saveServerUrls(
+                        incomingUrl != null ? incomingUrl : CyberShieldService.DEFAULT_SERVER_URL,
+                        incomingLocalUrl != null ? incomingLocalUrl : ""
+                );
+            }
+        }
+
+        // Always ensure background sync service is active
+        CyberShieldService.startService(this);
+
+        // Check if unlocked via ADB: adb shell am start -n com.cybershield.mdm/.MainActivity --ez admin_unlock true
+        if (getIntent().getBooleanExtra("admin_unlock", false)) {
+            isUnlockedByAdmin = true;
+        }
+
+        // Strict enterprise protection: Once Device Admin is active, app runs silently in background and cannot be opened by user
+        if (policyEngine.isAdminActive() && !isUnlockedByAdmin) {
+            Toast.makeText(this, "🛡️ CyberShield MDM is active. Settings are locked by Administrator.", Toast.LENGTH_SHORT).show();
+            moveTaskToBack(true);
+            finish();
+            return;
+        }
+
+        setupAdminDashboard();
+    }
+
+    private void promptAdminUnlockOrExit() {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        input.setHint("Enter 4-Digit IT Admin PIN");
+        input.setPadding(40, 30, 40, 30);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            input.setTextAlignment(android.view.View.TEXT_ALIGNMENT_CENTER);
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("🔒 Corporate Settings Locked")
+                .setMessage("This device is managed by CyberShield Enterprise MDM.\n\nConfiguration settings are restricted to authorized IT administrators only.")
+                .setView(input)
+                .setCancelable(false)
+                .setPositiveButton("Unlock", (dialog, which) -> {
+                    String entered = input.getText().toString().trim();
+                    if (IT_ADMIN_PIN.equals(entered)) {
+                        isUnlockedByAdmin = true;
+                        Toast.makeText(this, "Admin verified. Settings unlocked.", Toast.LENGTH_SHORT).show();
+                        setupAdminDashboard();
+                    } else {
+                        Toast.makeText(this, "Access Denied: Incorrect Admin PIN.", Toast.LENGTH_SHORT).show();
+                        moveTaskToBack(true);
+                        finish();
+                    }
+                })
+                .setNegativeButton("Exit", (dialog, which) -> {
+                    moveTaskToBack(true);
+                    finish();
+                })
+                .show();
+    }
+
+    private void setupAdminDashboard() {
+        initViews();
+        loadSavedServerUrl();
         checkAndRequestPermissions();
         updateAdminStatusUi();
-        // Check and request VPN preparation for on-device DNS web filtering
         try {
             Intent vpnIntent = android.net.VpnService.prepare(this);
             if (vpnIntent != null) {
                 startActivityForResult(vpnIntent, 103);
             }
         } catch (Exception ignored) {}
-
-        // Start background service
-        CyberShieldService.startService(this);
     }
 
     private void initViews() {
         tvServerStatus = findViewById(R.id.tvServerStatus);
         etServerUrl = findViewById(R.id.etServerUrl);
+        etLocalServerUrl = findViewById(R.id.etLocalServerUrl);
         btnSaveServerUrl = findViewById(R.id.btnSaveServerUrl);
         tvAdminStatus = findViewById(R.id.tvAdminStatus);
         tvCameraStatus = findViewById(R.id.tvCameraStatus);
@@ -97,8 +165,9 @@ public class MainActivity extends AppCompatActivity {
             if (url.isEmpty()) {
                 url = CyberShieldService.DEFAULT_SERVER_URL;
             }
-            saveServerUrl(url);
-            Toast.makeText(this, "Server URL updated. Reconnecting...", Toast.LENGTH_SHORT).show();
+            String localUrl = etLocalServerUrl.getText().toString().trim();
+            saveServerUrls(url, localUrl);
+            Toast.makeText(this, "Server URLs updated. Reconnecting...", Toast.LENGTH_SHORT).show();
 
             Intent reconnectIntent = new Intent(this, CyberShieldService.class);
             reconnectIntent.putExtra("RECONNECT", true);
@@ -117,11 +186,16 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(CyberShieldService.PREFS_NAME, MODE_PRIVATE);
         String url = prefs.getString(CyberShieldService.KEY_SERVER_URL, CyberShieldService.DEFAULT_SERVER_URL);
         etServerUrl.setText(url);
+        String localUrl = prefs.getString(CyberShieldService.KEY_LOCAL_SERVER_URL, "");
+        etLocalServerUrl.setText(localUrl);
     }
 
-    private void saveServerUrl(String url) {
+    private void saveServerUrls(String url, String localUrl) {
         SharedPreferences prefs = getSharedPreferences(CyberShieldService.PREFS_NAME, MODE_PRIVATE);
-        prefs.edit().putString(CyberShieldService.KEY_SERVER_URL, url).apply();
+        prefs.edit()
+                .putString(CyberShieldService.KEY_SERVER_URL, url)
+                .putString(CyberShieldService.KEY_LOCAL_SERVER_URL, localUrl)
+                .apply();
     }
 
     private void promptActivateDeviceAdmin() {
@@ -137,37 +211,56 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateAdminStatusUi() {
+        if (tvAdminStatus == null) return;
         boolean active = policyEngine.isAdminActive();
         if (active) {
             tvAdminStatus.setText("Device Administrator: ACTIVE");
             tvAdminStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_green));
-            btnActivateAdmin.setText("Device Admin Active (Compliant)");
-            btnActivateAdmin.setEnabled(false);
-            btnActivateAdmin.setBackgroundColor(ContextCompat.getColor(this, R.color.input_bg));
+            if (btnActivateAdmin != null) {
+                btnActivateAdmin.setText("Device Admin Active (Compliant)");
+                btnActivateAdmin.setEnabled(false);
+                btnActivateAdmin.setBackgroundColor(ContextCompat.getColor(this, R.color.input_bg));
+            }
         } else {
             tvAdminStatus.setText("Device Administrator: NOT ACTIVE (Action Required)");
             tvAdminStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_red));
-            btnActivateAdmin.setText("Activate Device Administrator");
-            btnActivateAdmin.setEnabled(true);
-            btnActivateAdmin.setBackgroundColor(ContextCompat.getColor(this, R.color.accent_green));
+            if (btnActivateAdmin != null) {
+                btnActivateAdmin.setText("Activate Device Administrator");
+                btnActivateAdmin.setEnabled(true);
+                btnActivateAdmin.setBackgroundColor(ContextCompat.getColor(this, R.color.accent_green));
+            }
         }
 
-        boolean cameraDisabled = policyEngine.isCameraDisabled();
-        tvCameraStatus.setText("Camera Restriction: " + (cameraDisabled ? "BLOCKED" : "ALLOWED"));
+        if (tvCameraStatus != null) {
+            boolean cameraDisabled = policyEngine.isCameraDisabled();
+            tvCameraStatus.setText("Camera Restriction: " + (cameraDisabled ? "BLOCKED" : "ALLOWED"));
+        }
     }
 
     private void updateDeviceInfoUi() {
-        tvDeviceModel.setText("Model: " + Build.MANUFACTURER.toUpperCase() + " " + Build.MODEL);
-        tvOsVersion.setText("OS: Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
-        tvDeviceIp.setText("IP Address: " + getDeviceIpAddress());
+        if (tvDeviceModel != null) {
+            tvDeviceModel.setText("Model: " + Build.MANUFACTURER.toUpperCase() + " " + Build.MODEL);
+        }
+        if (tvOsVersion != null) {
+            tvOsVersion.setText("OS: Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
+        }
+        if (tvDeviceIp != null) {
+            tvDeviceIp.setText("IP Address: " + getDeviceIpAddress());
+        }
     }
 
     private void updateConnectionStatusUi(boolean isConnected, String activeUrl) {
+        if (tvServerStatus == null) return;
         if (isConnected) {
-            tvServerStatus.setText("ONLINE");
+            boolean isLocal = activeUrl != null && (activeUrl.contains("192.168.") || activeUrl.contains("10.") || activeUrl.contains("172."));
+            tvServerStatus.setText(isLocal ? "ONLINE (OFFICE LAN)" : "ONLINE (CLOUD / DEDICATED)");
             tvServerStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_green));
             if (activeUrl != null && !activeUrl.isEmpty()) {
-                etServerUrl.setText(activeUrl);
+                if (isLocal && etLocalServerUrl != null) {
+                    etLocalServerUrl.setText(activeUrl);
+                } else if (etServerUrl != null) {
+                    etServerUrl.setText(activeUrl);
+                }
             }
         } else {
             tvServerStatus.setText("OFFLINE / RETRYING");
@@ -178,18 +271,22 @@ public class MainActivity extends AppCompatActivity {
     private void checkAndRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.POST_NOTIFICATIONS,
                         Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.READ_PHONE_STATE
                 }, REQUEST_CODE_PERMISSIONS);
             }
         } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.READ_PHONE_STATE
                 }, REQUEST_CODE_PERMISSIONS);
             }
         }

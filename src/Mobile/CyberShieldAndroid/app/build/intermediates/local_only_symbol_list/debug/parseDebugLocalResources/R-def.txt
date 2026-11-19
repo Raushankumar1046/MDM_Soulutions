@@ -13,6 +13,7 @@ drawable ic_launcher
 id btnActivateAdmin
 id btnRunInBackground
 id btnSaveServerUrl
+id etLocalServerUrl
 id etServerUrl
 id tvAdminStatus
 id tvCameraStatus

@@ -110,6 +110,27 @@
                     android:textColorHint="@color/text_muted"
                     android:textSize="13sp" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Office Local Server URL (Optional / Auto-Detect):"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/etLocalServerUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@color/input_bg"
+                    android:hint="Auto-Discovered or e.g. http://192.168.X.X:5000/hubs/endpoints"
+                    android:inputType="textUri"
+                    android:padding="12dp"
+                    android:textColor="@color/text_main"
+                    android:textColorHint="@color/text_muted"
+                    android:textSize="13sp" />
+
                 <Button
                     android:id="@+id/btnSaveServerUrl"
                     android:layout_width="match_parent"

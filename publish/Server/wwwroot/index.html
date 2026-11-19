@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>CyberShield MDM - Endpoint Management Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,88 +22,117 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
     }
-    /* === DAY / NIGHT THEME STYLING (COMPREHENSIVE EYE-FRIENDLY LIGHT MODE) === */
+        /* =========================================================================
+       UNIVERSAL SELECT & OPTION DROPDOWN STYLING (FIXES CHROMIUM WHITE POPUP BUG)
+       Prevents OS/Browser native popup from rendering white text on white background
+       ========================================================================= */
+    select, select.form-input, .form-input select {
+      background-color: #1a142e !important;
+      color: #f5f3ff !important;
+      border: 1px solid #4d3d75 !important;
+    }
+
+    select option, select.form-input option,
+    #assetFieldDept option, #assetFieldStatus option,
+    #invDeptFilter option, #invStatusFilter option, #invTypeFilter option,
+    #auditCategoryFilter option, #inviteRole option, #manageUserRole option,
+    #powerTargetSelect option {
+      background-color: #1a142e !important;
+      color: #f5f3ff !important;
+      padding: 8px 12px !important;
+    }
+
+    select option:checked, select option:hover {
+      background-color: #7c3aed !important;
+      color: #ffffff !important;
+    }
+
+    /* =========================================================================
+       DAY MODE: SOOTHING BAINGANI (PURPLE VELVET / EYE-FRIENDLY THEME)
+       Eliminates harsh stark-white glare ("aankho me chubhta h").
+       Uses elegant, rich velvet purple, deep violet slate & soft lavender text.
+       ========================================================================= */
     body.light-accent-mode {
-      --bg: #f1f5f9;
-      --bg-dark: #f1f5f9;
-      --sidebar-bg: #0f172a;
-      --card-bg: #ffffff;
-      --card-hover: #f8fafc;
-      --border: #cbd5e1;
-      --border-subtle: #cbd5e1;
-      --border-glow: rgba(59, 130, 246, 0.25);
-      --text-main: #0f172a; /* CRITICAL FIX: Eliminates white-on-white text across the entire app */
-      --text-primary: #0f172a;
-      --text-secondary: #334155;
-      --text-muted: #64748b;
-      background: #f1f5f9 !important;
-      color: #0f172a !important;
+      --bg: #161224;
+      --bg-dark: #161224;
+      --sidebar-bg: #120e20;
+      --card-bg: #241c3d;
+      --card-hover: #2c234a;
+      --border: #4a3a6d;
+      --border-subtle: #4a3a6d;
+      --border-glow: rgba(168, 85, 247, 0.35);
+      --text-main: #f5f3ff;
+      --text-primary: #f5f3ff;
+      --text-secondary: #ddd6fe;
+      --text-muted: #a79fc2;
+      background: #161224 !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .enterprise-app-shell {
-      background: #f1f5f9 !important;
+      background: #161224 !important;
     }
 
-    /* Soft Slate Canvas - eliminates blinding stark white glare */
+    /* Soothing Baingani Velvet Canvas */
     body.light-accent-mode .main-workspace {
-      background: #f1f5f9 !important;
+      background: #161224 !important;
     }
 
-    /* Crisp Header with defined lower border */
+    /* Deep Royal Violet Top Header */
     body.light-accent-mode .top-header {
-      background: #ffffff !important;
-      border-bottom: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+      background: #1e1833 !important;
+      border-bottom: 1px solid #4a3a6d !important;
+      box-shadow: 0 2px 12px rgba(10, 8, 20, 0.45) !important;
     }
 
     body.light-accent-mode .header-search-input {
-      background: #f8fafc !important;
-      border: 1.5px solid #cbd5e1 !important;
-      color: #0f172a !important;
+      background: #171228 !important;
+      border: 1.5px solid #4a3a6d !important;
+      color: #f5f3ff !important;
       font-weight: 500;
     }
 
     body.light-accent-mode .header-search-input:focus {
-      background: #ffffff !important;
-      border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+      background: #1e1833 !important;
+      border-color: #a855f7 !important;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
     }
 
     body.light-accent-mode .header-search-input::placeholder {
-      color: #64748b !important;
+      color: #9d8ec2 !important;
     }
 
     body.light-accent-mode .live-digital-clock {
-      background: #f8fafc !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #0f172a !important;
+      background: #1c1536 !important;
+      border: 1px solid #4a3a6d !important;
+      color: #ddd6fe !important;
       font-weight: 700 !important;
     }
 
     body.light-accent-mode .system-online-pill {
-      background: #ecfdf5 !important;
-      border: 1px solid #a7f3d0 !important;
-      color: #047857 !important;
+      background: rgba(16, 185, 129, 0.2) !important;
+      border: 1px solid #10b981 !important;
+      color: #6ee7b7 !important;
       font-weight: 700;
     }
 
     body.light-accent-mode .header-action-icon-btn {
-      background: #f8fafc !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #334155 !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      color: #ddd6fe !important;
     }
 
     body.light-accent-mode .header-action-icon-btn:hover {
-      background: #e2e8f0 !important;
-      color: #0f172a !important;
-      border-color: #94a3b8 !important;
+      background: #312652 !important;
+      color: #ffffff !important;
+      border-color: #8b5cf6 !important;
     }
 
-    /* Executive Hero Banner: Rich Deep Navy Gradient */
+    /* Executive Hero Banner: Majestic Baingani / Violet Gradient */
     body.light-accent-mode .hero-welcome-banner {
-      background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 60%, #0369a1 100%) !important;
-      border: 1px solid rgba(59, 130, 246, 0.3) !important;
-      box-shadow: 0 4px 16px rgba(30, 58, 138, 0.15) !important;
+      background: linear-gradient(135deg, #2e1065 0%, #581c87 50%, #3b0764 100%) !important;
+      border: 1px solid #7c3aed !important;
+      box-shadow: 0 4px 18px rgba(91, 33, 182, 0.35) !important;
     }
 
     body.light-accent-mode .hero-welcome-banner .banner-text-side h1 {
@@ -108,393 +140,382 @@
     }
 
     body.light-accent-mode .hero-welcome-banner .banner-text-side p {
-      color: #cbd5e1 !important;
+      color: #e9d5ff !important;
     }
 
-    /* Floating Crisp White KPI Cards with defined border & soft shadow */
+    /* Baingani Velvet KPI Cards */
     body.light-accent-mode .kpi-card {
       cursor: pointer;
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      box-shadow: 0 4px 14px rgba(10, 8, 20, 0.3) !important;
     }
 
     body.light-accent-mode .kpi-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 20px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.06) !important;
-      border-color: #94a3b8 !important;
+      box-shadow: 0 10px 22px rgba(124, 58, 237, 0.25) !important;
+      border-color: #8b5cf6 !important;
+      background: #2a2046 !important;
     }
 
     body.light-accent-mode .kpi-number-big {
-      color: #0f172a !important;
+      color: #fae8ff !important;
       font-weight: 800 !important;
+      text-shadow: 0 0 12px rgba(192, 132, 252, 0.4);
     }
 
     body.light-accent-mode .kpi-title-label {
-      color: #334155 !important;
+      color: #c4b5fd !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .kpi-card div {
-      color: #475569;
+      color: #ddd6fe;
     }
 
-    /* Analytics Cards */
+    /* Analytics Cards in Baingani Theme */
     body.light-accent-mode .analytics-card {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      box-shadow: 0 4px 14px rgba(10, 8, 20, 0.3) !important;
     }
 
     body.light-accent-mode .analytics-card-title {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
       font-weight: 700 !important;
     }
 
     body.light-accent-mode .card-action-link {
-      color: #2563eb !important;
+      color: #c084fc !important;
       font-weight: 600;
     }
 
     /* Security Overview Circular Gauge & Checklist */
     body.light-accent-mode .security-gauge-body circle:first-of-type {
-      stroke: #e2e8f0 !important;
+      stroke: #392b5a !important;
     }
 
     body.light-accent-mode #execCompliancePct {
-      fill: #0f172a !important;
+      fill: #f5f3ff !important;
       font-weight: 800 !important;
     }
 
     body.light-accent-mode .security-gauge-body text:last-of-type {
-      fill: #475569 !important;
+      fill: #c4b5fd !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .compliance-check-row {
-      color: #1e293b !important;
+      color: #ede9fe !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .compliance-check-row span:first-child {
-      color: #1e293b !important;
+      color: #ede9fe !important;
     }
 
-    /* Status Pills in Light Mode - high contrast & readable */
-    body.light-accent-mode .pill-status-green {
-      color: #065f46 !important;
-      background: #d1fae5 !important;
-      border: 1px solid #6ee7b7 !important;
-      font-weight: 700 !important;
-    }
-
+    /* Status Pills in Baingani Mode - Soft, readable, zero glare */
+    body.light-accent-mode .pill-status-green,
     body.light-accent-mode .status-badge.online {
-      color: #065f46 !important;
-      background: #d1fae5 !important;
-      border: 1px solid #6ee7b7 !important;
+      color: #6ee7b7 !important;
+      background: rgba(16, 185, 129, 0.18) !important;
+      border: 1px solid #10b981 !important;
       font-weight: 700 !important;
     }
 
     body.light-accent-mode .status-badge.offline {
-      color: #991b1b !important;
-      background: #fee2e2 !important;
-      border: 1px solid #fca5a5 !important;
+      color: #fca5a5 !important;
+      background: rgba(239, 68, 68, 0.18) !important;
+      border: 1px solid #ef4444 !important;
       font-weight: 700 !important;
     }
 
-    /* Trend Chart Styling in Light Mode */
+    /* Trend Chart Styling in Baingani Mode */
     body.light-accent-mode .trend-chart-container line {
-      stroke: #e2e8f0 !important;
+      stroke: #4a3a6d !important;
     }
 
     body.light-accent-mode .trend-chart-container text {
-      fill: #475569 !important;
+      fill: #c4b5fd !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .trend-select-sm {
-      background: #f8fafc !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #1e293b !important;
+      background: #1a142e !important;
+      border: 1px solid #4a3a6d !important;
+      color: #ede9fe !important;
       font-weight: 600;
     }
 
     /* Security Alerts Live Feed */
     body.light-accent-mode .alert-feed-item {
-      background: #f8fafc !important;
-      border: 1px solid #e2e8f0 !important;
+      background: #1f1836 !important;
+      border: 1px solid #433364 !important;
     }
 
     body.light-accent-mode .alert-feed-item:hover {
-      background: #f1f5f9 !important;
-      border-color: #cbd5e1 !important;
+      background: #281f47 !important;
+      border-color: #6d52ad !important;
     }
 
     body.light-accent-mode .alert-title-text {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .alert-target-sub {
-      color: #475569 !important;
+      color: #c4b5fd !important;
       font-weight: 500 !important;
     }
 
     body.light-accent-mode .alert-time-tag {
-      color: #64748b !important;
+      color: #a79fc2 !important;
       font-weight: 600 !important;
     }
 
-    /* Endpoint Inventory Table in Light Mode */
-    body.light-accent-mode .dashboard-table thead th {
-      background: #f8fafc !important;
-      color: #1e293b !important;
+    /* Endpoint & Inventory Table in Baingani Mode */
+    body.light-accent-mode .dashboard-table thead th,
+    body.light-accent-mode .device-table thead th {
+      background: #1e1735 !important;
+      color: #ddd6fe !important;
       font-weight: 700 !important;
-      border-bottom: 2px solid #cbd5e1 !important;
+      border-bottom: 2px solid #523f78 !important;
     }
 
-    body.light-accent-mode .dashboard-table tbody tr {
-      border-bottom: 1px solid #e2e8f0 !important;
-      color: #0f172a !important;
+    body.light-accent-mode .dashboard-table tbody tr,
+    body.light-accent-mode .device-table tbody tr {
+      border-bottom: 1px solid rgba(139, 92, 246, 0.12) !important;
+      color: #f5f3ff !important;
+      background: #241c3d !important;
     }
 
-    body.light-accent-mode .dashboard-table tbody tr:hover {
-      background: #f8fafc !important;
+    body.light-accent-mode .dashboard-table tbody tr:hover,
+    body.light-accent-mode .device-table tbody tr:hover {
+      background: #2c234a !important;
     }
 
-    body.light-accent-mode .dashboard-table td code {
-      background: #f1f5f9 !important;
-      color: #0f172a !important;
-      border: 1px solid #cbd5e1 !important;
+    body.light-accent-mode .dashboard-table td code,
+    body.light-accent-mode .device-table td code {
+      background: #171228 !important;
+      color: #c084fc !important;
+      border: 1px solid #503e82 !important;
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: 600;
     }
 
     body.light-accent-mode .btn-action-icon-sm {
-      background: #f1f5f9 !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #334155 !important;
+      background: #2b2247 !important;
+      border: 1px solid #4a3a6d !important;
+      color: #ddd6fe !important;
     }
 
     body.light-accent-mode .btn-action-icon-sm:hover {
-      background: #e2e8f0 !important;
-      border-color: #94a3b8 !important;
+      background: #362b5a !important;
+      border-color: #8b5cf6 !important;
+      color: #ffffff !important;
     }
 
     /* Notification Popover */
     body.light-accent-mode .notif-popover {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15) !important;
-      color: #0f172a !important;
+      background: #221a3e !important;
+      border: 1px solid #4a3a6d !important;
+      box-shadow: 0 10px 25px rgba(10, 8, 20, 0.5) !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .notif-header {
-      border-bottom: 1px solid #e2e8f0 !important;
-      color: #0f172a !important;
+      border-bottom: 1px solid #4a3a6d !important;
+      color: #f5f3ff !important;
       font-weight: 700;
     }
 
-    /* Device Management & Table View in Light Mode */
+    /* Device Management & Containers */
     body.light-accent-mode .card,
     body.light-accent-mode .devices-table-wrap,
     body.light-accent-mode .audit-card {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-    }
-
-    body.light-accent-mode .device-table thead th {
-      background: #f8fafc !important;
-      color: #1e293b !important;
-      font-weight: 700 !important;
-      border-bottom: 2px solid #cbd5e1 !important;
-    }
-
-    body.light-accent-mode .device-table tbody tr {
-      border-bottom: 1px solid #e2e8f0 !important;
-      color: #0f172a !important;
-    }
-
-    body.light-accent-mode .device-table tbody tr:hover {
-      background: #f8fafc !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      box-shadow: 0 4px 14px rgba(10, 8, 20, 0.3) !important;
     }
 
     body.light-accent-mode .table-host-name {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
       font-weight: 700 !important;
     }
 
     /* Filter Toolbar & Search */
     body.light-accent-mode .filter-pill-btn {
-      background: #ffffff !important;
-      color: #334155 !important;
-      border: 1px solid #cbd5e1 !important;
+      background: #241c3d !important;
+      color: #ddd6fe !important;
+      border: 1px solid #4a3a6d !important;
       font-weight: 600;
     }
 
     body.light-accent-mode .filter-pill-btn:hover {
-      background: #f1f5f9 !important;
-      border-color: #94a3b8 !important;
+      background: #312652 !important;
+      border-color: #8b5cf6 !important;
+      color: #ffffff !important;
     }
 
     body.light-accent-mode .filter-pill-btn.active {
-      background: #2563eb !important;
+      background: linear-gradient(135deg, #7c3aed, #9333ea) !important;
       color: #ffffff !important;
-      border-color: #2563eb !important;
+      border-color: #a855f7 !important;
     }
 
     body.light-accent-mode .search-input-box input {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #0f172a !important;
+      background: #171228 !important;
+      border: 1px solid #4a3a6d !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .search-input-box input::placeholder {
-      color: #64748b !important;
+      color: #9d8ec2 !important;
     }
 
-    /* =========================================================================
-       CRITICAL FIX: UNIVERSAL HIGH-CONTRAST BUTTONS IN DAY MODE (.btn)
-       Eliminates invisible white text across all 70+ buttons in console
-       ========================================================================= */
+    /* Buttons in Baingani Theme */
     body.light-accent-mode .btn {
-      background: #ffffff !important;
-      color: #0f172a !important; /* Deep dark slate text */
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+      background: #2b2247 !important;
+      color: #ede9fe !important;
+      border: 1px solid #503f75 !important;
+      box-shadow: 0 1px 3px rgba(10, 8, 20, 0.25) !important;
       font-weight: 600 !important;
     }
 
     body.light-accent-mode .btn:hover {
-      background: #f1f5f9 !important;
-      color: #0f172a !important;
-      border-color: #94a3b8 !important;
+      background: #362b5a !important;
+      color: #ffffff !important;
+      border-color: #8b5cf6 !important;
       transform: translateY(-1px);
     }
 
     body.light-accent-mode .btn.btn-primary {
-      background: #2563eb !important;
+      background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%) !important;
       color: #ffffff !important;
-      border-color: #2563eb !important;
-      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
+      border-color: #a855f7 !important;
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4) !important;
     }
 
     body.light-accent-mode .btn.btn-primary:hover {
-      background: #1d4ed8 !important;
+      background: linear-gradient(135deg, #6d28d9 0%, #7e22ce 100%) !important;
       color: #ffffff !important;
-      border-color: #1d4ed8 !important;
+      border-color: #c084fc !important;
     }
 
     body.light-accent-mode .btn.btn-danger {
-      background: #fee2e2 !important;
-      color: #b91c1c !important;
-      border: 1px solid #fca5a5 !important;
+      background: rgba(239, 68, 68, 0.18) !important;
+      color: #fca5a5 !important;
+      border: 1px solid #ef4444 !important;
     }
 
     body.light-accent-mode .btn.btn-danger:hover {
-      background: #fecaca !important;
-      color: #991b1b !important;
+      background: rgba(239, 68, 68, 0.3) !important;
+      color: #ffffff !important;
       border-color: #f87171 !important;
     }
 
     body.light-accent-mode .btn.btn-success {
-      background: #d1fae5 !important;
-      color: #047857 !important;
-      border: 1px solid #6ee7b7 !important;
+      background: rgba(16, 185, 129, 0.18) !important;
+      color: #6ee7b7 !important;
+      border: 1px solid #10b981 !important;
     }
 
     body.light-accent-mode .btn.btn-success:hover {
-      background: #a7f3d0 !important;
-      color: #065f46 !important;
+      background: rgba(16, 185, 129, 0.3) !important;
+      color: #ffffff !important;
       border-color: #34d399 !important;
     }
 
-    /* Quick Action Buttons */
     body.light-accent-mode .btn-quick-action {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      color: #0f172a !important;
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      color: #ede9fe !important;
+      box-shadow: 0 2px 6px rgba(10, 8, 20, 0.25) !important;
     }
 
     body.light-accent-mode .btn-quick-action:hover {
-      background: #f8fafc !important;
-      border-color: #94a3b8 !important;
+      background: #2e244c !important;
+      border-color: #8b5cf6 !important;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1) !important;
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3) !important;
     }
 
-    /* Web Filter & Users Sections in Day Mode */
+    /* Web Filter & Users Sections */
     body.light-accent-mode #webfilterSection > div,
     body.light-accent-mode #usersSection > div {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-      color: #0f172a !important;
+      background: #241c3d !important;
+      border: 1px solid #4a3a6d !important;
+      box-shadow: 0 4px 14px rgba(10, 8, 20, 0.3) !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode #webfilterSection h3,
     body.light-accent-mode #usersSection h3 {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode #webfilterSection p,
     body.light-accent-mode #usersSection p {
-      color: #475569 !important;
+      color: #c4b5fd !important;
     }
 
-    /* Form Inputs & Selects across the app in Day Mode */
+    /* Form Inputs & Selects */
     body.light-accent-mode input[type="text"]:not(#remoteTextInput),
     body.light-accent-mode input[type="password"],
     body.light-accent-mode input[type="number"],
+    body.light-accent-mode input[type="date"],
     body.light-accent-mode select,
     body.light-accent-mode textarea {
-      background: #ffffff !important;
-      color: #0f172a !important;
-      border: 1px solid #cbd5e1 !important;
+      background: #171228 !important;
+      color: #f5f3ff !important;
+      border: 1px solid #4a3a6d !important;
+    }
+
+    body.light-accent-mode select option {
+      background-color: #1a142e !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode input:focus:not(#remoteTextInput),
     body.light-accent-mode select:focus,
     body.light-accent-mode textarea:focus {
-      border-color: #3b82f6 !important;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+      border-color: #a855f7 !important;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25) !important;
     }
 
     body.light-accent-mode input::placeholder:not(#remoteTextInput),
     body.light-accent-mode textarea::placeholder {
-      color: #94a3b8 !important;
+      color: #9d8ec2 !important;
     }
 
-    /* Modal Windows in Day Mode */
+    /* Modal Windows in Baingani Theme */
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) {
-      background: #ffffff !important;
-      border: 1px solid #cbd5e1 !important;
-      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
-      color: #0f172a !important;
+      background: #221a3e !important;
+      border: 1px solid #5a468f !important;
+      box-shadow: 0 25px 50px -12px rgba(10, 8, 20, 0.7) !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) .modal-header {
-      border-bottom: 1px solid #e2e8f0 !important;
-      color: #0f172a !important;
+      border-bottom: 1px solid #4a3a6d !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) .modal-title {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) .modal-close {
-      color: #64748b !important;
+      color: #a79fc2 !important;
     }
 
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) .modal-close:hover {
-      color: #0f172a !important;
+      color: #f5f3ff !important;
     }
 
     body.light-accent-mode .modal-window:not(#remoteDesktopModal .modal-window) label {
-      color: #334155 !important;
+      color: #c4b5fd !important;
       font-weight: 600 !important;
     }
 
@@ -2679,12 +2700,28 @@
           </div>
         </a>
 
-        <a class="sidebar-nav-item" data-tab="endpoints" onclick="switchMainTab('endpoints')">
+        <a class="sidebar-nav-item" data-tab="endpoints" onclick="switchMainTab('endpoints'); setDeviceTypeFilter('laptops');">
           <div class="nav-left">
             <span class="nav-icon">💻</span>
-            <span>Device Management</span>
+            <span>Windows Laptops</span>
           </div>
           <span class="sidebar-nav-badge" id="sideBadgeEndpoints">0</span>
+        </a>
+
+        <a class="sidebar-nav-item" data-tab="mobiles" onclick="switchMainTab('endpoints'); setDeviceTypeFilter('mobiles');">
+          <div class="nav-left">
+            <span class="nav-icon">📱</span>
+            <span>Mobile MDM</span>
+          </div>
+          <span class="sidebar-nav-badge" id="sideBadgeMobiles" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">0</span>
+        </a>
+
+        <a class="sidebar-nav-item" data-tab="inventory" onclick="switchMainTab('inventory')" title="Enterprise IT Asset &amp; Hardware Inventory Registry">
+          <div class="nav-left">
+            <span class="nav-icon">🏷️</span>
+            <span>IT Asset &amp; Inventory</span>
+          </div>
+          <span class="sidebar-nav-badge" id="sideBadgeInventory" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">0</span>
         </a>
 
         <a class="sidebar-nav-item" data-tab="security" onclick="switchMainTab('security')">
@@ -2706,7 +2743,7 @@
             <span class="nav-icon">📦</span>
             <span>Software Management</span>
           </div>
-          <span class="sidebar-nav-badge" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3);">v1.2.0</span>
+          <span class="sidebar-nav-badge" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3);">v1.3.0</span>
         </a>
 
         <a class="sidebar-nav-item" data-tab="webfilter" onclick="switchMainTab('webfilter')">
@@ -2794,11 +2831,11 @@
 
         <div class="header-actions-right">
           <!-- Quick Download Client Links -->
-          <a href="/downloads/CyberShield-Windows-Client.zip" download="CyberShield-Windows-Client.zip" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11.5px; text-decoration: none;" title="Download Windows Laptop Client Package">
-            💻 Client Zip
+          <a href="/downloads/CyberShield-Windows-Client.zip" download="CyberShield-Windows-Client.zip" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11.5px; text-decoration: none;" title="Download Windows Laptop Client Package (Clean Install & Auto-Start)">
+            💻 Windows Client (.zip)
           </a>
-          <a href="/downloads/CyberShield-MDM-Client.apk" download="CyberShield-MDM-Client.apk" class="btn btn-sm" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11.5px; text-decoration: none;" title="Download Android Mobile Client APK">
-            📱 Mobile APK
+          <a href="/downloads/CyberShield-Mobile-Enrollment-Kit.zip" download="CyberShield-Mobile-Enrollment-Kit.zip" class="btn btn-sm" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 11.5px; text-decoration: none;" title="Download Complete Android Mobile Enrollment Kit (Portable ADB + APK + 1-Click Cable Enrollment Script)">
+            📱 Mobile Enrollment Kit (.zip)
           </a>
 
           <!-- Notification Bell -->
@@ -2808,7 +2845,7 @@
           </button>
 
           <!-- Theme Toggle -->
-          <button class="header-action-icon-btn" onclick="toggleThemeMode()" title="Toggle Theme Accent">
+          <button class="header-action-icon-btn" onclick="toggleThemeMode()" title="Day Mode (Baingani Eye-Friendly) / Night Mode Switcher">
             <span id="themeToggleIcon">🌙</span>
           </button>
 
@@ -3332,7 +3369,13 @@
       <div class="filter-search-bar">
         <div class="search-input-box">
           <span class="search-icon-inside">🔍</span>
-          <input type="text" id="deviceSearchInput" placeholder="Filter by hostname, user, IP, or location..." oninput="handleDeviceSearchFilter()">
+          <input type="text" id="deviceSearchInput" placeholder="Filter by hostname, serial/IMEI, user, IP, or location..." oninput="handleDeviceSearchFilter()">
+        </div>
+        <!-- Device Category Filter (Laptops vs Mobiles Separation) -->
+        <div class="status-filter-pills" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 2px; display: inline-flex; gap: 4px;">
+          <button class="filter-pill-btn active" id="typeFilterAll" onclick="setDeviceTypeFilter('all')">🌐 All Fleet (<span id="typeCountAll">0</span>)</button>
+          <button class="filter-pill-btn" id="typeFilterLaptops" onclick="setDeviceTypeFilter('laptops')">💻 Laptops (<span id="typeCountLaptops">0</span>)</button>
+          <button class="filter-pill-btn" id="typeFilterMobiles" onclick="setDeviceTypeFilter('mobiles')" style="color: #d8b4fe;">📱 Mobiles (<span id="typeCountMobiles">0</span>)</button>
         </div>
         <div class="status-filter-pills">
           <button class="filter-pill-btn active" id="filterAll" onclick="setDeviceStatusFilter('all')">All (<span id="filterCountAll">0</span>)</button>
@@ -3341,7 +3384,10 @@
           <button class="filter-pill-btn" id="filterWfh" onclick="setDeviceStatusFilter('wfh')">🏠 WFH (<span id="filterCountWfh">0</span>)</button>
           <button class="filter-pill-btn" id="filterOffline" onclick="setDeviceStatusFilter('offline')">🔴 Offline (<span id="filterCountOffline">0</span>)</button>
         </div>
-        <div style="display: flex; gap: 4px; align-items: center; margin-left: auto;">
+        <div style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
+          <button class="btn btn-sm" onclick="exportDeviceInventoryCsv()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981; color: #fff; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 5px 12px;" title="Export current view as Excel / CSV spreadsheet">
+            <span>📥 Export Inventory (CSV)</span>
+          </button>
           <button class="btn btn-sm btn-primary" id="viewModeTableBtn" onclick="setDeviceLayout('table')" title="Compact Table List (Recommended for 100+ endpoints)">☰ List View</button>
           <button class="btn btn-sm" id="viewModeGridBtn" onclick="setDeviceLayout('grid')" title="Full Cards Grid View">⊞ Grid View</button>
         </div>
@@ -3352,8 +3398,9 @@
         <table class="device-table">
           <thead>
             <tr>
-              <th style="width: 250px;">Endpoint Laptop</th>
-              <th style="width: 140px;">Status</th>
+              <th style="width: 250px;" id="thDeviceColumnName">Endpoint Laptop</th>
+              <th style="width: 130px;">Status</th>
+              <th style="width: 170px;" id="thHardwareIdColumn">BIOS Serial No.</th>
               <th style="width: 150px;">Location</th>
               <th>IP &amp; User</th>
               <th>Enforced Policies</th>
@@ -3362,7 +3409,7 @@
             </tr>
           </thead>
           <tbody id="devicesTableBody">
-            <tr><td colspan="7" class="empty-state">Loading endpoint devices...</td></tr>
+            <tr><td colspan="8" class="empty-state">Loading endpoint devices...</td></tr>
           </tbody>
         </table>
       </div>
@@ -3370,6 +3417,119 @@
       <!-- Active Laptops Grid View (Alternative toggle) -->
       <div class="grid" id="devicesGrid" style="display: none;">
         <div class="empty-state">Connecting to Server Gateway...</div>
+      </div>
+    </div>
+
+    <!-- 2.5 Section: IT Asset & Inventory Management Registry (Level 2) -->
+    <div id="inventorySection" style="display: none;">
+      <!-- Hero / Header -->
+      <div style="background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 22px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              🏷️ IT Asset &amp; Inventory Management Registry
+            </h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 5px;">
+              Centralized Enterprise Hardware Lifecycle: Manage Asset Tags, Department Allocations, Employee Ownership, and Warranty status.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="openRegisterAssetModal()" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" title="Manually register a new box-pack, spare, or repair hardware asset">
+              <span>➕ Register New Asset</span>
+            </button>
+            <button class="btn" onclick="openBulkImportModal()" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" title="Upload an Excel CSV sheet to register or update multiple assets in bulk">
+              <span>📥 Bulk Import (CSV)</span>
+            </button>
+            <button class="btn" onclick="downloadSampleInventoryTemplate()" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;" title="Download pre-formatted Excel/CSV template with sample Laptop & Mobile rows">
+              <span>📄 Sample CSV Template</span>
+            </button>
+            <button class="btn btn-primary" onclick="exportDeviceInventoryCsv('inventory')" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <span>📊 Export Ledger (CSV)</span>
+            </button>
+            <button class="btn" onclick="fetchData()" title="Reload latest asset records">
+              <span>🔄 Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards for Asset Management -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 20px;">
+          <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11.5px; color: #93c5fd; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total Tracked Assets</div>
+            <div style="font-size: 24px; font-weight: 700; color: #fff; margin-top: 6px;" id="invMetricTotal">0</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="invMetricTypes">0 Laptops • 0 Mobiles</div>
+          </div>
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11.5px; color: #6ee7b7; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Assets In-Use</div>
+            <div style="font-size: 24px; font-weight: 700; color: #34d399; margin-top: 6px;" id="invMetricInUse">0</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Assigned to active employees</div>
+          </div>
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11.5px; color: #fcd34d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Spare / In Stock</div>
+            <div style="font-size: 24px; font-weight: 700; color: #fbbf24; margin-top: 6px;" id="invMetricSpare">0</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ready for new deployment</div>
+          </div>
+          <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 11.5px; color: #d8b4fe; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Asset Tagging Compliance</div>
+            <div style="font-size: 24px; font-weight: 700; color: #c084fc; margin-top: 6px;" id="invMetricTagCompliance">0%</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="invMetricTaggedCount">0 with Asset Tag ID</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Search & Multi-Filter Bar -->
+      <div class="filter-search-bar" style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <div class="search-input-box" style="flex: 1; min-width: 260px;">
+          <span class="search-icon-inside">🔍</span>
+          <input type="text" id="invSearchInput" placeholder="Search Asset Tag, Hostname, Serial/IMEI, User, Dept, EMP ID..." oninput="applyInventoryFilters()">
+        </div>
+        <!-- Department Filter -->
+        <select id="invDeptFilter" onchange="applyInventoryFilters()" class="form-input" style="width: 170px; padding: 7px 12px; font-size: 12px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 8px;">
+          <option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Departments</option>
+          <option value="Tech / IT" style="background: #1a142e; color: #f5f3ff;">💻 Tech / IT</option>
+          <option value="Sales & BD" style="background: #1a142e; color: #f5f3ff;">💼 Sales &amp; BD</option>
+          <option value="Human Resources" style="background: #1a142e; color: #f5f3ff;">👥 HR</option>
+          <option value="Finance & Accounts" style="background: #1a142e; color: #f5f3ff;">💰 Finance</option>
+          <option value="Operations" style="background: #1a142e; color: #f5f3ff;">⚙️ Operations</option>
+          <option value="Management" style="background: #1a142e; color: #f5f3ff;">👔 Management</option>
+          <option value="UNASSIGNED" style="background: #1a142e; color: #f5f3ff;">⚪ Unassigned</option>
+        </select>
+        <!-- Asset Lifecycle Status Filter -->
+        <select id="invStatusFilter" onchange="applyInventoryFilters()" class="form-input" style="width: 170px; padding: 7px 12px; font-size: 12px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 8px;">
+          <option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Asset Statuses</option>
+          <option value="In-Use" style="background: #1a142e; color: #f5f3ff;">🟢 In-Use</option>
+          <option value="Spare / In Stock" style="background: #1a142e; color: #f5f3ff;">🟡 Spare / In Stock</option>
+          <option value="Under Repair" style="background: #1a142e; color: #f5f3ff;">🔴 Under Repair</option>
+          <option value="Decommissioned" style="background: #1a142e; color: #f5f3ff;">⚪ Decommissioned</option>
+        </select>
+        <!-- Device Type Filter -->
+        <select id="invTypeFilter" onchange="applyInventoryFilters()" class="form-input" style="width: 150px; padding: 7px 12px; font-size: 12px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 8px;">
+          <option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Asset Types</option>
+          <option value="laptops" style="background: #1a142e; color: #f5f3ff;">💻 Laptops Only</option>
+          <option value="mobiles" style="background: #1a142e; color: #f5f3ff;">📱 Mobiles Only</option>
+        </select>
+      </div>
+
+      <!-- Inventory Registry Table Wrap -->
+      <div class="devices-table-wrap">
+        <table class="device-table">
+          <thead>
+            <tr>
+              <th style="width: 150px;">Asset Tag ID</th>
+              <th style="width: 200px;">Device Hostname</th>
+              <th style="width: 170px;">BIOS Serial / IMEI</th>
+              <th style="width: 170px;">Assigned Employee</th>
+              <th style="width: 130px;">Department</th>
+              <th style="width: 130px;">Asset Status</th>
+              <th style="width: 140px;">MDM State</th>
+              <th>Warranty / Notes</th>
+              <th style="width: 110px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <tr><td colspan="9" class="empty-state">Loading IT Asset Registry...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -3442,14 +3602,14 @@
             <input type="text" id="auditSearchInput" placeholder="Filter audit logs by User, Host, Policy, or Keyword..." oninput="handleAuditSearchFilter()">
           </div>
           <!-- Category Filter Dropdown -->
-          <select id="auditCategoryFilter" onchange="handleAuditSearchFilter()" class="form-input" style="width: 170px; padding: 6px 12px; font-size: 12px; background: var(--input-bg); color: var(--text);">
-            <option value="ALL">All Categories</option>
-            <option value="Auth">👤 Logins &amp; 2FA</option>
-            <option value="Policy">🛡️ Policy Changes</option>
-            <option value="WebFilter">🌐 Web Filters</option>
-            <option value="UserManagement">👥 User Control</option>
-            <option value="RemoteControl">💻 Remote Access</option>
-            <option value="Device">🖥️ Devices</option>
+          <select id="auditCategoryFilter" onchange="handleAuditSearchFilter()" class="form-input" style="width: 170px; padding: 6px 12px; font-size: 12px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;">
+            <option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Categories</option>
+            <option value="Auth" style="background: #1a142e; color: #f5f3ff;">👤 Logins &amp; 2FA</option>
+            <option value="Policy" style="background: #1a142e; color: #f5f3ff;">🛡️ Policy Changes</option>
+            <option value="WebFilter" style="background: #1a142e; color: #f5f3ff;">🌐 Web Filters</option>
+            <option value="UserManagement" style="background: #1a142e; color: #f5f3ff;">👥 User Control</option>
+            <option value="RemoteControl" style="background: #1a142e; color: #f5f3ff;">💻 Remote Access</option>
+            <option value="Device" style="background: #1a142e; color: #f5f3ff;">🖥️ Devices</option>
           </select>
         </div>
 
@@ -3608,7 +3768,7 @@
     <div class="modal-window" style="width: 680px; max-width: 95vw;">
       <div class="modal-header">
         <div class="modal-title">
-          <span style="font-size: 18px;">💻</span>
+          <span style="font-size: 18px;" id="modalDeviceIcon">💻</span>
           <span id="modalDeviceHost" style="color: #38bdf8; font-family: monospace; font-size: 16px; font-weight: 700;">DESKTOP-NAME</span>
           <span class="status-badge online" id="modalDeviceStatus">Online</span>
           <span class="badge-loc office" id="modalDeviceLoc">🏢 In Office</span>
@@ -3623,6 +3783,7 @@
           <span>Operating System: <strong id="modalDeviceOs">Windows 11</strong></span>
           <span>Agent Version: <strong id="modalDeviceClientVersion" style="color: #38bdf8;">v1.0.0</strong></span>
           <span>Last Heartbeat: <strong id="modalDeviceLastSeen">Just now</strong></span>
+          <span>Serial / IMEI: <strong id="modalDeviceHardwareId" style="color: #34d399; font-family: monospace;">N/A</strong></span>
         </div>
 
         <!-- Geo Location Strip -->
@@ -3644,7 +3805,7 @@
           <span style="font-size: 18px;">🛡️</span>
           <div>
             <strong>Android Enterprise Device Owner Enforced</strong>
-            <div style="font-size: 11px; color: #6ee7b7;">Hardware Factory Reset blocked in Android Settings & Application Uninstall Disabled. Only Central MDM can authorize device wipes.</div>
+            <div style="font-size: 11px; color: #6ee7b7;">Hardware Factory Reset blocked in Android Settings, Application Uninstall Disabled, Samsung Account Locked, & Remote Screen Unlock (Samsung Care Bypass) Ready.</div>
           </div>
         </div>
 
@@ -3705,6 +3866,30 @@
               </div>
               <label class="switch">
                 <input type="checkbox" id="modalPrintSwitch" onchange="handleModalPolicyToggle(5, this.checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Option 6: Force GPS Always ON & Live Tracking -->
+            <div class="policy-item" id="modalGpsPolicyRow" style="display: none;">
+              <div class="policy-info">
+                <span class="policy-title">🛰️ Force GPS Always ON (Option 6)</span>
+                <span class="policy-sub">Locks location ON at OS level; user cannot toggle off GPS in Android settings</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalGpsSwitch" onchange="handleModalPolicyToggle(19, this.checked)" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Hide Persistent Sync Notification -->
+            <div class="policy-item" id="modalSyncNotifPolicyRow" style="display: none;">
+              <div class="policy-info">
+                <span class="policy-title">🔕 Hide Persistent Sync Notification</span>
+                <span class="policy-sub">Hides "Device security sync active" notification from user's notification bar & lockscreen</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="modalSyncNotifSwitch" onchange="handleModalPolicyToggle(21, this.checked)">
                 <span class="slider"></span>
               </label>
             </div>
@@ -3780,7 +3965,7 @@
         <!-- Canary OTA Client Update Box -->
         <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
           <div>
-            <div style="font-size: 13px; font-weight: 600; color: #93c5fd;">🚀 Canary Push: Update This Laptop to v1.2.0</div>
+            <div style="font-size: 13px; font-weight: 600; color: #93c5fd;">🚀 Canary Push: Update This Laptop to v1.3.0</div>
             <div style="font-size: 11px; color: var(--text-muted);">Silently downloads & updates client agent on this specific machine for testing without impacting other fleet laptops.</div>
           </div>
           <button class="btn btn-primary" id="modalBtnPushUpdate" onclick="pushUpdateToCurrentDevice()" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; font-size: 12px; font-weight: 600; white-space: nowrap; padding: 8px 14px;">
@@ -3801,6 +3986,8 @@
       </div>
     </div>
   </div>
+
+
 
   <!-- Modal: Remote PowerShell Terminal -->
   <div class="modal-backdrop" id="terminalModal">
@@ -3963,10 +4150,10 @@
 
         <div class="form-group">
           <label class="form-label">Role</label>
-          <select class="form-input" id="inviteRole" style="background: var(--input-bg); color: var(--text);">
-            <option value="Admin">Admin (Full Control)</option>
-            <option value="Manager">Manager (View &amp; Policies)</option>
-            <option value="Viewer">Viewer (Read-Only)</option>
+          <select class="form-input" id="inviteRole" style="background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;">
+            <option value="Admin" style="background: #1a142e; color: #f5f3ff;">Admin (Full Control)</option>
+            <option value="Manager" style="background: #1a142e; color: #f5f3ff;">Manager (View &amp; Policies)</option>
+            <option value="Viewer" style="background: #1a142e; color: #f5f3ff;">Viewer (Read-Only)</option>
           </select>
         </div>
 
@@ -4074,10 +4261,10 @@
         <!-- 4. Role & Permissions -->
         <div class="form-group" style="margin-bottom: 14px;">
           <label class="form-label" style="font-size: 12px;">Role &amp; Permissions</label>
-          <select class="form-input" id="manageUserRole" style="background: var(--input-bg); color: var(--text);" onchange="onManageUserRoleChanged(this.value)">
-            <option value="SuperAdmin">SuperAdmin (Full Control, Invite Users &amp; Policies)</option>
-            <option value="Admin">Admin (Manage Endpoints &amp; Execute Security Policies)</option>
-            <option value="Viewer">Viewer (Read-Only: View Endpoints &amp; Audit Logs)</option>
+          <select class="form-input" id="manageUserRole" style="background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;" onchange="onManageUserRoleChanged(this.value)">
+            <option value="SuperAdmin" style="background: #1a142e; color: #f5f3ff;">SuperAdmin (Full Control, Invite Users &amp; Policies)</option>
+            <option value="Admin" style="background: #1a142e; color: #f5f3ff;">Admin (Manage Endpoints &amp; Execute Security Policies)</option>
+            <option value="Viewer" style="background: #1a142e; color: #f5f3ff;">Viewer (Read-Only: View Endpoints &amp; Audit Logs)</option>
           </select>
         </div>
 
@@ -4270,7 +4457,7 @@
         <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 16px; margin-bottom: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">📦 Latest Client Release Package</div>
-            <span class="status-badge online" id="serverClientVersionBadge" style="font-size: 12px; padding: 3px 10px;">v1.2.0</span>
+            <span class="status-badge online" id="serverClientVersionBadge" style="font-size: 12px; padding: 3px 10px;">v1.3.0</span>
           </div>
           <div style="font-size: 12px; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>Target File: <strong style="color: #f1f5f9;">EndpointManager.Client.exe</strong></div>
@@ -4289,7 +4476,7 @@
                 🔄 Auto-Update Laptops on Reconnect (Offline Laptops)
               </div>
               <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-                When enabled, whenever an offline or older client connects, it will silently download and install the latest v1.2.0 client in the background without disturbing the user.
+                When enabled, whenever an offline or older client connects, it will silently download and install the latest v1.3.0 client in the background without disturbing the user.
               </div>
             </div>
             <label class="switch" style="flex-shrink: 0; margin-top: 2px;">
@@ -4422,6 +4609,322 @@
               🚀 Execute Action
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: IT Asset & Inventory Registry Editor (Level 2) -->
+  <div class="modal-backdrop" id="editAssetModal">
+    <div class="modal-window" style="width: 580px; max-width: 95vw;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.1)); border-bottom: 1px solid rgba(16, 185, 129, 0.25);">
+        <div class="modal-title">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">🏷️</span>
+            <span>Edit IT Asset &amp; Inventory Details</span>
+          </span>
+        </div>
+        <button class="modal-close" onclick="closeEditAssetModal()">&times;</button>
+      </div>
+      <div style="padding: 22px;">
+        <!-- Alert Box -->
+        <div id="editAssetAlert" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 12.5px;"></div>
+
+        <!-- Read-Only Hardware Identity Strip -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px 14px; margin-bottom: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+          <div>
+            <span style="color: var(--text-muted);">Device Hostname:</span>
+            <div style="font-weight: 700; color: #fff; font-size: 13px;" id="assetModalHost">-</div>
+          </div>
+          <div>
+            <span style="color: var(--text-muted);">BIOS Serial / IMEI:</span>
+            <div style="font-weight: 700; color: #38bdf8; font-family: monospace; font-size: 13px;" id="assetModalSerial">-</div>
+          </div>
+        </div>
+
+        <!-- Form Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+              Asset Tag ID (Sticker)
+            </label>
+            <input type="text" id="assetFieldTag" placeholder="e.g. HEXA-LP-042" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: #34d399; font-family: monospace; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px;">
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase;">Hardware Category</label>
+              <button type="button" onclick="promptAddCategoryToSelect('assetFieldCategory')" style="background: none; border: none; color: #c084fc; font-size: 11px; font-weight: 600; cursor: pointer;">+ Add New</button>
+            </div>
+            <select id="assetFieldCategory" onchange="handleCategoryDropdownChange(this)" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase;">Department</label>
+              <button type="button" onclick="promptAddDepartmentToSelect('assetFieldDept')" style="background: none; border: none; color: #c084fc; font-size: 11px; font-weight: 600; cursor: pointer;">+ Add New</button>
+            </div>
+            <select id="assetFieldDept" onchange="handleDepartmentDropdownChange(this)" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;">
+              <option value="" style="background: #1a142e; color: #f5f3ff;">-- Select Department --</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+              Employee ID / Code
+            </label>
+            <input type="text" id="assetFieldEmpId" placeholder="e.g. EMP-1042" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+              Asset Lifecycle Status
+            </label>
+            <select id="assetFieldStatus" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #1a142e; color: #f5f3ff; border: 1px solid #4d3d75; border-radius: 6px;">
+              <option value="In-Use" style="background: #1a142e; color: #f5f3ff;">🟢 In-Use (Active Employee)</option>
+              <option value="Spare / In Stock" style="background: #1a142e; color: #f5f3ff;">🟡 Spare / In Stock (Available)</option>
+              <option value="Under Repair" style="background: #1a142e; color: #f5f3ff;">🔴 Under Repair (Service Center)</option>
+              <option value="Decommissioned" style="background: #1a142e; color: #f5f3ff;">⚪ Decommissioned / Retired</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+              Purchase Date
+            </label>
+            <input type="date" id="assetFieldPurchaseDate" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+              Warranty / AMC Expiry
+            </label>
+            <input type="date" id="assetFieldWarranty" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 11.5px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;">
+            Hardware Specs / Vendor AMC Notes
+          </label>
+          <textarea id="assetFieldNotes" rows="2" placeholder="e.g. Dell Latitude 5420 • Core i7 11th Gen • 16GB RAM • 512GB NVMe • ProSupport AMC active" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; resize: vertical;"></textarea>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn" onclick="closeEditAssetModal()">Cancel</button>
+          <button class="btn btn-primary" id="btnSaveAssetDetails" onclick="saveAssetDetails()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981; font-weight: 600; padding: 8px 20px;">
+            💾 Save Asset Details
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Manual Register New Hardware Asset (Pre-Provisioned / Spare Inventory) -->
+  <div class="modal-backdrop" id="registerAssetModal">
+    <div class="modal-window" style="width: 620px; max-width: 95vw;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(59, 130, 246, 0.15)); border-bottom: 1px solid rgba(168, 85, 247, 0.35);">
+        <div class="modal-title">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">➕</span>
+            <span>Register New Hardware Asset / Device</span>
+          </span>
+        </div>
+        <button class="modal-close" onclick="closeRegisterAssetModal()">&times;</button>
+      </div>
+
+      <div style="padding: 22px;">
+        <div id="regAssetAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-bottom: 16px;"></div>
+
+        <!-- Smart Pre-provisioning Info Notice -->
+        <div style="background: rgba(124, 58, 237, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 8px; padding: 12px 14px; margin-bottom: 18px; display: flex; gap: 10px; align-items: flex-start;">
+          <span style="font-size: 18px;">💡</span>
+          <div style="font-size: 12px; color: #ddd6fe; line-height: 1.5;">
+            <strong>Smart Enterprise Pre-Registration:</strong> Register new box-pack laptops or mobiles. When this device later runs the MDM client agent, the server will <strong>auto-merge</strong> telemetry with this record using its BIOS Serial Number or Hostname!
+          </div>
+        </div>
+
+        <!-- Row 1: Hostname & BIOS Serial / IMEI -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Device Hostname / Name <span style="color: #f87171;">*</span>
+            </label>
+            <input type="text" id="regAssetHost" placeholder="e.g. LP-DELL-5420 or HEXA-DESK-01" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              BIOS Serial No. / Mobile IMEI
+            </label>
+            <input type="text" id="regAssetSerial" placeholder="e.g. 8FC29B3 or 358941209876543" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; font-family: monospace; background: #171228; color: #38bdf8; font-weight: 600; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+        </div>
+
+        <!-- Row 2: Asset Tag & Hardware Category -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Asset Tag ID (Sticker)
+            </label>
+            <input type="text" id="regAssetTag" placeholder="e.g. HEXA-LP-105" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: #34d399; font-family: monospace; background: #171228; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase;">Hardware Category</label>
+              <button type="button" onclick="promptAddCategoryToSelect('regAssetType')" style="background: none; border: none; color: #c084fc; font-size: 11px; font-weight: 600; cursor: pointer;">+ Add New</button>
+            </div>
+            <select id="regAssetType" onchange="handleCategoryDropdownChange(this)" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+              <!-- Populated dynamically with Laptop, Mobile, Printer, CCTV, Switch, Desktop, TV + Custom -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: Department & Asset Status -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase;">Department</label>
+              <button type="button" onclick="promptAddDepartmentToSelect('regAssetDept')" style="background: none; border: none; color: #c084fc; font-size: 11px; font-weight: 600; cursor: pointer;">+ Add New</button>
+            </div>
+            <select id="regAssetDept" onchange="handleDepartmentDropdownChange(this)" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+              <option value="" style="background: #1a142e; color: #f5f3ff;">-- Select Department --</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Asset Lifecycle Status
+            </label>
+            <select id="regAssetStatus" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+              <option value="Spare / In Stock" selected style="background: #1a142e; color: #f5f3ff;">🟡 Spare / In Stock (Ready for Deployment)</option>
+              <option value="In-Use" style="background: #1a142e; color: #f5f3ff;">🟢 In-Use (Active Employee)</option>
+              <option value="Under Repair" style="background: #1a142e; color: #f5f3ff;">🔴 Under Repair (Service Center)</option>
+              <option value="Decommissioned" style="background: #1a142e; color: #f5f3ff;">⚪ Decommissioned / Retired</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 4: Assigned Employee & EMP ID -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Assigned Employee Name
+            </label>
+            <input type="text" id="regAssetUser" placeholder="e.g. Rahul Sharma" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Employee ID / Code
+            </label>
+            <input type="text" id="regAssetEmpId" placeholder="e.g. EMP-1042" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12.5px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+        </div>
+
+        <!-- Row 5: Purchase Date & Warranty Expiry -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Purchase Date
+            </label>
+            <input type="date" id="regAssetPurchaseDate" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+              Warranty / AMC Expiry
+            </label>
+            <input type="date" id="regAssetWarranty" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px;">
+          </div>
+        </div>
+
+        <!-- Row 6: Hardware Specs & Vendor Notes -->
+        <div style="margin-bottom: 22px;">
+          <label style="display: block; font-size: 11.5px; font-weight: 600; color: #c4b5fd; text-transform: uppercase; margin-bottom: 6px;">
+            Hardware Specs / Vendor AMC Notes
+          </label>
+          <textarea id="regAssetNotes" rows="2" placeholder="e.g. Dell Latitude 5420 • Core i7 11th Gen • 16GB RAM • 512GB SSD • 3-Year ProSupport Plus" class="form-input" style="width: 100%; padding: 8px 12px; font-size: 12px; background: #171228; color: #f5f3ff; border: 1px solid #4a3a6d; border-radius: 6px; resize: vertical;"></textarea>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn" onclick="closeRegisterAssetModal()" style="background: #2b2247; border: 1px solid #503f75; color: #ede9fe;">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnSaveNewAsset" onclick="submitRegisterAsset()" style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <span>💾 Register Asset</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk Import Hardware Assets via CSV / Excel -->
+  <div class="modal-backdrop" id="bulkImportAssetModal">
+    <div class="modal-window" style="width: 760px; max-width: 95vw;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.15)); border-bottom: 1px solid rgba(59, 130, 246, 0.35);">
+        <div class="modal-title">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">📥</span>
+            <span>Bulk Register Hardware Assets (Excel / CSV)</span>
+          </span>
+        </div>
+        <button class="modal-close" onclick="closeBulkImportModal()">&times;</button>
+      </div>
+
+      <div style="padding: 22px;">
+        <div id="bulkImportAlert" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-bottom: 16px;"></div>
+
+        <!-- Explanatory Box & Sample Download -->
+        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #93c5fd;">Need the standard spreadsheet format?</div>
+            <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 3px;">Download the official sample template with pre-filled Laptop &amp; Mobile rows to ensure 0% column mismatch.</div>
+          </div>
+          <button type="button" class="btn" onclick="downloadSampleInventoryTemplate()" style="background: #2563eb; color: #fff; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <span>📄 Download Sample CSV</span>
+          </button>
+        </div>
+
+        <!-- File Upload Drag-and-Drop Area -->
+        <div id="csvDropZone" style="border: 2px dashed #6d52ad; background: rgba(109, 82, 173, 0.08); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s;" onclick="document.getElementById('bulkCsvFileInput').click()">
+          <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+          <div style="font-size: 14px; font-weight: 600; color: #f5f3ff;">Click to Choose CSV File or Drag &amp; Drop here</div>
+          <div style="font-size: 12px; color: #a79fc2; margin-top: 4px;">Supports .csv files exported from Excel, Google Sheets, or IT asset trackers</div>
+          <input type="file" id="bulkCsvFileInput" accept=".csv" style="display: none;" onchange="handleBulkCsvSelected(event)">
+        </div>
+
+        <!-- Live Parsed Preview Container -->
+        <div id="bulkPreviewContainer" style="display: none; margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 13px; font-weight: 700; color: #f5f3ff;" id="bulkPreviewTitle">Parsed Assets Preview</div>
+            <div id="bulkPreviewBadge" style="font-size: 11.5px; font-weight: 600; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 2px 10px; border-radius: 6px;">0 Assets Found</div>
+          </div>
+
+          <div style="max-height: 240px; overflow-y: auto; border: 1px solid #4a3a6d; border-radius: 8px; background: #171228;">
+            <table class="dashboard-table" style="font-size: 11.5px; width: 100%;">
+              <thead>
+                <tr style="background: #1e1735; position: sticky; top: 0;">
+                  <th>Asset Tag</th>
+                  <th>Category</th>
+                  <th>Hostname</th>
+                  <th>Serial / IMEI</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="bulkPreviewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn" onclick="closeBulkImportModal()" style="background: #2b2247; border: 1px solid #503f75; color: #ede9fe;">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmBulkImport" onclick="submitBulkImport()" disabled style="font-weight: 600; display: inline-flex; align-items: center; gap: 6px; opacity: 0.5;">
+            <span>🚀 Confirm &amp; Import Assets</span>
+          </button>
         </div>
       </div>
     </div>
@@ -4797,6 +5300,7 @@
       const viewMap = {
         'dashboard': document.getElementById('viewDashboard'),
         'endpoints': document.getElementById('endpointsSection'),
+        'inventory': document.getElementById('inventorySection'),
         'security': document.getElementById('securitySection'),
         'audit': document.getElementById('auditSection'),
         'webfilter': document.getElementById('webfilterSection'),
@@ -4821,6 +5325,9 @@
 
       if (tab === 'webfilter') fetchBlockedDomains();
       if (tab === 'users') fetchUsersList();
+      if (tab === 'inventory' && allLoadedDevices.length) {
+        renderInventorySection(allLoadedDevices);
+      }
       if (tab === 'dashboard' && allLoadedDevices.length) {
         renderExecutiveDashboard(allLoadedDevices, allLoadedAuditLogs);
       }
@@ -5611,6 +6118,31 @@
       if (gridWrap) gridWrap.style.display = (mode === 'grid') ? 'grid' : 'none';
     }
 
+    let currentDeviceTypeFilter = 'all';
+
+    function setDeviceTypeFilter(type) {
+      currentDeviceTypeFilter = type.toLowerCase();
+      ['All', 'Laptops', 'Mobiles'].forEach(t => {
+        const el = document.getElementById('typeFilter' + t);
+        if (el) el.classList.toggle('active', t.toLowerCase() === currentDeviceTypeFilter);
+      });
+      const navEndpoints = document.querySelector('.sidebar-nav-item[data-tab="endpoints"]');
+      const navMobiles = document.querySelector('.sidebar-nav-item[data-tab="mobiles"]');
+      if (navEndpoints && navMobiles) {
+        navEndpoints.classList.toggle('active', currentDeviceTypeFilter === 'laptops');
+        navMobiles.classList.toggle('active', currentDeviceTypeFilter === 'mobiles');
+      }
+      const thCol = document.getElementById('thDeviceColumnName');
+      if (thCol) {
+        thCol.textContent = currentDeviceTypeFilter === 'mobiles' ? '📱 Mobile Device' : (currentDeviceTypeFilter === 'laptops' ? '💻 Windows Laptop' : 'Endpoint Device');
+      }
+      const thHw = document.getElementById('thHardwareIdColumn');
+      if (thHw) {
+        thHw.textContent = currentDeviceTypeFilter === 'mobiles' ? '📱 IMEI Number' : (currentDeviceTypeFilter === 'laptops' ? '💻 BIOS Serial No.' : '🔑 Serial / IMEI');
+      }
+      applyDeviceFilters();
+    }
+
     function setDeviceStatusFilter(filter) {
       currentDeviceFilter = filter.toLowerCase();
       ['All', 'Online', 'Office', 'Wfh', 'Offline'].forEach(f => {
@@ -5624,18 +6156,66 @@
       applyDeviceFilters();
     }
 
+    function resolveDeviceLocation(d) {
+      if (!d) return { label: '🏢 In Office', badgeClass: 'office', subtext: 'Office LAN', geoText: 'Office Local Network', ispText: 'Office LAN', isOffice: true };
+      
+      const ip = (d.ipAddress || '').trim();
+      const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android')) || (d.assetCategory === 'Android Mobile');
+      
+      // Office LAN is strictly 192.168.68.0/22 (192.168.68.x - 192.168.71.x) or localhost
+      const isOfficeSubnet = ip.startsWith('192.168.68.') || 
+                             ip.startsWith('192.168.69.') || 
+                             ip.startsWith('192.168.70.') || 
+                             ip.startsWith('192.168.71.') || 
+                             ip === '127.0.0.1' || ip === '::1';
+
+      const isOffice = isOfficeSubnet && d.networkLocation !== 'Work From Home';
+
+      if (isOffice) {
+        return {
+          isOffice: true,
+          label: '🏢 In Office',
+          badgeClass: 'office',
+          subtext: d.city ? `${escapeHtml(d.city)}, ${escapeHtml(d.country || '')}` : 'Office LAN',
+          geoText: d.city ? `${d.city}, ${d.country || ''}` : 'Office Local Network',
+          ispText: d.isp ? `ISP: ${d.isp}` : 'Office LAN'
+        };
+      }
+
+      // Remote / Hotspot / WFH
+      const isHotspot = ip.startsWith('10.') || ip.startsWith('192.168.43.') || ip.startsWith('172.20.10.');
+      const label = isAndroid ? (isHotspot ? '📱 Mobile Hotspot' : '🏠 Work From Home') : '🏠 WFH';
+      const subtext = d.city ? `${escapeHtml(d.city)}, ${escapeHtml(d.country || '')}` : (isHotspot ? 'Personal Hotspot / WFH' : (isAndroid ? 'Mobile Network / WFH' : 'Remote / WFH'));
+      const geoText = d.city ? `${d.city}, ${d.country || ''}` : (isHotspot ? 'Personal Mobile Hotspot' : (isAndroid ? 'Mobile Cellular / WFH' : 'Remote Work Location'));
+      const ispText = d.isp ? `ISP: ${d.isp}` : (isHotspot ? 'Personal Hotspot' : (isAndroid ? 'Mobile Data (4G/5G)' : 'Home Broadband / Remote'));
+
+      return {
+        isOffice: false,
+        label: label,
+        badgeClass: 'remote',
+        subtext: subtext,
+        geoText: geoText,
+        ispText: ispText
+      };
+    }
+
     function applyDeviceFilters() {
       const searchBox = document.getElementById('deviceSearchInput');
       const query = (searchBox ? searchBox.value : '').toLowerCase().trim();
 
       const filtered = allLoadedDevices.filter(d => {
+        // Device Category filter (Laptops vs Mobiles separation)
+        const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
+        if (currentDeviceTypeFilter === 'laptops' && isAndroid) return false;
+        if (currentDeviceTypeFilter === 'mobiles' && !isAndroid) return false;
+
         // Status filter
         const isOnline = !!d.isOnline;
-        const isOffice = (d.networkLocation === 'In Office');
+        const loc = resolveDeviceLocation(d);
         if (currentDeviceFilter === 'online' && !isOnline) return false;
         if (currentDeviceFilter === 'offline' && isOnline) return false;
-        if (currentDeviceFilter === 'office' && (!isOnline || !isOffice)) return false;
-        if (currentDeviceFilter === 'wfh' && (!isOnline || isOffice)) return false;
+        if (currentDeviceFilter === 'office' && (!isOnline || !loc.isOffice)) return false;
+        if (currentDeviceFilter === 'wfh' && (!isOnline || loc.isOffice)) return false;
         if (currentDeviceFilter === 'atrisk') {
           const isAtRisk = (!d.usbStorageBlocked || !d.softwareInstallDisabled || !isOnline);
           if (!isAtRisk) return false;
@@ -5647,8 +6227,9 @@
           const matchUser = (d.userName || '').toLowerCase().includes(query);
           const matchIp = (d.ipAddress || '').toLowerCase().includes(query);
           const matchCity = (d.city || '').toLowerCase().includes(query);
-          const matchLoc = (d.networkLocation || '').toLowerCase().includes(query);
-          if (!matchHost && !matchUser && !matchIp && !matchCity && !matchLoc) return false;
+          const matchLoc = (d.networkLocation || '').toLowerCase().includes(query) || (loc.label || '').toLowerCase().includes(query) || (loc.subtext || '').toLowerCase().includes(query);
+          const matchHardware = (d.hardwareId || '').toLowerCase().includes(query);
+          if (!matchHost && !matchUser && !matchIp && !matchCity && !matchLoc && !matchHardware) return false;
         }
 
         return true;
@@ -5817,8 +6398,8 @@
 
     function updateHeaderAndFilterBadges(devices) {
       const onlineCount = devices.filter(d => d.isOnline).length;
-      const officeCount = devices.filter(d => d.isOnline && d.networkLocation === 'In Office').length;
-      const wfhCount = devices.filter(d => d.isOnline && d.networkLocation !== 'In Office').length;
+      const officeCount = devices.filter(d => d.isOnline && resolveDeviceLocation(d).isOffice).length;
+      const wfhCount = devices.filter(d => d.isOnline && !resolveDeviceLocation(d).isOffice).length;
       const offlineCount = devices.filter(d => !d.isOnline).length;
       const totalCount = devices.length;
 
@@ -5832,7 +6413,28 @@
       if (wfhEl) wfhEl.textContent = wfhCount;
       if (totalEl) totalEl.textContent = totalCount;
 
-      // Tab badges
+      // Tab badges & Category Counts (Laptops vs Mobiles)
+      const mobileCount = allLoadedDevices.filter(d => (d.osVersion && d.osVersion.toLowerCase().includes('android'))).length;
+      const laptopCount = totalCount - mobileCount;
+
+      const tAll = document.getElementById('typeCountAll');
+      const tLap = document.getElementById('typeCountLaptops');
+      const tMob = document.getElementById('typeCountMobiles');
+      if (tAll) tAll.textContent = totalCount;
+      if (tLap) tLap.textContent = laptopCount;
+      if (tMob) tMob.textContent = mobileCount;
+
+      const sideBadgeMob = document.getElementById('sideBadgeMobiles');
+      if (sideBadgeMob) sideBadgeMob.textContent = mobileCount;
+      const sideBadgeEp = document.getElementById('sideBadgeEndpoints');
+      if (sideBadgeEp) sideBadgeEp.textContent = laptopCount;
+      const sideBadgeInv = document.getElementById('sideBadgeInventory');
+      if (sideBadgeInv) sideBadgeInv.textContent = totalCount;
+
+      if (currentMainTab === 'inventory') {
+        renderInventorySection(devices);
+      }
+
       const tabEpEl = document.getElementById('tabEndpointCount');
       const tabAuEl = document.getElementById('tabAuditCount');
       if (tabEpEl) tabEpEl.textContent = totalCount;
@@ -5856,20 +6458,19 @@
       if (!tbody) return;
 
       if (!devices || devices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No matching endpoint devices found. Run <code>EndpointManager.Client.exe</code> on client laptop.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No matching endpoint devices found. Run <code>EndpointManager.Client.exe</code> on client laptop.</td></tr>';
         return;
       }
 
       tbody.innerHTML = devices.map(d => {
-        const isOffice = (d.networkLocation === 'In Office');
-        const locLabel = isOffice ? '🏢 In Office' : '🏠 WFH';
-        const locClass = isOffice ? 'office' : 'remote';
+        const loc = resolveDeviceLocation(d);
+        const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
 
         return `
           <tr onclick="openDeviceModal('${escapeHtml(d.machineName)}')">
             <td>
               <div class="table-host-cell">
-                <span style="font-size: 18px;">${(d.osVersion && d.osVersion.toLowerCase().includes('android')) ? '📱' : '💻'}</span>
+                <span style="font-size: 18px;">${isAndroid ? '📱' : '💻'}</span>
                 <div>
                   <div class="table-host-name">
                     ${escapeHtml(d.machineName)}
@@ -5885,11 +6486,19 @@
               </span>
             </td>
             <td>
-              <span class="badge-loc ${locClass}">
-                ${locLabel}
+              <div style="font-family: 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 600; color: #38bdf8; letter-spacing: 0.5px;">
+                ${escapeHtml(d.hardwareId || 'N/A')}
+              </div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">
+                ${isAndroid ? 'IMEI Number' : 'BIOS Serial'}
+              </div>
+            </td>
+            <td>
+              <span class="badge-loc ${loc.badgeClass}">
+                ${loc.label}
               </span>
               <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
-                ${d.city ? `${escapeHtml(d.city)}, ${escapeHtml(d.country || '')}` : 'Office LAN'}
+                ${loc.subtext}
               </div>
             </td>
             <td>
@@ -5940,9 +6549,7 @@
       const currentPerms = getCurrentPermissions();
 
       grid.innerHTML = devices.map(d => {
-        const isOffice = (d.networkLocation === 'In Office');
-        const locLabel = isOffice ? '🏢 In Office' : '🏠 Work From Home';
-        const locClass = isOffice ? 'office' : 'remote';
+        const loc = resolveDeviceLocation(d);
         const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
 
         return `
@@ -5952,8 +6559,8 @@
               <span>${isAndroid ? '📱' : '💻'}</span> <span>${escapeHtml(d.machineName)}</span>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
-              <span class="badge-loc ${locClass}" title="Location: ${locLabel}">
-                ${locLabel}
+              <span class="badge-loc ${loc.badgeClass}" title="Location: ${loc.label}">
+                ${loc.label}
               </span>
               <span class="status-badge ${d.isOnline ? 'online' : 'offline'}">
                 ${d.isOnline ? 'Online' : 'Offline'}
@@ -5964,6 +6571,7 @@
           <div class="details-row">
             <span>User: <strong>${escapeHtml(d.userName || 'SYSTEM')}</strong></span>
             <span>IP: <strong>${escapeHtml(d.ipAddress)}</strong></span>
+            <span>${isAndroid ? 'IMEI' : 'Serial'}: <strong style="color: #38bdf8; font-family: monospace;">${escapeHtml(d.hardwareId || 'N/A')}</strong></span>
             <span>OS: <strong>${escapeHtml((d.osVersion || '').substring(0, 18))}...</strong></span>
             <span>Agent: <strong style="color: #38bdf8;">v${escapeHtml(d.clientVersion || '1.0.0')}</strong></span>
             <span>Last Seen: <strong>${new Date(d.lastSeenUtc).toLocaleTimeString()}</strong></span>
@@ -6077,9 +6685,8 @@
 
     function populateDeviceModal(d) {
       selectedModalDevice = d;
-      const isOffice = (d.networkLocation === 'In Office');
-      const locLabel = isOffice ? '🏢 In Office' : '🏠 Work From Home';
-      const locClass = isOffice ? 'office' : 'remote';
+      isMobileAlarmRinging = false;
+      const loc = resolveDeviceLocation(d);
 
       document.getElementById('modalDeviceHost').textContent = d.machineName;
       
@@ -6088,12 +6695,14 @@
       statusBadge.textContent = d.isOnline ? 'Online' : 'Offline';
 
       const locBadge = document.getElementById('modalDeviceLoc');
-      locBadge.className = 'badge-loc ' + locClass;
-      locBadge.textContent = locLabel;
+      locBadge.className = 'badge-loc ' + loc.badgeClass;
+      locBadge.textContent = loc.label;
 
       document.getElementById('modalDeviceUser').textContent = d.userName || 'SYSTEM';
       document.getElementById('modalDeviceIp').textContent = d.ipAddress;
       document.getElementById('modalDeviceOs').textContent = d.osVersion;
+      const hwIdEl = document.getElementById('modalDeviceHardwareId');
+      if (hwIdEl) hwIdEl.textContent = d.hardwareId || 'N/A';
       const clientVerEl = document.getElementById('modalDeviceClientVersion');
       if (clientVerEl) clientVerEl.textContent = 'v' + (d.clientVersion || '1.0.0');
       const btnPush = document.getElementById('modalBtnPushUpdate');
@@ -6103,8 +6712,8 @@
       }
       document.getElementById('modalDeviceLastSeen').textContent = new Date(d.lastSeenUtc).toLocaleString();
 
-      document.getElementById('modalDeviceGeo').textContent = d.city ? `${d.city}, ${d.country || ''}` : 'Office Local Network';
-      document.getElementById('modalDeviceIsp').textContent = d.isp ? `ISP: ${d.isp}` : 'Local LAN';
+      document.getElementById('modalDeviceGeo').textContent = loc.geoText;
+      document.getElementById('modalDeviceIsp').textContent = loc.ispText;
 
       const mapsLink = document.getElementById('modalDeviceMapsLink');
       if (d.latitude && d.longitude) {
@@ -6149,6 +6758,19 @@
 
       const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
 
+      const devIcon = document.getElementById('modalDeviceIcon');
+      if (devIcon) devIcon.textContent = isAndroid ? '📱' : '💻';
+
+      const gpsRow = document.getElementById('modalGpsPolicyRow');
+      if (gpsRow) gpsRow.style.display = isAndroid ? 'flex' : 'none';
+
+      const notifRow = document.getElementById('modalSyncNotifPolicyRow');
+      if (notifRow) notifRow.style.display = isAndroid ? 'flex' : 'none';
+      const notifSwitch = document.getElementById('modalSyncNotifSwitch');
+      if (notifSwitch) {
+        notifSwitch.checked = !!d.syncNotificationHidden;
+      }
+
       const androidBanner = document.getElementById('modalAndroidBanner');
       if (androidBanner) androidBanner.style.display = isAndroid ? 'flex' : 'none';
 
@@ -6161,6 +6783,9 @@
       const webTitle = document.getElementById('modalWebFilterTitle');
       const webSub = document.getElementById('modalWebFilterSub');
 
+      const printTitle = document.getElementById('modalPrintTitle');
+      const printSub = document.getElementById('modalPrintSub');
+
       if (isAndroid) {
         if (usbTitle) usbTitle.textContent = 'USB / MTP File Transfer Lock';
         if (usbSub) usbSub.textContent = 'Restricts USB file transfers to PC & exfiltration';
@@ -6170,6 +6795,11 @@
         if (transSub) transSub.textContent = 'Disables front and back cameras on the device';
         if (webTitle) webTitle.textContent = 'On-Device DNS Web & Content Filter';
         if (webSub) webSub.textContent = 'Blocks YouTube, Social Media, Adult & Gambling domains';
+        if (printTitle) printTitle.textContent = 'Personal Samsung Account Lock';
+        if (printSub) printSub.textContent = 'Blocks personal Samsung/Cloud accounts (Corporate email remains active)';
+        if (swPrint) {
+          swPrint.onchange = function() { handleModalPolicyToggle(16, this.checked); };
+        }
       } else {
         if (usbTitle) usbTitle.textContent = 'USB Mass Storage Lock';
         if (usbSub) usbSub.textContent = 'Blocks USB drives, pen drives & flash storage (HKLM USBSTOR)';
@@ -6179,6 +6809,11 @@
         if (transSub) transSub.textContent = 'Read-only restriction on removable and portable storage devices';
         if (webTitle) webTitle.textContent = 'Web & Entertainment Filtering';
         if (webSub) webSub.textContent = 'Blocks YouTube, Facebook, Instagram & Video Streaming (Hosts & Browser URLBlocklist)';
+        if (printTitle) printTitle.textContent = 'Selective Print Guard';
+        if (printSub) printSub.textContent = 'Allows printing in web browsers (Chrome/Edge), strictly blocks standalone PDF readers (Adobe, Foxit, Sumatra)';
+        if (swPrint) {
+          swPrint.onchange = function() { handleModalPolicyToggle(5, this.checked); };
+        }
       }
 
       // Online-only buttons
@@ -6193,6 +6828,60 @@
       if (btnPs) btnPs.innerHTML = isAndroid ? '🤖 Android Shell Terminal' : '💻 Remote PowerShell';
       if (btnLock) btnLock.innerHTML = isAndroid ? '🔒 Lock Mobile Screen' : '🔒 Lock Remote Screen';
       if (btnRestart) btnRestart.innerHTML = isAndroid ? '🔄 Reboot Phone' : '🔄 Reboot Client Machine';
+
+      let btnUnlock = document.getElementById('modalBtnClearLock');
+      if (!btnUnlock) {
+        btnUnlock = document.createElement('button');
+        btnUnlock.id = 'modalBtnClearLock';
+        btnUnlock.className = 'btn btn-primary';
+        btnUnlock.style = 'grid-column: span 2; padding: 10px; font-size: 13px; justify-content: center; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #a7f3d0;';
+        btnUnlock.onclick = triggerRemoteScreenUnlock;
+        if (btnRestart && btnRestart.parentNode) btnRestart.parentNode.appendChild(btnUnlock);
+      }
+      if (btnUnlock) {
+        btnUnlock.style.display = isAndroid ? 'flex' : 'none';
+        btnUnlock.disabled = !isOnline;
+        btnUnlock.style.opacity = isOnline ? '1' : '0.5';
+        btnUnlock.style.cursor = isOnline ? 'pointer' : 'not-allowed';
+        btnUnlock.innerHTML = '🔓 Reset / Clear Screen Lock (Samsung Care Bypass)';
+      }
+
+      let oldBtnAlarm = document.getElementById('modalBtnLostAlarm');
+      if (oldBtnAlarm) oldBtnAlarm.remove();
+
+      let btnStartAlarm = document.getElementById('modalBtnStartAlarm');
+      if (!btnStartAlarm) {
+        btnStartAlarm = document.createElement('button');
+        btnStartAlarm.id = 'modalBtnStartAlarm';
+        btnStartAlarm.className = 'btn';
+        btnStartAlarm.style = 'padding: 10px; font-size: 13px; justify-content: center; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fde68a;';
+        btnStartAlarm.onclick = () => dispatchLostPhoneAlarm(true);
+        btnStartAlarm.innerHTML = '🚨 Play Siren';
+        if (btnRestart && btnRestart.parentNode) btnRestart.parentNode.appendChild(btnStartAlarm);
+      }
+      if (btnStartAlarm) {
+        btnStartAlarm.style.display = isAndroid ? 'flex' : 'none';
+        btnStartAlarm.disabled = !isOnline;
+        btnStartAlarm.style.opacity = isOnline ? '1' : '0.5';
+        btnStartAlarm.style.cursor = isOnline ? 'pointer' : 'not-allowed';
+      }
+
+      let btnStopAlarm = document.getElementById('modalBtnStopAlarm');
+      if (!btnStopAlarm) {
+        btnStopAlarm = document.createElement('button');
+        btnStopAlarm.id = 'modalBtnStopAlarm';
+        btnStopAlarm.className = 'btn';
+        btnStopAlarm.style = 'padding: 10px; font-size: 13px; justify-content: center; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5;';
+        btnStopAlarm.onclick = () => dispatchLostPhoneAlarm(false);
+        btnStopAlarm.innerHTML = '🛑 STOP Siren';
+        if (btnRestart && btnRestart.parentNode) btnRestart.parentNode.appendChild(btnStopAlarm);
+      }
+      if (btnStopAlarm) {
+        btnStopAlarm.style.display = isAndroid ? 'flex' : 'none';
+        btnStopAlarm.disabled = !isOnline;
+        btnStopAlarm.style.opacity = isOnline ? '1' : '0.5';
+        btnStopAlarm.style.cursor = isOnline ? 'pointer' : 'not-allowed';
+      }
 
       let btnWipe = document.getElementById('modalBtnMobileWipe');
       if (!btnWipe) {
@@ -6290,6 +6979,79 @@
         }
       } catch (err) {
         alert('Error: ' + err.message);
+      }
+    }
+
+    async function triggerRemoteScreenUnlock() {
+      const perms = getCurrentPermissions();
+      if (!perms.canEmergencyAction) {
+        alert("🔒 Access Denied: You do not have permission to execute screen lock reset.");
+        return;
+      }
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      const connId = selectedModalDevice.lastConnectionId;
+      
+      const choice = prompt(`🔓 Remote Screen Lock Removal / Reset for [${host}]:\n\n• Type 'CLEAR' to remove PIN/Password completely (Phone unlocks with No Lock)\n• OR type a temporary 4-6 digit numeric PIN (e.g. 1234):\n\n(Click OK with CLEAR to remove lock):`, "CLEAR");
+      if (choice === null) return;
+      
+      const payload = (choice.trim().toUpperCase() === "CLEAR" || choice.trim() === "") ? "CLEAR" : choice.trim();
+      
+      try {
+        const res = await authFetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connectionId: connId,
+            machineName: host,
+            policy: 15,
+            enableRestriction: true,
+            payload: payload
+          })
+        });
+        if (res.ok) {
+          alert(`✅ Remote Screen Unlock command dispatched to [${host}]!\n\nLock status: ${payload === "CLEAR" ? "Screen lock cleared (No PIN/Password)" : "New PIN set to " + payload}.\nDevice will unlock without needing Samsung Care.`);
+        } else {
+          alert('Failed to dispatch unlock command: Server rejected request.');
+        }
+      } catch (err) {
+        alert('Error dispatching unlock: ' + err.message);
+      }
+    }
+
+    async function dispatchLostPhoneAlarm(start) {
+      const perms = getCurrentPermissions();
+      if (!perms.canEmergencyAction) {
+        alert("🔒 Access Denied: You do not have permission to execute emergency actions (Siren Alarm).");
+        return;
+      }
+      if (!selectedModalDevice) return;
+      const host = selectedModalDevice.machineName;
+      const connId = selectedModalDevice.lastConnectionId;
+
+      if (start) {
+        if (!confirm(`🚨 Sound loud siren on [${host}]?\n\n• The phone will ring at 100% MAXIMUM volume immediately.\n• This overrides Do Not Disturb (DND), Silent, and Vibrate mode.\n\nProceed?`)) return;
+      }
+
+      try {
+        const res = await authFetch('/api/policies/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connectionId: connId,
+            machineName: host,
+            policy: 18,
+            enableRestriction: start,
+            payload: start ? "START" : "STOP"
+          })
+        });
+        if (res.ok) {
+          alert(`✅ ${start ? "🚨 Loud Siren started on" : "🛑 Siren stopped on"} [${host}]!`);
+        } else {
+          alert('Failed to dispatch alarm command: Server rejected request.');
+        }
+      } catch (err) {
+        alert('Error dispatching alarm: ' + err.message);
       }
     }
 
@@ -7617,10 +8379,11 @@
       const onlineCount = allLoadedDevices ? allLoadedDevices.filter(d => d.isOnline).length : 0;
       const totalCount = allLoadedDevices ? allLoadedDevices.length : 0;
       
-      const confirmMsg = `Are you sure you want to push the latest Client Update (v1.2.0) to ALL connected laptops?\n\n` +
+      const targetVer = (typeof clientUpdateInfoCache !== 'undefined' && clientUpdateInfoCache && clientUpdateInfoCache.version) ? 'v' + clientUpdateInfoCache.version : 'v1.3.0';
+      const confirmMsg = `Are you sure you want to push the latest Client Update (${targetVer}) to ALL connected laptops?\n\n` +
         `• Active Online Laptops: ${onlineCount}\n` +
         `• Total Enrolled Fleet: ${totalCount}\n\n` +
-        `Online laptops will immediately download the package, verify integrity, silently restart, and reconnect as v1.2.0 within 2-3 seconds.\n` +
+        `Online laptops will immediately download the package, verify integrity, silently restart, and reconnect as ${targetVer} within 2-3 seconds.\n` +
         `Offline laptops will update automatically on their next startup/connection.`;
         
       if (!confirm(confirmMsg)) return;
@@ -7664,7 +8427,8 @@
     async function pushUpdateToCurrentDevice() {
       if (!selectedModalDevice) return;
       const host = selectedModalDevice.machineName;
-      if (!confirm(`Deploy Canary Client Update (v1.2.0) to "${host}"?\n\nThe agent on this laptop will download the update, swap the binary, and reconnect within seconds without affecting other laptops.`)) return;
+      const targetVer = (typeof clientUpdateInfoCache !== 'undefined' && clientUpdateInfoCache && clientUpdateInfoCache.version) ? 'v' + clientUpdateInfoCache.version : 'v1.3.0';
+      if (!confirm(`Deploy Canary Client Update (${targetVer}) to "${host}"?\n\nThe agent on this laptop will download the update, swap the binary, and reconnect within seconds without affecting other laptops.`)) return;
 
       const btn = document.getElementById('modalBtnPushUpdate');
       if (btn) { btn.disabled = true; btn.textContent = '⏳ Pushing...'; }
@@ -8056,7 +8820,7 @@
       const total = devices.length;
       const online = devices.filter(d => d.isOnline).length;
       const offline = total - online;
-      const office = devices.filter(d => d.isOnline && d.networkLocation === 'In Office').length;
+      const office = devices.filter(d => d.isOnline && resolveDeviceLocation(d).isOffice).length;
       const wfh = online - office;
 
       // At risk: devices where USB or Software install is allowed, or offline > 24 hours
@@ -8220,10 +8984,976 @@
               (isOnline ? '<button class="btn-action-icon-sm" onclick="openRemoteDesktop(\'' + host + '\')" title="Remote Screen">🖥️</button>' : '') +
               (isOnline ? '<button class="btn-action-icon-sm" onclick="openTerminal(\'' + host + '\')" title="PowerShell Terminal">💻</button>' : '') +
               '<button class="btn-action-icon-sm" onclick="openDeviceModal(\'' + host + '\')" title="Manage">⚙️</button>' +
+              (!isOnline ? '<button class="btn-action-icon-sm" onclick="removeDevice(\'' + host + '\')" title="Delete Stale Record" style="color: #ef4444; border-color: rgba(239,68,68,0.4);">🗑️</button>' : '') +
             '</div>' +
           '</td>' +
         '</tr>';
       }).join('');
+    }
+
+    // === Level 2 IT Asset & Inventory Management Implementation ===
+    let selectedAssetDevice = null;
+
+    function renderInventorySection(devices) {
+      devices = devices || allLoadedDevices || [];
+      populateAllDepartmentDropdowns();
+      populateAllCategoryDropdowns();
+      
+      // Calculate Metrics
+      const total = devices.length;
+      const printers = devices.filter(d => ((d.assetCategory || '') + ' ' + (d.osVersion || '')).toLowerCase().includes('printer')).length;
+      const cctv = devices.filter(d => ((d.assetCategory || '') + ' ' + (d.osVersion || '')).toLowerCase().includes('cctv') || ((d.assetCategory || '') + ' ' + (d.osVersion || '')).toLowerCase().includes('camera')).length;
+      const mobiles = devices.filter(d => (d.osVersion && d.osVersion.toLowerCase().includes('android')) || (d.assetCategory || '').toLowerCase().includes('mobile')).length;
+      const laptops = Math.max(0, total - mobiles - printers - cctv);
+      const inUse = devices.filter(d => !d.assetStatus || d.assetStatus === 'In-Use').length;
+      const spare = devices.filter(d => d.assetStatus === 'Spare / In Stock').length;
+      const tagged = devices.filter(d => d.assetTag && d.assetTag.trim().length > 0).length;
+      const tagPercent = total > 0 ? Math.round((tagged / total) * 100) : 0;
+
+      const mTotal = document.getElementById('invMetricTotal');
+      const mTypes = document.getElementById('invMetricTypes');
+      const mInUse = document.getElementById('invMetricInUse');
+      const mSpare = document.getElementById('invMetricSpare');
+      const mTagComp = document.getElementById('invMetricTagCompliance');
+      const mTaggedCount = document.getElementById('invMetricTaggedCount');
+
+      if (mTotal) mTotal.textContent = total;
+      if (mTypes) {
+        let parts = [`${laptops} Laptops`, `${mobiles} Mobiles`];
+        if (printers > 0) parts.push(`${printers} Printers`);
+        if (cctv > 0) parts.push(`${cctv} CCTV`);
+        mTypes.textContent = parts.join(' • ');
+      }
+      if (mInUse) mInUse.textContent = inUse;
+      if (mSpare) mSpare.textContent = spare;
+      if (mTagComp) mTagComp.textContent = tagPercent + '%';
+      if (mTaggedCount) mTaggedCount.textContent = `${tagged} of ${total} Tagged`;
+
+      applyInventoryFilters();
+    }
+
+    function applyInventoryFilters() {
+      const tbody = document.getElementById('inventoryTableBody');
+      if (!tbody) return;
+
+      const query = (document.getElementById('invSearchInput')?.value || '').toLowerCase().trim();
+      const deptFilter = document.getElementById('invDeptFilter')?.value || 'ALL';
+      const statusFilter = document.getElementById('invStatusFilter')?.value || 'ALL';
+      const typeFilter = document.getElementById('invTypeFilter')?.value || 'ALL';
+
+      const filtered = (allLoadedDevices || []).filter(d => {
+        if (typeFilter !== 'ALL') {
+          const cat = ((d.assetCategory || '') + ' ' + (d.osVersion || '') + ' ' + (d.machineName || '')).toLowerCase();
+          const tf = typeFilter.toLowerCase();
+          if (tf.includes('printer')) {
+            if (!cat.includes('printer') && !cat.includes('scanner')) return false;
+          } else if (tf.includes('cctv') || tf.includes('camera')) {
+            if (!cat.includes('cctv') && !cat.includes('camera') && !cat.includes('dvr') && !cat.includes('nvr') && !cat.includes('cam')) return false;
+          } else if (tf.includes('switch') || tf.includes('router')) {
+            if (!cat.includes('switch') && !cat.includes('router') && !cat.includes('network') && !cat.includes('firewall')) return false;
+          } else if (tf.includes('mobile') || tf.includes('android')) {
+            if (!cat.includes('mobile') && !cat.includes('android') && !cat.includes('phone') && !cat.includes('tablet')) return false;
+          } else if (tf.includes('laptop') || tf.includes('pc') || tf.includes('windows')) {
+            if (cat.includes('printer') || cat.includes('cctv') || cat.includes('camera') || cat.includes('switch') || cat.includes('mobile') || cat.includes('android')) return false;
+          } else {
+            if (!cat.includes(tf)) return false;
+          }
+        }
+
+        const currentDept = d.department || '';
+        if (deptFilter === 'UNASSIGNED') {
+          if (currentDept) return false;
+        } else if (deptFilter !== 'ALL') {
+          if (currentDept.toLowerCase() !== deptFilter.toLowerCase()) return false;
+        }
+
+        const currentStatus = d.assetStatus || 'In-Use';
+        if (statusFilter !== 'ALL') {
+          if (currentStatus.toLowerCase() !== statusFilter.toLowerCase()) return false;
+        }
+
+        if (query) {
+          const matchTag = (d.assetTag || '').toLowerCase().includes(query);
+          const matchHost = (d.machineName || '').toLowerCase().includes(query);
+          const matchHw = (d.hardwareId || '').toLowerCase().includes(query);
+          const matchUser = (d.userName || '').toLowerCase().includes(query);
+          const matchEmp = (d.employeeId || '').toLowerCase().includes(query);
+          const matchDept = (d.department || '').toLowerCase().includes(query);
+          const matchNotes = (d.assetNotes || '').toLowerCase().includes(query);
+          if (!matchTag && !matchHost && !matchHw && !matchUser && !matchEmp && !matchDept && !matchNotes) return false;
+        }
+
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No matching IT assets found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(d => {
+        const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
+        const catLabel = d.assetCategory || (isAndroid ? 'Android Mobile' : 'Windows Laptop');
+        const typeIcon = getCategoryIcon(d.assetCategory, d.osVersion, d.machineName);
+        const isOnline = !!d.isOnline;
+        const assetTagHtml = d.assetTag 
+          ? `<span style="display: inline-flex; align-items: center; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 6px;">🏷️ ${escapeHtml(d.assetTag)}</span>`
+          : `<button onclick="openEditAssetModal('${escapeHtml(d.machineName)}')" style="background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.25); color: #94a3b8; font-size: 11px; padding: 2px 8px; border-radius: 6px; cursor: pointer;">+ Assign Tag</button>`;
+
+        let statusBadge = '<span style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🟢 In-Use</span>';
+        if (d.assetStatus === 'Spare / In Stock') {
+          statusBadge = '<span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🟡 Spare</span>';
+        } else if (d.assetStatus === 'Under Repair') {
+          statusBadge = '<span style="background: rgba(239, 68, 68, 0.15); color: #f87171; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🔴 In Repair</span>';
+        } else if (d.assetStatus === 'Decommissioned') {
+          statusBadge = '<span style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">⚪ Retired</span>';
+        }
+
+        const deptBadge = d.department 
+          ? `<span style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500;">${escapeHtml(d.department)}</span>`
+          : `<span style="color: var(--text-muted); font-size: 11px;">Unassigned</span>`;
+
+        const hwId = d.hardwareId || 'N/A';
+        const copyHwBtn = hwId !== 'N/A' 
+          ? `<button onclick="copyToClipboard('${escapeHtml(hwId)}')" title="Copy Serial/IMEI" style="background: none; border: none; color: #38bdf8; cursor: pointer; padding: 0 4px; font-size: 12px;">📋</button>`
+          : '';
+
+        return `
+          <tr onclick="openEditAssetModal('${escapeHtml(d.machineName)}')">
+            <td>${assetTagHtml}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;" title="Category: ${escapeHtml(catLabel)}">${typeIcon}</span>
+                <div>
+                  <div style="font-weight: 600; color: #fff;">${escapeHtml(d.machineName)}</div>
+                  <div style="font-size: 10.5px; color: #c4b5fd; font-weight: 500;">${escapeHtml(catLabel)}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-family: monospace; font-size: 11.5px; color: #38bdf8; font-weight: 600;">${escapeHtml(hwId)}</span>
+                ${copyHwBtn}
+              </div>
+            </td>
+            <td>
+              <div>👤 <strong>${escapeHtml(d.userName || 'SYSTEM')}</strong></div>
+              ${d.employeeId ? `<div style="font-size: 10.5px; color: var(--text-muted); font-family: monospace;">ID: ${escapeHtml(d.employeeId)}</div>` : ''}
+            </td>
+            <td>${deptBadge}</td>
+            <td>${statusBadge}</td>
+            <td>
+              ${(d.osVersion && d.osVersion.includes('Pre-Provisioned')) || d.ipAddress === 'Awaiting Enrollment'
+                ? `<span style="background: rgba(245, 158, 11, 0.18); border: 1px solid #f59e0b; color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700;">🟡 Pre-Provisioned</span>
+                   <div style="font-size: 10px; color: #fbbf24; font-family: monospace; margin-top: 2px;">Awaiting Agent</div>`
+                : `<span class="status-badge ${isOnline ? 'online' : 'offline'}" style="font-size: 11px; padding: 2px 8px;">
+                    ${isOnline ? '🟢 Online' : '🔴 Offline'}
+                   </span>
+                   <div style="font-size: 10.5px; color: var(--text-muted); font-family: monospace; margin-top: 2px;">${escapeHtml(d.ipAddress || '')}</div>`
+              }
+            </td>
+            <td>
+              <div style="font-size: 11px; color: #e2e8f0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(d.assetNotes || '')}">
+                ${d.assetNotes ? escapeHtml(d.assetNotes) : '<span style="color: var(--text-muted);">No notes</span>'}
+              </div>
+              ${d.warrantyExpiry ? `<div style="font-size: 10px; color: #fbbf24;">Warranty: ${escapeHtml(d.warrantyExpiry)}</div>` : ''}
+            </td>
+            <td style="text-align: right;" onclick="event.stopPropagation()">
+              <button class="btn btn-sm" onclick="openEditAssetModal('${escapeHtml(d.machineName)}')" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93c5fd; font-size: 11px; padding: 4px 10px;" title="Edit Asset Info">
+                ✏️ Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+
+    // =========================================================================
+    // IT ASSET & INVENTORY REGISTRY (LEVEL 2): DYNAMIC DEPARTMENTS & PRE-PROVISIONING
+    // =========================================================================
+    const DEFAULT_DEPARTMENTS = [
+      "Tech / IT",
+      "Sales & BD",
+      "Human Resources (HR)",
+      "Finance & Accounts",
+      "Operations",
+      "Management",
+      "Marketing",
+      "Legal & Compliance"
+    ];
+
+    function getCustomDepartments() {
+      try {
+        const raw = localStorage.getItem('cybershield_custom_depts');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCustomDepartment(deptName) {
+      if (!deptName || !deptName.trim()) return null;
+      const clean = deptName.trim();
+      const custom = getCustomDepartments();
+      if (!custom.some(d => d.toLowerCase() === clean.toLowerCase()) && 
+          !DEFAULT_DEPARTMENTS.some(d => d.toLowerCase() === clean.toLowerCase())) {
+        custom.push(clean);
+        localStorage.setItem('cybershield_custom_depts', JSON.stringify(custom));
+      }
+      populateAllDepartmentDropdowns();
+      return clean;
+    }
+
+    function getAllKnownDepartments() {
+      const set = new Set(DEFAULT_DEPARTMENTS);
+      getCustomDepartments().forEach(d => set.add(d));
+      (allLoadedDevices || []).forEach(d => {
+        if (d.department && d.department.trim()) set.add(d.department.trim());
+      });
+      return Array.from(set);
+    }
+
+    function populateAllDepartmentDropdowns(selectedDeptForModal = null) {
+      const allDepts = getAllKnownDepartments();
+
+      // 1. Edit Asset Modal Dept Select
+      const editDeptSelect = document.getElementById('assetFieldDept');
+      if (editDeptSelect) {
+        const curVal = selectedDeptForModal !== null ? selectedDeptForModal : editDeptSelect.value;
+        let html = '<option value="" style="background: #1a142e; color: #f5f3ff;">-- Select Department --</option>';
+        allDepts.forEach(d => {
+          const sel = (curVal && curVal.toLowerCase() === d.toLowerCase()) ? 'selected' : '';
+          html += `<option value="${escapeHtml(d)}" ${sel} style="background: #1a142e; color: #f5f3ff;">🏢 ${escapeHtml(d)}</option>`;
+        });
+        html += '<option value="__ADD_NEW__" style="background: #2a1f4d; color: #c084fc; font-weight: 700;">➕ + Add New Department...</option>';
+        editDeptSelect.innerHTML = html;
+      }
+
+      // 2. Register New Asset Modal Dept Select
+      const regDeptSelect = document.getElementById('regAssetDept');
+      if (regDeptSelect) {
+        const curVal = regDeptSelect.value;
+        let html = '<option value="" style="background: #1a142e; color: #f5f3ff;">-- Select Department --</option>';
+        allDepts.forEach(d => {
+          const sel = (curVal && curVal.toLowerCase() === d.toLowerCase()) ? 'selected' : '';
+          html += `<option value="${escapeHtml(d)}" ${sel} style="background: #1a142e; color: #f5f3ff;">🏢 ${escapeHtml(d)}</option>`;
+        });
+        html += '<option value="__ADD_NEW__" style="background: #2a1f4d; color: #c084fc; font-weight: 700;">➕ + Add New Department...</option>';
+        regDeptSelect.innerHTML = html;
+      }
+
+      // 3. Inventory Section Filter Select
+      const invFilterSelect = document.getElementById('invDeptFilter');
+      if (invFilterSelect) {
+        const curFilter = invFilterSelect.value || 'ALL';
+        let html = '<option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Departments</option>';
+        allDepts.forEach(d => {
+          const sel = (curFilter && curFilter.toLowerCase() === d.toLowerCase()) ? 'selected' : '';
+          html += `<option value="${escapeHtml(d)}" ${sel} style="background: #1a142e; color: #f5f3ff;">🏢 ${escapeHtml(d)}</option>`;
+        });
+        html += '<option value="UNASSIGNED" style="background: #1a142e; color: #f5f3ff;">⚪ Unassigned</option>';
+        invFilterSelect.innerHTML = html;
+      }
+    }
+
+    function handleDepartmentDropdownChange(selectEl) {
+      if (!selectEl) return;
+      if (selectEl.value === '__ADD_NEW__') {
+        const newDept = prompt("Enter new Department name (e.g. Quality Assurance, Logistics, Customer Support):");
+        if (newDept && newDept.trim()) {
+          const saved = saveCustomDepartment(newDept);
+          selectEl.value = saved;
+        } else {
+          selectEl.value = '';
+        }
+      }
+    }
+
+    function promptAddDepartmentToSelect(selectId) {
+      const selectEl = document.getElementById(selectId);
+      const newDept = prompt("Enter new Department name (e.g. Quality Assurance, Logistics, Customer Support):");
+      if (newDept && newDept.trim()) {
+        const saved = saveCustomDepartment(newDept);
+        if (selectEl) selectEl.value = saved;
+      }
+    }
+
+
+    // =========================================================================
+    // DYNAMIC HARDWARE CATEGORIES (LAPTOPS, MOBILES, PRINTERS, CCTV, SWITCHES...)
+    // =========================================================================
+    const DEFAULT_CATEGORIES = [
+      "Windows Laptop / PC",
+      "Android Mobile",
+      "Network Printer / Scanner",
+      "CCTV / IP Camera",
+      "Network Switch / Router",
+      "Desktop / Server / Workstation",
+      "Smart TV / Display / Projector",
+      "UPS / Power Backup"
+    ];
+
+    function getCustomCategories() {
+      try {
+        const raw = localStorage.getItem('cybershield_custom_categories');
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCustomCategory(catName) {
+      if (!catName || !catName.trim()) return null;
+      const clean = catName.trim();
+      const custom = getCustomCategories();
+      if (!custom.some(c => c.toLowerCase() === clean.toLowerCase()) && 
+          !DEFAULT_CATEGORIES.some(c => c.toLowerCase() === clean.toLowerCase())) {
+        custom.push(clean);
+        localStorage.setItem('cybershield_custom_categories', JSON.stringify(custom));
+      }
+      populateAllCategoryDropdowns();
+      return clean;
+    }
+
+    function getAllKnownCategories() {
+      const set = new Set(DEFAULT_CATEGORIES);
+      getCustomCategories().forEach(c => set.add(c));
+      (allLoadedDevices || []).forEach(d => {
+        if (d.assetCategory && d.assetCategory.trim()) set.add(d.assetCategory.trim());
+      });
+      return Array.from(set);
+    }
+
+    function getCategoryIcon(cat, osVersion, host) {
+      const c = ((cat || '') + ' ' + (osVersion || '') + ' ' + (host || '')).toLowerCase();
+      if (c.includes('printer') || c.includes('scanner')) return '🖨️';
+      if (c.includes('cctv') || c.includes('camera') || c.includes('cam') || c.includes('dvr') || c.includes('nvr')) return '📹';
+      if (c.includes('switch') || c.includes('router') || c.includes('firewall') || c.includes('wifi') || c.includes('network') || c.includes('access point')) return '🌐';
+      if (c.includes('server') || c.includes('nas') || c.includes('workstation')) return '🖥️';
+      if (c.includes('tv') || c.includes('display') || c.includes('projector') || c.includes('screen')) return '📺';
+      if (c.includes('ups') || c.includes('battery') || c.includes('power')) return '🔋';
+      if (c.includes('biometric') || c.includes('fingerprint') || c.includes('attendance')) return '👆';
+      if (c.includes('barcode') || c.includes('pos')) return '🏷️';
+      if (c.includes('mobile') || c.includes('android') || c.includes('phone') || c.includes('tablet')) return '📱';
+      if (c.includes('mac') || c.includes('apple') || c.includes('macos')) return '🍏';
+      return '💻';
+    }
+
+    function populateAllCategoryDropdowns(selectedCatForEdit = null, selectedCatForReg = null) {
+      const allCats = getAllKnownCategories();
+
+      function renderCategoryOptions(curVal) {
+        let html = '';
+        allCats.forEach(c => {
+          const sel = (curVal && curVal.toLowerCase() === c.toLowerCase()) ? 'selected' : '';
+          const icon = getCategoryIcon(c, '', '');
+          html += `<option value="${escapeHtml(c)}" ${sel} style="background: #1a142e; color: #f5f3ff;">${icon} ${escapeHtml(c)}</option>`;
+        });
+        html += '<option value="__ADD_NEW_CAT__" style="background: #2a1f4d; color: #c084fc; font-weight: 700;">➕ + Add Custom Category...</option>';
+        return html;
+      }
+
+      // 1. Register Modal Category Select
+      const regSelect = document.getElementById('regAssetType');
+      if (regSelect) {
+        const cur = selectedCatForReg !== null ? selectedCatForReg : regSelect.value;
+        regSelect.innerHTML = renderCategoryOptions(cur || 'Windows Laptop / PC');
+      }
+
+      // 2. Edit Modal Category Select
+      const editSelect = document.getElementById('assetFieldCategory');
+      if (editSelect) {
+        const cur = selectedCatForEdit !== null ? selectedCatForEdit : editSelect.value;
+        editSelect.innerHTML = renderCategoryOptions(cur || 'Windows Laptop / PC');
+      }
+
+      // 3. Inventory Multi-Filter Category Select
+      const filterSelect = document.getElementById('invTypeFilter');
+      if (filterSelect) {
+        const cur = filterSelect.value || 'ALL';
+        let html = '<option value="ALL" style="background: #1a142e; color: #f5f3ff;">All Asset Categories</option>';
+        allCats.forEach(c => {
+          const sel = (cur && cur.toLowerCase() === c.toLowerCase()) ? 'selected' : '';
+          const icon = getCategoryIcon(c, '', '');
+          html += `<option value="${escapeHtml(c)}" ${sel} style="background: #1a142e; color: #f5f3ff;">${icon} ${escapeHtml(c)}</option>`;
+        });
+        filterSelect.innerHTML = html;
+      }
+    }
+
+    function handleCategoryDropdownChange(selectEl) {
+      if (!selectEl) return;
+      if (selectEl.value === '__ADD_NEW_CAT__') {
+        const newCat = prompt("Enter new Hardware Category name (e.g. Printer / Scanner, CCTV Camera, Barcode Scanner, Biometric Machine):");
+        if (newCat && newCat.trim()) {
+          const saved = saveCustomCategory(newCat);
+          selectEl.value = saved;
+        } else {
+          selectEl.value = 'Windows Laptop / PC';
+        }
+      }
+    }
+
+    function promptAddCategoryToSelect(selectId) {
+      const selectEl = document.getElementById(selectId);
+      const newCat = prompt("Enter new Hardware Category name (e.g. Network Printer, CCTV Camera, Biometric Machine, Barcode Scanner):");
+      if (newCat && newCat.trim()) {
+        const saved = saveCustomCategory(newCat);
+        if (selectEl) selectEl.value = saved;
+      }
+    }
+
+    // Single Asset Manual Registration
+    function openRegisterAssetModal() {
+      populateAllDepartmentDropdowns();
+      populateAllCategoryDropdowns(null, 'Windows Laptop / PC');
+      const alertBox = document.getElementById('regAssetAlert');
+      if (alertBox) alertBox.style.display = 'none';
+
+      document.getElementById('regAssetHost').value = '';
+      document.getElementById('regAssetSerial').value = '';
+      document.getElementById('regAssetTag').value = '';
+      document.getElementById('regAssetUser').value = '';
+      document.getElementById('regAssetEmpId').value = '';
+      document.getElementById('regAssetDept').value = '';
+      document.getElementById('regAssetStatus').value = 'Spare / In Stock';
+      document.getElementById('regAssetPurchaseDate').value = '';
+      document.getElementById('regAssetWarranty').value = '';
+      document.getElementById('regAssetNotes').value = '';
+
+      const modal = document.getElementById('registerAssetModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeRegisterAssetModal() {
+      const modal = document.getElementById('registerAssetModal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    async function submitRegisterAsset() {
+      const host = document.getElementById('regAssetHost').value.trim();
+      const serial = document.getElementById('regAssetSerial').value.trim();
+      const alertBox = document.getElementById('regAssetAlert');
+      const btn = document.getElementById('btnSaveNewAsset');
+
+      if (!host && !serial) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          alertBox.style.color = '#f87171';
+          alertBox.textContent = '❌ Please enter at least a Device Hostname or BIOS Serial / Mobile IMEI.';
+        }
+        return;
+      }
+
+      const catVal = document.getElementById('regAssetType').value;
+      const payload = {
+        MachineName: host || ('ASSET-' + serial),
+        HardwareId: serial || null,
+        AssetTag: document.getElementById('regAssetTag').value.trim() || null,
+        AssetCategory: catVal,
+        UserName: document.getElementById('regAssetUser').value.trim() || 'Unassigned',
+        EmployeeId: document.getElementById('regAssetEmpId').value.trim() || null,
+        Department: document.getElementById('regAssetDept').value || null,
+        AssetStatus: document.getElementById('regAssetStatus').value || 'Spare / In Stock',
+        PurchaseDate: document.getElementById('regAssetPurchaseDate').value || null,
+        WarrantyExpiry: document.getElementById('regAssetWarranty').value || null,
+        AssetNotes: document.getElementById('regAssetNotes').value.trim() || null,
+        OsType: catVal
+      };
+
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Registering...'; }
+      if (alertBox) alertBox.style.display = 'none';
+
+      try {
+        const res = await authFetch('/api/inventory/register-asset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.Success) {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            alertBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            alertBox.style.color = '#34d399';
+            alertBox.textContent = `✅ Asset '${payload.MachineName}' registered successfully!`;
+          }
+          setTimeout(() => {
+            closeRegisterAssetModal();
+            fetchData();
+          }, 900);
+        } else {
+          throw new Error(data.Message || 'Failed to register asset.');
+        }
+      } catch (err) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          alertBox.style.color = '#f87171';
+          alertBox.textContent = '❌ Error: ' + err.message;
+        }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Register Asset'; }
+      }
+    }
+
+    // Bulk CSV Import Modal
+    let parsedBulkAssets = [];
+
+    function openBulkImportModal() {
+      parsedBulkAssets = [];
+      const alertBox = document.getElementById('bulkImportAlert');
+      if (alertBox) alertBox.style.display = 'none';
+
+      const fileInput = document.getElementById('bulkCsvFileInput');
+      if (fileInput) fileInput.value = '';
+
+      const previewContainer = document.getElementById('bulkPreviewContainer');
+      if (previewContainer) previewContainer.style.display = 'none';
+
+      const confirmBtn = document.getElementById('btnConfirmBulkImport');
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.5';
+        confirmBtn.innerHTML = '<span>🚀 Confirm &amp; Import Assets</span>';
+      }
+
+      const modal = document.getElementById('bulkImportAssetModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeBulkImportModal() {
+      const modal = document.getElementById('bulkImportAssetModal');
+      if (modal) modal.classList.remove('active');
+      parsedBulkAssets = [];
+    }
+
+    function downloadSampleInventoryTemplate() {
+      const csvContent = 
+`\uFEFFAsset Tag ID,Device Hostname,BIOS Serial / IMEI,Hardware Category,Assigned Employee,Department,Asset Status,Purchase Date,Warranty Expiry,Notes / Specs
+HEXA-LP-101,LP-DELL-5420,8FC29B3,Windows Laptop / PC,Rahul Sharma,Tech / IT,In-Use,2024-02-15,2027-02-15,Dell Latitude 5420 - Core i7 16GB RAM
+HEXA-MOB-01,SAMSUNG-M055F,358941209876543,Android Mobile,Amit Verma,Sales & BD,In-Use,2024-03-01,2025-03-01,Field Sales Samsung M05
+HEXA-PRN-01,PRINTER-FLOOR2,CNB3K98765,Network Printer / Scanner,,Operations,In-Use,2024-01-10,2026-01-10,HP LaserJet Pro MFP M428fdw - IP 192.168.1.50
+HEXA-CAM-08,CCTV-MAIN-GATE,CPPL20240987,CCTV / IP Camera,,Security,In-Use,2024-03-01,2026-03-01,Hikvision 4MP IP Dome Camera
+HEXA-SW-01,SWITCH-CORE-01,FDO22340567,Network Switch / Router,,Tech / IT,In-Use,2023-11-15,2028-11-15,Cisco Catalyst 24-Port Gigabit PoE Switch
+HEXA-LP-102,LP-LENOVO-T14,PF3X98A,Windows Laptop / PC,,Tech / IT,Spare / In Stock,2024-06-10,2027-06-10,Box Pack in IT Room Shelf 2`;
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'CyberShield_Asset_Inventory_Sample_Template.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function parseCsvText(text) {
+      const lines = [];
+      let row = [""];
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+
+        if (c === '"') {
+          if (inQuotes && next === '"') {
+            row[row.length - 1] += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === ',' && !inQuotes) {
+          row.push("");
+        } else if ((c === '\r' || c === '\n') && !inQuotes) {
+          if (c === '\r' && next === '\n') i++;
+          lines.push(row);
+          row = [""];
+        } else {
+          row[row.length - 1] += c;
+        }
+      }
+      if (row.length > 1 || row[0] !== "") {
+        lines.push(row);
+      }
+      return lines;
+    }
+
+    function handleBulkCsvSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const alertBox = document.getElementById('bulkImportAlert');
+      if (alertBox) alertBox.style.display = 'none';
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const text = evt.target.result;
+          const rows = parseCsvText(text);
+          if (!rows || rows.length < 2) {
+            if (alertBox) {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+              alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+              alertBox.style.color = '#f87171';
+              alertBox.textContent = '❌ The uploaded CSV file is empty or missing data rows.';
+            }
+            return;
+          }
+
+          const headers = rows[0].map(h => (h || '').trim().toLowerCase());
+          
+          // Map header indices
+          const idxTag = headers.findIndex(h => h.includes('tag'));
+          const idxHost = headers.findIndex(h => h.includes('host') || h.includes('machine') || h.includes('device') || h.includes('name'));
+          const idxSerial = headers.findIndex(h => h.includes('serial') || h.includes('imei') || h.includes('bios') || h.includes('hardware id'));
+          const idxCat = headers.findIndex(h => h.includes('category') || h.includes('type') || h.includes('hardware category'));
+          const idxUser = headers.findIndex(h => h.includes('employee') || h.includes('user') || h.includes('assigned'));
+          const idxDept = headers.findIndex(h => h.includes('dept') || h.includes('department'));
+          const idxStatus = headers.findIndex(h => h.includes('status'));
+          const idxPurchase = headers.findIndex(h => h.includes('purchase'));
+          const idxWarranty = headers.findIndex(h => h.includes('warranty'));
+          const idxNotes = headers.findIndex(h => h.includes('note') || h.includes('spec'));
+
+          parsedBulkAssets = [];
+          for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            if (!r || r.length === 0 || r.every(c => !c.trim())) continue;
+
+            const host = (idxHost >= 0 ? r[idxHost] : '').trim();
+            const serial = (idxSerial >= 0 ? r[idxSerial] : '').trim();
+            if (!host && !serial) continue;
+
+            const rawCat = (idxCat >= 0 ? r[idxCat] : '').trim();
+            const inferredCat = rawCat || ((host.startsWith('SM-') || (serial && serial.length === 15)) ? 'Android Mobile' : (host.toLowerCase().includes('printer') ? 'Network Printer / Scanner' : (host.toLowerCase().includes('cctv') || host.toLowerCase().includes('cam') ? 'CCTV / IP Camera' : 'Windows Laptop / PC')));
+
+            parsedBulkAssets.push({
+              AssetTag: (idxTag >= 0 ? r[idxTag] : '').trim() || null,
+              MachineName: host || ('ASSET-' + serial),
+              HardwareId: serial || null,
+              AssetCategory: inferredCat,
+              UserName: (idxUser >= 0 ? r[idxUser] : '').trim() || 'Unassigned',
+              Department: (idxDept >= 0 ? r[idxDept] : '').trim() || null,
+              EmployeeId: null,
+              AssetStatus: (idxStatus >= 0 ? r[idxStatus] : '').trim() || 'Spare / In Stock',
+              PurchaseDate: (idxPurchase >= 0 ? r[idxPurchase] : '').trim() || null,
+              WarrantyExpiry: (idxWarranty >= 0 ? r[idxWarranty] : '').trim() || null,
+              AssetNotes: (idxNotes >= 0 ? r[idxNotes] : '').trim() || null,
+              OsType: inferredCat
+            });
+          }
+
+          if (parsedBulkAssets.length === 0) {
+            if (alertBox) {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+              alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+              alertBox.style.color = '#f87171';
+              alertBox.textContent = '❌ No valid devices found in CSV. Please ensure Hostname or Serial/IMEI columns have data.';
+            }
+            return;
+          }
+
+          // Render Preview
+          const previewContainer = document.getElementById('bulkPreviewContainer');
+          const previewBadge = document.getElementById('bulkPreviewBadge');
+          const tbody = document.getElementById('bulkPreviewTableBody');
+          const confirmBtn = document.getElementById('btnConfirmBulkImport');
+
+          if (previewContainer) previewContainer.style.display = 'block';
+          if (previewBadge) previewBadge.textContent = `${parsedBulkAssets.length} Assets Detected`;
+
+          if (tbody) {
+            tbody.innerHTML = parsedBulkAssets.slice(0, 15).map(a => `
+              <tr>
+                <td><code>${escapeHtml(a.AssetTag || 'N/A')}</code></td>
+                <td><span>${getCategoryIcon(a.AssetCategory, '', a.MachineName)} ${escapeHtml(a.AssetCategory || 'Hardware')}</span></td>
+                <td><strong>${escapeHtml(a.MachineName)}</strong></td>
+                <td><span style="color: #38bdf8; font-family: monospace;">${escapeHtml(a.HardwareId || 'N/A')}</span></td>
+                <td>${escapeHtml(a.Department || 'Unassigned')}</td>
+                <td><span style="color: #fbbf24;">${escapeHtml(a.AssetStatus)}</span></td>
+              </tr>
+            `).join('');
+
+            if (parsedBulkAssets.length > 15) {
+              tbody.innerHTML += `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); font-style: italic;">... and ${parsedBulkAssets.length - 15} more records ready for import</td></tr>`;
+            }
+          }
+
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.style.opacity = '1';
+            confirmBtn.innerHTML = `<span>🚀 Confirm &amp; Import ${parsedBulkAssets.length} Assets</span>`;
+          }
+        } catch (err) {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+            alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+            alertBox.style.color = '#f87171';
+            alertBox.textContent = '❌ Error parsing CSV: ' + err.message;
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function submitBulkImport() {
+      if (!parsedBulkAssets || parsedBulkAssets.length === 0) return;
+      const btn = document.getElementById('btnConfirmBulkImport');
+      const alertBox = document.getElementById('bulkImportAlert');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = `⏳ Importing ${parsedBulkAssets.length} Assets...`;
+      }
+      if (alertBox) alertBox.style.display = 'none';
+
+      try {
+        const res = await authFetch('/api/inventory/bulk-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedBulkAssets)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.Success) {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            alertBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            alertBox.style.color = '#34d399';
+            alertBox.textContent = `🎉 Import Complete! Created ${data.CreatedCount} new assets and updated ${data.UpdatedCount} existing assets.`;
+          }
+          setTimeout(() => {
+            closeBulkImportModal();
+            fetchData();
+          }, 1200);
+        } else {
+          throw new Error(data.Message || 'Bulk import failed.');
+        }
+      } catch (err) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          alertBox.style.color = '#f87171';
+          alertBox.textContent = '❌ Error during bulk import: ' + err.message;
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>🚀 Confirm &amp; Import Assets</span>`;
+        }
+      }
+    }
+
+    function openEditAssetModal(machineName) {
+      const dev = (allLoadedDevices || []).find(d => d.machineName === machineName);
+      if (!dev) return;
+
+      selectedAssetDevice = dev;
+      document.getElementById('assetModalHost').textContent = dev.machineName;
+      document.getElementById('assetModalSerial').textContent = dev.hardwareId || 'N/A';
+      document.getElementById('assetFieldTag').value = dev.assetTag || '';
+      populateAllDepartmentDropdowns(dev.department);
+      populateAllCategoryDropdowns(dev.assetCategory || (dev.osVersion && dev.osVersion.toLowerCase().includes('android') ? 'Android Mobile' : 'Windows Laptop / PC'));
+      const catEl = document.getElementById('assetFieldCategory');
+      if (catEl) catEl.value = dev.assetCategory || (dev.osVersion && dev.osVersion.toLowerCase().includes('android') ? 'Android Mobile' : 'Windows Laptop / PC');
+      document.getElementById('assetFieldDept').value = dev.department || '';
+      document.getElementById('assetFieldEmpId').value = dev.employeeId || '';
+      document.getElementById('assetFieldStatus').value = dev.assetStatus || 'In-Use';
+      document.getElementById('assetFieldPurchaseDate').value = dev.purchaseDate || '';
+      document.getElementById('assetFieldWarranty').value = dev.warrantyExpiry || '';
+      document.getElementById('assetFieldNotes').value = dev.assetNotes || '';
+
+      const alertBox = document.getElementById('editAssetAlert');
+      if (alertBox) alertBox.style.display = 'none';
+
+      document.getElementById('editAssetModal').classList.add('active');
+    }
+
+    function closeEditAssetModal() {
+      const modal = document.getElementById('editAssetModal');
+      if (modal) modal.classList.remove('active');
+      selectedAssetDevice = null;
+    }
+
+    async function saveAssetDetails() {
+      if (!selectedAssetDevice) return;
+      const btn = document.getElementById('btnSaveAssetDetails');
+      const alertBox = document.getElementById('editAssetAlert');
+
+      const payload = {
+        AssetTag: document.getElementById('assetFieldTag').value.trim() || null,
+        AssetCategory: document.getElementById('assetFieldCategory') ? document.getElementById('assetFieldCategory').value : null,
+        Department: document.getElementById('assetFieldDept').value || null,
+        EmployeeId: document.getElementById('assetFieldEmpId').value.trim() || null,
+        AssetStatus: document.getElementById('assetFieldStatus').value || 'In-Use',
+        PurchaseDate: document.getElementById('assetFieldPurchaseDate').value || null,
+        WarrantyExpiry: document.getElementById('assetFieldWarranty').value || null,
+        AssetNotes: document.getElementById('assetFieldNotes').value.trim() || null
+      };
+
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving...'; }
+      if (alertBox) alertBox.style.display = 'none';
+
+      try {
+        const res = await authFetch(`/api/devices/${encodeURIComponent(selectedAssetDevice.machineName)}/asset-info`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Failed to save asset details');
+        }
+
+        // Optimistically update in memory
+        Object.assign(selectedAssetDevice, {
+          assetTag: payload.AssetTag,
+          department: payload.Department,
+          employeeId: payload.EmployeeId,
+          assetStatus: payload.AssetStatus,
+          purchaseDate: payload.PurchaseDate,
+          warrantyExpiry: payload.WarrantyExpiry,
+          assetNotes: payload.AssetNotes
+        });
+
+        closeEditAssetModal();
+        applyInventoryFilters();
+        if (currentMainTab === 'inventory') renderInventorySection(allLoadedDevices);
+        fetchData(); // Sync fresh from server
+      } catch (err) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          alertBox.style.color = '#f87171';
+          alertBox.textContent = '❌ Error saving: ' + err.message;
+        }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Save Asset Details'; }
+      }
+    }
+
+    function copyToClipboard(text) {
+      if (!navigator.clipboard) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      } else {
+        navigator.clipboard.writeText(text);
+      }
+      alert('📋 Copied to clipboard: ' + text);
+    }
+
+    function exportDeviceInventoryCsv(source) {
+      try {
+        let devicesToExport = allLoadedDevices || [];
+        let filenamePrefix = "CyberShield_Asset_Inventory";
+
+        if (source === 'laptops' || (currentMainTab === 'endpoints' && currentDeviceTypeFilter === 'laptops')) {
+          devicesToExport = devicesToExport.filter(d => !(d.osVersion && d.osVersion.toLowerCase().includes('android')));
+          filenamePrefix = "CyberShield_Windows_Laptops_Inventory";
+        } else if (source === 'mobiles' || (currentMainTab === 'endpoints' && currentDeviceTypeFilter === 'mobiles')) {
+          devicesToExport = devicesToExport.filter(d => (d.osVersion && d.osVersion.toLowerCase().includes('android')));
+          filenamePrefix = "CyberShield_Mobile_MDM_Inventory";
+        }
+
+        const escapeCsv = (val) => {
+          if (val === null || val === undefined) return '""';
+          const str = String(val).replace(/"/g, '""');
+          return `"${str}"`;
+        };
+
+        const headers = [
+          "Asset Name",
+          "Device Type",
+          "BIOS Serial / IMEI",
+          "Asset Tag ID",
+          "Assigned Employee",
+          "Employee ID",
+          "Department",
+          "Asset Lifecycle Status",
+          "Live MDM Status",
+          "MDM Agent Version",
+          "IP Address",
+          "Network Location",
+          "Physical Location",
+          "Operating System",
+          "USB Mass Storage Lock",
+          "Software Install Block",
+          "External Exfil Guard",
+          "Web Domain Filter",
+          "Selective Print Guard",
+          "Purchase Date",
+          "Warranty Expiry",
+          "IT Notes",
+          "Last Heartbeat (Local Time)"
+        ];
+
+        const rows = devicesToExport.map(d => {
+          const isAndroid = (d.osVersion && d.osVersion.toLowerCase().includes('android'));
+          const type = isAndroid ? "Android Mobile" : "Windows Laptop";
+          const location = d.city ? `${d.city}, ${d.country || ''}`.trim() : "Office Local Network";
+          const localTime = d.lastSeenUtc ? new Date(d.lastSeenUtc).toLocaleString() : "N/A";
+
+          return [
+            escapeCsv(d.machineName),
+            escapeCsv(type),
+            escapeCsv(d.hardwareId || 'N/A'),
+            escapeCsv(d.assetTag || ''),
+            escapeCsv(d.userName || 'SYSTEM'),
+            escapeCsv(d.employeeId || ''),
+            escapeCsv(d.department || 'Unassigned'),
+            escapeCsv(d.assetStatus || 'In-Use'),
+            escapeCsv(d.isOnline ? 'ONLINE' : 'OFFLINE'),
+            escapeCsv('v' + (d.clientVersion || '1.0.0')),
+            escapeCsv(d.ipAddress || ''),
+            escapeCsv(resolveDeviceLocation(d).label),
+            escapeCsv(location),
+            escapeCsv(d.osVersion || ''),
+            escapeCsv(d.usbStorageBlocked ? 'Blocked' : 'Allowed'),
+            escapeCsv(d.softwareInstallDisabled ? 'Blocked' : 'Allowed'),
+            escapeCsv(d.externalFileTransferRestricted ? 'Restricted' : 'Allowed'),
+            escapeCsv(d.webFilteringBlocked ? 'Filtered' : 'Open'),
+            escapeCsv(d.selectivePrintRestricted ? 'Enforced' : 'Allowed'),
+            escapeCsv(d.purchaseDate || ''),
+            escapeCsv(d.warrantyExpiry || ''),
+            escapeCsv(d.assetNotes || ''),
+            escapeCsv(localTime)
+          ].join(',');
+        });
+
+        const csvContent = "\uFEFF" + headers.join(',') + "\r\n" + rows.join("\r\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `${filenamePrefix}_${dateStr}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Failed to export inventory CSV: " + err.message);
+      }
     }
 
   </script>

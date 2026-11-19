@@ -4,6 +4,7 @@ public class ClientHeartbeat
 {
     public string ConnectionId { get; set; } = string.Empty;
     public string MachineName { get; set; } = string.Empty;
+    public string? HardwareId { get; set; } // BIOS Serial Number (PC) or IMEI / Hardware Serial (Android)
     public string UserName { get; set; } = string.Empty;
     public string IpAddress { get; set; } = string.Empty;
     public string OsVersion { get; set; } = string.Empty;
@@ -12,6 +13,7 @@ public class ClientHeartbeat
     public bool ExternalFileTransferRestricted { get; set; }
     public bool WebFilteringBlocked { get; set; }
     public bool SelectivePrintRestricted { get; set; }
+    public bool SyncNotificationHidden { get; set; }
     public string ClientVersion { get; set; } = "1.0.0";
     public string? City { get; set; }
     public string? Region { get; set; }

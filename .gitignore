@@ -16,11 +16,14 @@ endpoints_data.db
 *.log
 .vs/
 .idea/
- 
+
 # Scratch
 scratch/
 
- 
+# Android build & cache
+.gradle/
+**/build/
+!**/build.gradle
+
 publish/Server/EndpointManager.Client.exe
 publish/Server/wwwroot/downloads/EndpointManager.Client.exe
-

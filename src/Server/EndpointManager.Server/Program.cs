@@ -80,7 +80,7 @@ app.UseStaticFiles(staticOptions);
 
 app.UseCors();
 
-// Direct APK download route with appropriate MIME headers
+// Direct file download route with appropriate MIME headers
 app.MapGet("/downloads/{fileName}", (string fileName) =>
 {
     var safeName = Path.GetFileName(fileName);
@@ -89,7 +89,14 @@ app.MapGet("/downloads/{fileName}", (string fileName) =>
     {
         return Results.NotFound(new { Message = $"File {safeName} not found." });
     }
-    return Results.File(filePath, "application/vnd.android.package-archive", safeName);
+    string contentType = Path.GetExtension(safeName).ToLowerInvariant() switch
+    {
+        ".zip" => "application/zip",
+        ".apk" => "application/vnd.android.package-archive",
+        ".exe" => "application/octet-stream",
+        _ => "application/octet-stream"
+    };
+    return Results.File(filePath, contentType, safeName);
 });
 
 // Map SignalR Hub Endpoint with large buffer (support both slash and dot notation)
@@ -498,7 +505,8 @@ app.MapGet("/api/devices", (HttpRequest httpReq, AuthService auth, LiteDbService
     foreach (var d in devices)
     {
         var activeClient = EndpointHub.ConnectedClients.Values
-            .FirstOrDefault(c => c.MachineName.Equals(d.MachineName, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(c => c.MachineName.Equals(d.MachineName, StringComparison.OrdinalIgnoreCase) ||
+                                (!string.IsNullOrEmpty(d.HardwareId) && !string.IsNullOrEmpty(c.HardwareId) && c.HardwareId.Equals(d.HardwareId, StringComparison.OrdinalIgnoreCase)));
         d.IsOnline = activeClient != null;
         if (activeClient != null)
         {
@@ -512,6 +520,35 @@ app.MapGet("/api/devices", (HttpRequest httpReq, AuthService auth, LiteDbService
             {
                 d.ClientVersion = activeClient.ClientVersion;
             }
+            if (!string.IsNullOrEmpty(activeClient.HardwareId))
+            {
+                d.HardwareId = activeClient.HardwareId;
+            }
+            if (!string.IsNullOrEmpty(activeClient.IpAddress))
+            {
+                d.IpAddress = activeClient.IpAddress;
+            }
+            if (!string.IsNullOrEmpty(activeClient.NetworkLocation))
+            {
+                d.NetworkLocation = activeClient.NetworkLocation;
+            }
+        }
+
+        // Subnet sanity check: device is ONLY "In Office" if on official Office LAN (192.168.68.0/22 or localhost)
+        string checkIp = (d.IpAddress ?? "").Trim();
+        bool isOfficeSubnet = checkIp.StartsWith("192.168.68.") || 
+                              checkIp.StartsWith("192.168.69.") || 
+                              checkIp.StartsWith("192.168.70.") || 
+                              checkIp.StartsWith("192.168.71.") || 
+                              checkIp == "127.0.0.1" || checkIp == "::1";
+
+        if (!isOfficeSubnet)
+        {
+            d.NetworkLocation = "Work From Home";
+        }
+        else if (string.IsNullOrWhiteSpace(d.NetworkLocation) || d.NetworkLocation == "Work From Home")
+        {
+            d.NetworkLocation = "In Office";
         }
     }
     return Results.Ok(devices);
@@ -538,6 +575,191 @@ app.MapDelete("/api/devices/{machineName}", (string machineName, HttpRequest htt
         return Results.Ok(new { Success = true, Message = $"Device '{machineName}' removed successfully." });
     }
     return Results.NotFound(new { Success = false, Message = $"Device '{machineName}' not found." });
+});
+
+// API: Update Asset & Inventory Info (Level 2 Enterprise Asset Registry)
+app.MapPost("/api/devices/{machineName}/asset-info", (
+    string machineName,
+    UpdateAssetInfoRequest req,
+    HttpRequest httpReq,
+    AuthService auth,
+    LiteDbService db) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out var currentUsername))
+    {
+        return Results.Unauthorized();
+    }
+
+    bool updated = db.UpdateAssetInfo(
+        machineName,
+        req.AssetTag,
+        req.Department,
+        req.EmployeeId,
+        req.AssetStatus,
+        req.PurchaseDate,
+        req.WarrantyExpiry,
+        req.AssetNotes,
+        req.AssetCategory);
+
+    if (updated)
+    {
+        db.LogAudit(machineName, "AssetManagement", true, true, 
+            $"User '{currentUsername}' updated asset registry for '{machineName}' (Tag: {req.AssetTag ?? "N/A"}, Dept: {req.Department ?? "N/A"}, Status: {req.AssetStatus ?? "In-Use"})",
+            actionBy: currentUsername, category: "Asset");
+        return Results.Ok(new { Success = true, Message = "Asset details updated successfully." });
+    }
+    return Results.NotFound(new { Success = false, Message = $"Device '{machineName}' not found." });
+});
+
+// API: Export Full Asset Inventory (CSV)
+app.MapGet("/api/inventory/export", (HttpRequest httpReq, AuthService auth, LiteDbService db) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out _)) return Results.Unauthorized();
+
+    var devices = db.GetAllDevices();
+    foreach (var d in devices)
+    {
+        var activeClient = EndpointHub.ConnectedClients.Values
+            .FirstOrDefault(c => c.MachineName.Equals(d.MachineName, StringComparison.OrdinalIgnoreCase));
+        d.IsOnline = activeClient != null;
+        if (activeClient != null)
+        {
+            if (!string.IsNullOrEmpty(activeClient.ClientVersion)) d.ClientVersion = activeClient.ClientVersion;
+            if (!string.IsNullOrEmpty(activeClient.HardwareId)) d.HardwareId = activeClient.HardwareId;
+        }
+    }
+
+    string Escape(string? val) => $"\"{(val ?? "").Replace("\"", "\"\"")}\"";
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine("Asset Name,Device Type,Serial / IMEI,Asset Tag,Assigned User,Employee ID,Department,Asset Status,Current Status,Agent Version,IP Address,Network Location,Location,Operating System,USB Lock,Software Block,Exfil Guard,Web Filter,Print Guard,Purchase Date,Warranty Expiry,Asset Notes,Last Seen (Local)");
+
+    foreach (var d in devices)
+    {
+        bool isAndroid = d.OsVersion?.Contains("Android", StringComparison.OrdinalIgnoreCase) == true;
+        string type = isAndroid ? "Android Mobile" : "Windows Laptop";
+        string location = !string.IsNullOrEmpty(d.City) ? $"{d.City}, {d.Country ?? ""}".Trim(',', ' ') : "Office Local Network";
+        string localTime = d.LastSeenUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+
+        sb.AppendLine(string.Join(",",
+            Escape(d.MachineName),
+            Escape(type),
+            Escape(d.HardwareId ?? "N/A"),
+            Escape(d.AssetTag ?? ""),
+            Escape(d.UserName),
+            Escape(d.EmployeeId ?? ""),
+            Escape(d.Department ?? ""),
+            Escape(d.AssetStatus ?? "In-Use"),
+            Escape(d.IsOnline ? "ONLINE" : "OFFLINE"),
+            Escape("v" + (d.ClientVersion ?? "1.0.0")),
+            Escape(d.IpAddress),
+            Escape(d.NetworkLocation),
+            Escape(location),
+            Escape(d.OsVersion),
+            Escape(d.UsbStorageBlocked ? "Blocked" : "Allowed"),
+            Escape(d.SoftwareInstallDisabled ? "Blocked" : "Allowed"),
+            Escape(d.ExternalFileTransferRestricted ? "Restricted" : "Allowed"),
+            Escape(d.WebFilteringBlocked ? "Filtered" : "Open"),
+            Escape(d.SelectivePrintRestricted ? "Enforced" : "Allowed"),
+            Escape(d.PurchaseDate ?? ""),
+            Escape(d.WarrantyExpiry ?? ""),
+            Escape(d.AssetNotes ?? ""),
+            Escape(localTime)
+        ));
+    }
+
+    var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+    return Results.File(bytes, "text/csv; charset=utf-8", $"CyberShield_Asset_Inventory_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+});
+
+// API: Register a Single Asset Manually (Pre-provisioned, Spare, or In-Use)
+app.MapPost("/api/inventory/register-asset", (
+    RegisterAssetItemDto req,
+    HttpRequest httpReq,
+    AuthService auth,
+    LiteDbService db) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out var currentUsername))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(req.MachineName) && string.IsNullOrWhiteSpace(req.HardwareId))
+    {
+        return Results.BadRequest(new { Success = false, Message = "Device Hostname or BIOS Serial/IMEI is required." });
+    }
+
+    var result = db.RegisterOrUpdateAsset(
+        req.MachineName,
+        req.HardwareId,
+        req.AssetTag,
+        req.UserName,
+        req.Department,
+        req.EmployeeId,
+        req.AssetStatus,
+        req.PurchaseDate,
+        req.WarrantyExpiry,
+        req.AssetNotes,
+        req.OsType,
+        req.AssetCategory);
+
+    if (result.Success)
+    {
+        db.LogAudit(result.Record?.MachineName ?? req.MachineName, "AssetRegistration", true, true,
+            $"User '{currentUsername}' registered/updated asset '{result.Record?.MachineName}' (Category: {req.AssetCategory ?? "Hardware"}, Tag: {req.AssetTag ?? "N/A"}, Status: {req.AssetStatus ?? "Spare / In Stock"})",
+            actionBy: currentUsername, category: "Asset");
+
+        return Results.Ok(new { Success = true, IsNew = result.IsNew, Message = result.Message, Device = result.Record });
+    }
+
+    return Results.BadRequest(new { Success = false, Message = result.Message });
+});
+
+// API: Bulk Register Assets via CSV/JSON (Enterprise Batch Ledger)
+app.MapPost("/api/inventory/bulk-register", (
+    List<RegisterAssetItemDto> items,
+    HttpRequest httpReq,
+    AuthService auth,
+    LiteDbService db) =>
+{
+    var token = AuthService.ExtractBearerToken(httpReq);
+    if (!auth.ValidateToken(token, out var currentUsername))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (items == null || items.Count == 0)
+    {
+        return Results.BadRequest(new { Success = false, Message = "No asset records provided in payload." });
+    }
+
+    var result = db.BulkRegisterAssets(items, currentUsername);
+    return Results.Ok(new
+    {
+        Success = true,
+        TotalProcessed = result.TotalProcessed,
+        CreatedCount = result.CreatedCount,
+        UpdatedCount = result.UpdatedCount,
+        ErrorCount = result.Errors.Count,
+        Errors = result.Errors
+    });
+});
+
+// API: Download Standard Asset Inventory CSV Sample Template
+app.MapGet("/api/inventory/sample-template", () =>
+{
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine("Asset Tag ID,Device Hostname,BIOS Serial / IMEI,Hardware Category,Assigned Employee,Department,Asset Status,Purchase Date,Warranty Expiry,Notes / Specs");
+    sb.AppendLine("HEXA-LP-101,LP-DELL-5420,8FC29B3,Windows Laptop / PC,Rahul Sharma,Tech / IT,In-Use,2024-02-15,2027-02-15,Dell Latitude 5420 - Core i7 16GB RAM");
+    sb.AppendLine("HEXA-MOB-01,SAMSUNG-M055F,358941209876543,Android Mobile,Amit Verma,Sales & BD,In-Use,2024-03-01,2025-03-01,Field Sales Samsung M05");
+    sb.AppendLine("HEXA-PRN-01,PRINTER-FLOOR2,CNB3K98765,Network Printer / Scanner,,Operations,In-Use,2024-01-10,2026-01-10,HP LaserJet Pro MFP M428fdw - IP 192.168.1.50");
+    sb.AppendLine("HEXA-CAM-08,CCTV-MAIN-GATE,CPPL20240987,CCTV / IP Camera,,Security,In-Use,2024-03-01,2026-03-01,Hikvision 4MP IP Dome Camera");
+    sb.AppendLine("HEXA-LP-102,LP-LENOVO-T14,PF3X98A,Windows Laptop / PC,,Tech / IT,Spare / In Stock,2024-06-10,2027-06-10,Box Pack in IT Room Shelf 2");
+
+    var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+    return Results.File(bytes, "text/csv; charset=utf-8", "CyberShield_Asset_Inventory_Sample_Template.csv");
 });
 
 // API: Recent Audit Trail (supports ?limit=N)
@@ -614,9 +836,13 @@ app.MapPost("/api/policies/dispatch", async (
     {
         return Results.BadRequest(new { Success = false, Message = "Access Denied: You do not have permission to manage Print Security policies." });
     }
-    if ((targetPolicy == PolicyType.LockWorkstation || targetPolicy == PolicyType.RestartLaptop || request.Policy == 99) && !permissions.CanEmergencyAction)
+    if (targetPolicy == PolicyType.BlockSamsungAccount && !permissions.CanToggleSoftwareBlock)
     {
-        return Results.BadRequest(new { Success = false, Message = "Access Denied: You do not have permission to execute emergency actions (Lock/Restart/Wipe)." });
+        return Results.BadRequest(new { Success = false, Message = "Access Denied: You do not have permission to modify Account Restrictions." });
+    }
+    if ((targetPolicy == PolicyType.LockWorkstation || targetPolicy == PolicyType.RestartLaptop || targetPolicy == PolicyType.ClearScreenLock || targetPolicy == PolicyType.PlayLostAlarm || request.Policy == 99 || targetPolicy == PolicyType.RemoteWipe) && !permissions.CanEmergencyAction)
+    {
+        return Results.BadRequest(new { Success = false, Message = "Access Denied: You do not have permission to execute emergency actions (Lock/Restart/Wipe/Screen Unlock/Alarm)." });
     }
 
     string? payload = request.Payload;
@@ -706,6 +932,40 @@ app.MapPost("/api/policies/dispatch", async (
         return Results.Ok(new { Success = true, Message = $"Dispatched to {clientName}." });
     }
 });
+
+// API: Android Enterprise Zero-Touch / QR Code Auto-Enrollment Payload
+app.MapGet("/api/android/provisioning-payload", (HttpRequest httpReq) =>
+{
+    var apkPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "downloads", "CyberShield-MDM-Client.apk");
+    if (!File.Exists(apkPath))
+    {
+        apkPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "downloads", "CyberShield-MDM-Client.apk");
+    }
+
+    string checksum = "";
+    if (File.Exists(apkPath))
+    {
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        using var stream = File.OpenRead(apkPath);
+        var hash = sha.ComputeHash(stream);
+        checksum = Convert.ToBase64String(hash)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
+    }
+
+    var scheme = httpReq.Scheme;
+    var host = httpReq.Host.Value;
+    var baseUrl = $"{scheme}://{host}";
+
+    return Results.Ok(new
+    {
+        packageChecksum = checksum,
+        component = "com.cybershield.mdm/com.cybershield.mdm.MdmDeviceAdminReceiver",
+        defaultApkUrl = $"{baseUrl}/downloads/CyberShield-MDM-Client.apk",
+        defaultServerUrl = $"{baseUrl}/hubs/endpoints"
+    });
+}).AllowAnonymous();
 
 // === Web Filtering Custom Domain APIs ===
 app.MapGet("/api/webfilter/domains", (HttpRequest httpReq, AuthService auth, LiteDbService db) =>
@@ -1246,4 +1506,16 @@ public class FleetPowerRequest
     public int DelaySeconds { get; set; } = 300;
     public string? CustomMessage { get; set; }
     public string? MachineName { get; set; }
+}
+
+public class UpdateAssetInfoRequest
+{
+    public string? AssetTag { get; set; }
+    public string? AssetCategory { get; set; }
+    public string? Department { get; set; }
+    public string? EmployeeId { get; set; }
+    public string? AssetStatus { get; set; }
+    public string? PurchaseDate { get; set; }
+    public string? WarrantyExpiry { get; set; }
+    public string? AssetNotes { get; set; }
 }

@@ -9,5 +9,11 @@ public enum PolicyType
     SelectivePrintRestriction = 5,
     LockWorkstation = 10,
     RestartLaptop = 11,
-    SendNotification = 12
+    SendNotification = 12,
+    ClearScreenLock = 15,
+    BlockSamsungAccount = 16,
+    PlayLostAlarm = 18,
+    ForceGpsAlwaysOn = 19,
+    HideSyncNotification = 21,
+    RemoteWipe = 99
 }

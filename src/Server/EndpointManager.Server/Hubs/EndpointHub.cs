@@ -58,29 +58,31 @@ public class EndpointHub : Hub<IEndpointClientContract>
         heartbeat.ConnectionId = Context.ConnectionId;
         heartbeat.TimestampUtc = DateTime.UtcNow;
 
-        // Purge any stale/dead connection entries for this same host
+        // Purge any stale/dead connection entries for this same host or hardware
         foreach (var kvp in ConnectedClients.ToArray())
         {
-            if (kvp.Key != Context.ConnectionId && kvp.Value.MachineName.Equals(heartbeat.MachineName, StringComparison.OrdinalIgnoreCase))
+            bool sameMachine = kvp.Value.MachineName.Equals(heartbeat.MachineName, StringComparison.OrdinalIgnoreCase);
+            bool sameHardware = !string.IsNullOrEmpty(heartbeat.HardwareId) && 
+                                !string.IsNullOrEmpty(kvp.Value.HardwareId) && 
+                                kvp.Value.HardwareId.Equals(heartbeat.HardwareId, StringComparison.OrdinalIgnoreCase);
+
+            if (kvp.Key != Context.ConnectionId && (sameMachine || sameHardware))
             {
                 ConnectedClients.TryRemove(kvp.Key, out _);
             }
         }
 
-        // Ensure NetworkLocation is assigned
-        if (string.IsNullOrWhiteSpace(heartbeat.NetworkLocation))
-        {
-            var httpCtx = Context.GetHttpContext();
-            var remoteIp = httpCtx?.Connection.RemoteIpAddress?.ToString() ?? "";
-            if (remoteIp.StartsWith("192.168.") || remoteIp.StartsWith("10.") || remoteIp.StartsWith("172.") || remoteIp == "127.0.0.1" || remoteIp == "::1")
-            {
-                heartbeat.NetworkLocation = "In Office";
-            }
-            else
-            {
-                heartbeat.NetworkLocation = "Work From Home";
-            }
-        }
+        // Ensure accurate NetworkLocation:
+        // A device is ONLY "In Office" if its IP belongs to the official Office LAN subnet (192.168.68.0/22: 192.168.68.x - 192.168.71.x or localhost)
+        // All personal mobile hotspots (10.x.x.x, 192.168.43.x, 172.20.10.x), home broadband, and 4G/5G cellular are "Work From Home"
+        string devIp = (heartbeat.IpAddress ?? "").Trim();
+        bool isOfficeSubnet = devIp.StartsWith("192.168.68.") || 
+                              devIp.StartsWith("192.168.69.") || 
+                              devIp.StartsWith("192.168.70.") || 
+                              devIp.StartsWith("192.168.71.") || 
+                              devIp == "127.0.0.1" || devIp == "::1";
+
+        heartbeat.NetworkLocation = isOfficeSubnet ? "In Office" : "Work From Home";
 
         ConnectedClients[Context.ConnectionId] = heartbeat;
 

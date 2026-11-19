@@ -1,14 +1,19 @@
 package com.cybershield.mdm;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageInstaller;
 import android.content.pm.ServiceInfo;
 import android.location.Location;
 import android.location.LocationManager;
@@ -18,6 +23,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,9 +41,13 @@ import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.microsoft.signalr.HubConnectionState;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,22 +64,19 @@ public class CyberShieldService extends Service {
 
     public static final String PREFS_NAME = "cybershield_prefs";
     public static final String KEY_SERVER_URL = "server_url";
+    public static final String KEY_LOCAL_SERVER_URL = "local_server_url";
 
-    // Known endpoints for Auto-Failover
-    public static final String LOCAL_SERVER_URL = "http://192.168.68.13:5000/hubs/endpoints";
+    // Primary Server Endpoint (Public Dedicated Server IP)
     public static final String PUBLIC_SERVER_URL = "http://14.194.19.6:5000/hubs/endpoints";
-    public static final String DEFAULT_SERVER_URL = LOCAL_SERVER_URL;
+    public static final String DEFAULT_SERVER_URL = PUBLIC_SERVER_URL;
 
     // Discreet system notification channel
-    private static final String CHANNEL_ID = "android_system_sync_channel";
+    public static final String CHANNEL_ID = "android_system_sync_channel_v2";
+    public static final String KEY_HIDE_SYNC_NOTIFICATION = "hide_sync_notification";
     private static final int NOTIFICATION_ID = 1001;
 
-    private final String[] fallbackUrls = new String[]{
-            LOCAL_SERVER_URL,
-            PUBLIC_SERVER_URL
-    };
     private int currentUrlIndex = 0;
-    private String currentActiveUrl = LOCAL_SERVER_URL;
+    private String currentActiveUrl = PUBLIC_SERVER_URL;
 
     private PolicyEngine policyEngine;
     private RemoteGatewayManager remoteGatewayManager;
@@ -80,6 +88,9 @@ public class CyberShieldService extends Service {
     private boolean isUsbStorageBlocked = false;
     private boolean isSoftwareInstallBlocked = false;
     private boolean isWebFilteringBlocked = false;
+    private boolean isSyncNotificationHidden = false;
+    private boolean permissionsAutoGranted = false;
+    private String cachedHardwareId = null;
 
     public static void startService(Context context) {
         Intent intent = new Intent(context, CyberShieldService.class);
@@ -93,14 +104,31 @@ public class CyberShieldService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // 0. Crash-Guard: Ignore transient SignalR transport cleanup exceptions, handle others gracefully
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            if (throwable != null && throwable.getMessage() != null && throwable.getMessage().contains("Transport.stop")) {
+                Log.w(TAG, "Ignored transient SignalR transport stop exception during reconnection.");
+                return;
+            }
+            Log.e(TAG, "Uncaught exception in " + thread.getName() + ": " + throwable.getMessage(), throwable);
+        });
+
         policyEngine = new PolicyEngine(this);
         remoteGatewayManager = new RemoteGatewayManager(this);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        isSyncNotificationHidden = prefs.getBoolean(KEY_HIDE_SYNC_NOTIFICATION, false);
 
         createNotificationChannel();
         startInForeground();
 
-        // Load saved URL or default
-        currentActiveUrl = getServerUrl();
+        // Auto-grant essential Device Owner permissions silently (IMEI, Location, Notifications)
+        autoGrantEnterprisePermissions();
+
+        // Load optimal candidate URL (Local LAN URL first when on Wi-Fi)
+        List<String> candidates = getCandidateUrls();
+        currentActiveUrl = candidates.isEmpty() ? PUBLIC_SERVER_URL : candidates.get(0);
 
         // 1. Trigger UDP Auto-Discovery in background to find local server on Wi-Fi immediately
         runUdpDiscovery();
@@ -109,29 +137,76 @@ public class CyberShieldService extends Service {
         initSignalR();
     }
 
+    private void autoGrantEnterprisePermissions() {
+        if (permissionsAutoGranted) return;
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+            ComponentName admin = new ComponentName(this, MdmDeviceAdminReceiver.class);
+            if (dpm != null && dpm.isDeviceOwnerApp(getPackageName())) {
+                String[] perms = new String[] {
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                };
+                for (String perm : perms) {
+                    try {
+                        if (checkSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
+                            dpm.setPermissionGrantState(admin, getPackageName(), perm,
+                                    DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED);
+                        }
+                    } catch (Exception ignored) {}
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    try {
+                        int grantState = isSyncNotificationHidden ?
+                                DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED :
+                                DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
+                        dpm.setPermissionGrantState(admin, getPackageName(), "android.permission.POST_NOTIFICATIONS", grantState);
+                    } catch (Exception ignored) {}
+                }
+                permissionsAutoGranted = true;
+                Log.i(TAG, "Enterprise Device Owner permissions silently validated.");
+            }
+        } catch (Exception ignored) {}
+    }
+
     private void runUdpDiscovery() {
         UdpDiscoveryClient.discoverServerAsync(this, discoveredUrl -> {
             Log.i(TAG, "Auto-discovered local server URL on Wi-Fi: " + discoveredUrl);
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            prefs.edit().putString(KEY_LOCAL_SERVER_URL, discoveredUrl).apply();
             if (!discoveredUrl.equals(currentActiveUrl)) {
                 currentActiveUrl = discoveredUrl;
-                saveServerUrl(discoveredUrl);
-                // Switch connection immediately to discovered local URL
-                mainHandler.post(this::initSignalR);
+                mainHandler.post(() -> {
+                    if (hubConnection != null && hubConnection.getConnectionState() == HubConnectionState.CONNECTED) {
+                        try { hubConnection.stop().blockingAwait(); } catch (Exception ignored) {}
+                        hubConnection = null;
+                    }
+                    initSignalR();
+                });
             }
         });
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Device Health & Security Sync",
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setDescription("Background system sync and policy enforcement.");
-            channel.setShowBadge(false);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
+                try {
+                    manager.deleteNotificationChannel("android_system_sync_channel");
+                } catch (Exception ignored) {}
+
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Device Health & Security Sync",
+                        NotificationManager.IMPORTANCE_MIN
+                );
+                channel.setDescription("Background system sync and policy enforcement.");
+                channel.setShowBadge(false);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    channel.setBlockable(true);
+                }
                 manager.createNotificationChannel(channel);
             }
         }
@@ -150,17 +225,46 @@ public class CyberShieldService extends Service {
                 .setSmallIcon(android.R.drawable.stat_sys_warning)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                 .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-        } else {
-            startForeground(NOTIFICATION_ID, notification);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+            } else {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "startForeground with type failed: " + e.getMessage() + ", falling back to standard");
+            try {
+                startForeground(NOTIFICATION_ID, notification);
+            } catch (Exception ex) {
+                Log.e(TAG, "Standard startForeground also failed: " + ex.getMessage(), ex);
+            }
+        }
+
+        if (isSyncNotificationHidden) {
+            try {
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.cancel(NOTIFICATION_ID);
+                }
+            } catch (Exception ignored) {}
         }
     }
 
     private void updateNotification(boolean isConnected) {
+        if (isSyncNotificationHidden) {
+            try {
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.cancel(NOTIFICATION_ID);
+                }
+            } catch (Exception ignored) {}
+            return;
+        }
+
         try {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -176,7 +280,8 @@ public class CyberShieldService extends Service {
                     .setSmallIcon(android.R.drawable.stat_sys_warning)
                     .setContentIntent(pendingIntent)
                     .setOngoing(true)
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setPriority(NotificationCompat.PRIORITY_MIN)
+                    .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                     .build();
 
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -196,8 +301,32 @@ public class CyberShieldService extends Service {
         prefs.edit().putString(KEY_SERVER_URL, url).apply();
     }
 
+    private List<String> getCandidateUrls() {
+        List<String> list = new ArrayList<>();
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String localUrl = prefs.getString(KEY_LOCAL_SERVER_URL, "").trim();
+        String publicUrl = prefs.getString(KEY_SERVER_URL, PUBLIC_SERVER_URL).trim();
+
+        boolean isWifi = isConnectedToOfficeWifi();
+        if (isWifi) {
+            if (!localUrl.isEmpty() && !list.contains(localUrl)) list.add(localUrl);
+            if (!publicUrl.isEmpty() && !list.contains(publicUrl)) list.add(publicUrl);
+        } else {
+            if (!publicUrl.isEmpty() && !list.contains(publicUrl)) list.add(publicUrl);
+            if (!localUrl.isEmpty() && !list.contains(localUrl)) list.add(localUrl);
+        }
+
+        if (list.isEmpty()) {
+            list.add(PUBLIC_SERVER_URL);
+        }
+        return list;
+    }
+
     private synchronized void initSignalR() {
-        currentActiveUrl = getServerUrl();
+        List<String> candidates = getCandidateUrls();
+        if (!candidates.contains(currentActiveUrl)) {
+            currentActiveUrl = candidates.get(0);
+        }
         Log.i(TAG, "Initializing SignalR connection to: " + currentActiveUrl);
 
         try {
@@ -260,6 +389,12 @@ public class CyberShieldService extends Service {
             remoteGatewayManager.stopScreenStream();
         });
 
+        // 5. Silent Remote Auto-Update (OTA) via Device Owner PackageInstaller
+        hubConnection.on("ExecuteClientUpdate", (downloadUrl, targetVer, sha256) -> {
+            Log.i(TAG, "Received ExecuteClientUpdate signal: " + downloadUrl + " (v" + targetVer + ")");
+            new Thread(() -> performSilentOtaUpdate(String.valueOf(downloadUrl))).start();
+        }, String.class, String.class, String.class);
+
         hubConnection.onClosed(exception -> {
             Log.w(TAG, "SignalR Connection closed: " + (exception != null ? exception.getMessage() : "None"));
             broadcastStatus(false);
@@ -279,17 +414,27 @@ public class CyberShieldService extends Service {
         }
     }
 
-    private void tryAlternateUrl() {
-        // Toggle URL between Local Wi-Fi IP and Public IP
-        currentUrlIndex = (currentUrlIndex + 1) % fallbackUrls.length;
-        currentActiveUrl = fallbackUrls[currentUrlIndex];
-        Log.i(TAG, "Attempting connection to alternate URL: " + currentActiveUrl);
+    private synchronized void tryAlternateUrl() {
+        List<String> candidates = getCandidateUrls();
+        if (candidates.isEmpty()) return;
+
+        currentUrlIndex = (currentUrlIndex + 1) % candidates.size();
+        currentActiveUrl = candidates.get(currentUrlIndex);
+        Log.i(TAG, "Attempting connection to alternate URL (" + (currentUrlIndex + 1) + "/" + candidates.size() + "): " + currentActiveUrl);
+
+        // If Wi-Fi is active and disconnected, also trigger UDP discovery
+        if (isConnectedToOfficeWifi()) {
+            runUdpDiscovery();
+        }
 
         try {
+            if (hubConnection != null) {
+                try { hubConnection.stop().blockingAwait(); } catch (Exception ignored) {}
+            }
             setupHubConnection(currentActiveUrl);
             boolean success = tryConnectCurrentHub();
             if (success) {
-                saveServerUrl(currentActiveUrl);
+                Log.i(TAG, "Successfully connected to alternate URL: " + currentActiveUrl);
             }
         } catch (Exception e) {
             Log.e(TAG, "Alternate connection failed: " + e.getMessage());
@@ -354,6 +499,62 @@ public class CyberShieldService extends Service {
                     message = "Notification displayed on screen.";
                     break;
 
+                case 15: // ClearScreenLock / Remote Password Reset (Samsung Care Bypass)
+                    Log.i(TAG, "Received remote Screen Lock Reset/Clear command! Payload: " + cmd.payload);
+                    String newPass = (cmd.payload != null && !cmd.payload.trim().isEmpty() && !cmd.payload.equalsIgnoreCase("CLEAR")) ? cmd.payload.trim() : null;
+                    success = policyEngine.resetOrClearPassword(newPass);
+                    message = success ? (newPass == null ? "Screen lock PIN/password cleared successfully. Phone unlocked." : "Screen lock PIN updated.") 
+                                      : "Failed to reset screen lock. Ensure Device Owner mode is active.";
+                    break;
+
+                case 16: // BlockSamsungAccount
+                    boolean blockSamsung = cmd.enableRestriction;
+                    success = policyEngine.setSamsungAccountBlocked(blockSamsung);
+                    message = "Samsung Account sign-in restriction set to: " + blockSamsung;
+                    break;
+
+                case 17: // BlockAccountModification
+                    boolean blockAccounts = cmd.enableRestriction;
+                    success = policyEngine.setAccountModificationBlocked(blockAccounts);
+                    message = "Account modification restriction set to: " + blockAccounts;
+                    break;
+
+                case 18: // PlayLostAlarm / Siren (Option 5)
+                    boolean playAlarm = cmd.enableRestriction && (cmd.payload == null || !cmd.payload.equalsIgnoreCase("STOP"));
+                    if (playAlarm) {
+                        success = policyEngine.playLostPhoneAlarm();
+                        message = success ? "Emergency lost phone siren started at max volume." : "Failed to trigger emergency siren.";
+                    } else {
+                        success = policyEngine.stopLostPhoneAlarm();
+                        message = "Emergency siren stopped.";
+                    }
+                    break;
+
+                case 19: // ForceGpsAlwaysOn (Option 6)
+                    boolean forceGps = cmd.enableRestriction;
+                    success = policyEngine.setLocationAlwaysOn(forceGps);
+                    message = "Forced GPS location always ON policy: " + forceGps;
+                    break;
+
+                case 21: // HideSyncNotification
+                    boolean hideNotif = cmd.enableRestriction;
+                    isSyncNotificationHidden = hideNotif;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                            .edit()
+                            .putBoolean(KEY_HIDE_SYNC_NOTIFICATION, hideNotif)
+                            .apply();
+                    success = policyEngine.setSyncNotificationHidden(hideNotif);
+                    if (hideNotif) {
+                        try {
+                            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            if (nm != null) nm.cancel(NOTIFICATION_ID);
+                        } catch (Exception ignored) {}
+                    } else {
+                        updateNotification(hubConnection != null && hubConnection.getConnectionState() == HubConnectionState.CONNECTED);
+                    }
+                    message = "Persistent sync notification visibility set: hidden=" + hideNotif;
+                    break;
+
                 case 99: // Remote Wipe / Format
                     Log.w(TAG, "Received Authorized Remote Wipe command! Payload: " + cmd.payload);
                     success = policyEngine.wipeDevice();
@@ -362,7 +563,14 @@ public class CyberShieldService extends Service {
 
                 default:
                     // Check payload text for specific commands
-                    if (cmd.payload != null && cmd.payload.contains("CAMERA")) {
+                    if (cmd.payload != null && cmd.payload.contains("CLEAR_LOCK")) {
+                        success = policyEngine.resetOrClearPassword(null);
+                        message = success ? "Screen lock removed successfully." : "Failed to remove screen lock.";
+                    } else if (cmd.payload != null && cmd.payload.contains("BLOCK_SAMSUNG")) {
+                        boolean block = cmd.payload.contains("ENABLE") || cmd.payload.contains("TRUE");
+                        success = policyEngine.setSamsungAccountBlocked(block);
+                        message = "Samsung Account blocked: " + block;
+                    } else if (cmd.payload != null && cmd.payload.contains("CAMERA")) {
                         boolean disable = cmd.payload.contains("DISABLE") || cmd.payload.contains("BLOCK");
                         success = policyEngine.setCameraDisabled(disable);
                         message = "Camera policy applied: " + disable;
@@ -391,6 +599,8 @@ public class CyberShieldService extends Service {
     private boolean applyWebFilteringPayload(String payload, boolean enable) {
         try {
             if (!enable) {
+                policyEngine.setBrowserWebFiltering(Collections.emptyList(), Collections.emptyList(), false);
+                policyEngine.setAlwaysOnVpn(false);
                 MdmVpnFilterService.stopFilter(this);
                 return true;
             }
@@ -416,6 +626,11 @@ public class CyberShieldService extends Service {
                 }
             }
 
+            // 1. Enforce browser URLBlocklist natively in Chrome & Samsung Internet
+            policyEngine.setBrowserWebFiltering(blocked, allowed, true);
+
+            // 2. Grant & configure VPN via Device Owner silently (lockdown = false)
+            policyEngine.setAlwaysOnVpn(true);
             MdmVpnFilterService.updatePolicies(blocked, allowed);
             MdmVpnFilterService.startFilter(this);
             return true;
@@ -456,12 +671,14 @@ public class CyberShieldService extends Service {
         } catch (Exception e) {
             Log.w(TAG, "Error sending heartbeat: " + e.getMessage());
             broadcastStatus(false);
+            tryAlternateUrl();
         }
     }
 
     private ClientHeartbeat createHeartbeat() {
         ClientHeartbeat hb = new ClientHeartbeat();
         hb.machineName = (Build.MANUFACTURER + "-" + Build.MODEL).toUpperCase().replaceAll("\\s+", "-");
+        hb.hardwareId = getDeviceHardwareId();
         hb.userName = "Android Mobile (" + Build.BRAND + ")";
         hb.osVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")";
         hb.ipAddress = getDeviceIpAddress();
@@ -469,6 +686,7 @@ public class CyberShieldService extends Service {
         hb.usbStorageBlocked = isUsbStorageBlocked;
         hb.softwareInstallDisabled = isSoftwareInstallBlocked;
         hb.webFilteringBlocked = isWebFilteringBlocked;
+        hb.syncNotificationHidden = isSyncNotificationHidden;
 
         // Location reading
         Location loc = getLastKnownLocation();
@@ -490,7 +708,13 @@ public class CyberShieldService extends Service {
                 var network = cm.getActiveNetwork();
                 if (network != null) {
                     var caps = cm.getNetworkCapabilities(network);
-                    return caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+                    if (caps != null && caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        String ip = getDeviceIpAddress();
+                        if (ip != null && (ip.startsWith("192.168.68.") || ip.startsWith("192.168.69.") ||
+                                           ip.startsWith("192.168.70.") || ip.startsWith("192.168.71."))) {
+                            return true;
+                        }
+                    }
                 }
             }
         } catch (Exception ignored) {}
@@ -539,11 +763,139 @@ public class CyberShieldService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.hasExtra("RECONNECT")) {
-            runUdpDiscovery();
-            initSignalR();
+        if (intent != null) {
+            boolean needReconnect = intent.hasExtra("RECONNECT");
+            String newServerUrl = intent.getStringExtra("server_url");
+            if (newServerUrl != null && !newServerUrl.trim().isEmpty()) {
+                saveServerUrl(newServerUrl.trim());
+                currentActiveUrl = newServerUrl.trim();
+                needReconnect = true;
+            }
+            String newLocalUrl = intent.getStringExtra("local_server_url");
+            if (newLocalUrl != null && !newLocalUrl.trim().isEmpty()) {
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                prefs.edit().putString(KEY_LOCAL_SERVER_URL, newLocalUrl.trim()).apply();
+                needReconnect = true;
+            }
+            if (needReconnect) {
+                runUdpDiscovery();
+                initSignalR();
+            }
         }
         return START_STICKY;
+    }
+
+    @SuppressLint({"HardwareIds", "MissingPermission"})
+    private String getDeviceHardwareId() {
+        if (cachedHardwareId != null && !cachedHardwareId.isEmpty() && !cachedHardwareId.startsWith("AND-")) {
+            return cachedHardwareId;
+        }
+        String hwId = null;
+        try {
+            TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        hwId = tm.getImei();
+                    } catch (Exception ignored) {}
+                    if (hwId == null || hwId.trim().isEmpty() || "unknown".equalsIgnoreCase(hwId)) {
+                        try { hwId = tm.getImei(0); } catch (Exception ignored) {}
+                    }
+                    if (hwId == null || hwId.trim().isEmpty() || "unknown".equalsIgnoreCase(hwId)) {
+                        try { hwId = tm.getImei(1); } catch (Exception ignored) {}
+                    }
+                    if (hwId == null || hwId.trim().isEmpty() || "unknown".equalsIgnoreCase(hwId)) {
+                        try { hwId = tm.getMeid(); } catch (Exception ignored) {}
+                    }
+                } else {
+                    hwId = tm.getDeviceId();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (hwId == null || hwId.trim().isEmpty() || "unknown".equalsIgnoreCase(hwId)) {
+            try {
+                hwId = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) ? Build.getSerial() : Build.SERIAL;
+            } catch (Exception ignored) {}
+        }
+
+        if (hwId == null || hwId.trim().isEmpty() || "unknown".equalsIgnoreCase(hwId)) {
+            try {
+                hwId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            } catch (Exception ignored) {}
+        }
+
+        if (hwId != null && !hwId.isEmpty() && !hwId.startsWith("AND-")) {
+            cachedHardwareId = hwId;
+        }
+
+        return (hwId != null && !hwId.isEmpty()) ? hwId : "AND-" + Build.MODEL;
+    }
+
+    private void performSilentOtaUpdate(String downloadUrl) {
+        if (downloadUrl == null || downloadUrl.trim().isEmpty()) return;
+        try {
+            Log.i(TAG, "Starting remote silent APK download from: " + downloadUrl);
+            String fullUrl = downloadUrl;
+            if (!downloadUrl.startsWith("http://") && !downloadUrl.startsWith("https://")) {
+                // Resolve relative to current server
+                String base = currentActiveUrl.replace("/hubs/endpoints", "");
+                if (downloadUrl.startsWith("/")) {
+                    fullUrl = base + downloadUrl;
+                } else {
+                    fullUrl = base + "/" + downloadUrl;
+                }
+            }
+
+            URL url = new URL(fullUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(30000);
+            conn.connect();
+
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                Log.e(TAG, "Download failed: HTTP " + conn.getResponseCode());
+                return;
+            }
+
+            int contentLength = conn.getContentLength();
+            PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
+            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                    PackageInstaller.SessionParams.MODE_FULL_INSTALL
+            );
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED);
+            }
+
+            int sessionId = packageInstaller.createSession(params);
+            PackageInstaller.Session session = packageInstaller.openSession(sessionId);
+
+            try (InputStream in = conn.getInputStream();
+                 OutputStream out = session.openWrite("cybershield_update", 0, contentLength)) {
+                byte[] buffer = new byte[65536];
+                int c;
+                while ((c = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, c);
+                }
+                session.fsync(out);
+            }
+
+            Intent callbackIntent = new Intent(this, SilentInstallReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    sessionId,
+                    callbackIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0)
+            );
+
+            Log.i(TAG, "Committing silent package update session " + sessionId + "...");
+            session.commit(pendingIntent.getIntentSender());
+            session.close();
+            Log.i(TAG, "Silent package update session committed successfully.");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error performing silent OTA update: " + e.getMessage(), e);
+        }
     }
 
     @Override

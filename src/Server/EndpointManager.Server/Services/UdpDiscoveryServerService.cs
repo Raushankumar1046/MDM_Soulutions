@@ -48,8 +48,14 @@ public class UdpDiscoveryServerService : BackgroundService
                         {
                             var announcePayload = $"{DiscoveryConstants.AnnouncePrefix}http://{lanIp}:{_serverHttpPort}/hubs/endpoints";
                             var bytes = Encoding.UTF8.GetBytes(announcePayload);
-                            var broadcastEndpoint = new IPEndPoint(IPAddress.Broadcast, DiscoveryConstants.UdpPort);
-                            await udpServer.SendAsync(bytes, bytes.Length, broadcastEndpoint);
+                            foreach (var ep in GetBroadcastEndpoints())
+                            {
+                                try
+                                {
+                                    await udpServer.SendAsync(bytes, bytes.Length, ep);
+                                }
+                                catch { }
+                            }
                         }
 
                         await Task.Delay(5000, stoppingToken);
@@ -97,6 +103,59 @@ public class UdpDiscoveryServerService : BackgroundService
             }
             catch (OperationCanceledException) { }
         }
+    }
+
+    private static List<IPEndPoint> GetBroadcastEndpoints()
+    {
+        var endpoints = new List<IPEndPoint>
+        {
+            new IPEndPoint(IPAddress.Broadcast, DiscoveryConstants.UdpPort)
+        };
+
+        try
+        {
+            var interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                .Where(n => n.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                            n.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback);
+
+            foreach (var ni in interfaces)
+            {
+                var ipProps = ni.GetIPProperties();
+                foreach (var u in ipProps.UnicastAddresses)
+                {
+                    if (u.Address.AddressFamily == AddressFamily.InterNetwork && u.IPv4Mask != null)
+                    {
+                        var ipBytes = u.Address.GetAddressBytes();
+                        var maskBytes = u.IPv4Mask.GetAddressBytes();
+                        var broadcastBytes = new byte[4];
+                        for (int i = 0; i < 4; i++)
+                        {
+                            broadcastBytes[i] = (byte)(ipBytes[i] | ~maskBytes[i]);
+                        }
+                        var subnetBroadcast = new IPAddress(broadcastBytes);
+                        var ep = new IPEndPoint(subnetBroadcast, DiscoveryConstants.UdpPort);
+                        if (!endpoints.Any(e => e.Address.Equals(ep.Address)))
+                        {
+                            endpoints.Add(ep);
+                        }
+                    }
+                }
+                foreach (var gw in ipProps.GatewayAddresses)
+                {
+                    if (gw.Address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(gw.Address))
+                    {
+                        var gwEp = new IPEndPoint(gw.Address, DiscoveryConstants.UdpPort);
+                        if (!endpoints.Any(e => e.Address.Equals(gwEp.Address)))
+                        {
+                            endpoints.Add(gwEp);
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
+
+        return endpoints;
     }
 
     public static string GetLocalLanIp()

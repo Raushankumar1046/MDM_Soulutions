@@ -175,6 +175,7 @@ public class Worker : BackgroundService
                             {
                                 ConnectionId = _hubConnection.ConnectionId ?? string.Empty,
                                 MachineName = Environment.MachineName,
+                                HardwareId = GetHardwareId(),
                                 UserName = Environment.UserName,
                                 IpAddress = GetLocalIpAddress(),
                                 OsVersion = Environment.OSVersion.ToString(),
@@ -522,44 +523,32 @@ public class Worker : BackgroundService
             }
         }
 
-        // 2. Resolve Remote / Public Static IP (for Mobile Hotspot / Work From Home)
+        // 2. Resolve Dedicated Central Server URL
         const string DefaultRemoteUrl = "http://14.194.19.6:5000/hubs/endpoints";
         string remoteUrlToUse = !string.IsNullOrEmpty(configuredRemoteUrl) && !configuredRemoteUrl.Equals("auto", StringComparison.OrdinalIgnoreCase)
             ? configuredRemoteUrl
             : DefaultRemoteUrl;
         var normalizedRemote = NormalizeHubUrl(remoteUrlToUse);
 
-        // 3. Known Office LAN Fallback (if UDP broadcast was blocked by office router/switch)
-        const string DefaultOfficeLanUrl = "http://192.168.68.13:5000/hubs/endpoints";
-        const string DefaultLocalhostUrl = "http://127.0.0.1:5000/hubs/endpoints";
-
-        // 4. Test Remote Endpoint first (Fast connection for Mobile Hotspot / WFH)
-        _logger.LogInformation("Testing reachability for remote server: {Url}...", normalizedRemote);
+        // 3. Test Central Server Endpoint
+        _logger.LogInformation("Testing reachability for central server: {Url}...", normalizedRemote);
         if (await IsTcpReachableAsync(normalizedRemote, TimeSpan.FromSeconds(2.0)))
         {
-            _logger.LogInformation("Remote server is reachable: {Url} (Work From Home)", normalizedRemote);
-            Program.LogRuntime($"[RESOLVED] Remote server is reachable: {normalizedRemote} (Work From Home)");
-            return (normalizedRemote, "Work From Home");
+            _logger.LogInformation("Central server is reachable: {Url}", normalizedRemote);
+            Program.LogRuntime($"[RESOLVED] Central server is reachable: {normalizedRemote}");
+            return (normalizedRemote, "Online");
         }
 
-        // 5. Test Office LAN Fallback (for In Office when UDP was blocked)
-        _logger.LogInformation("Testing reachability for Office LAN fallback: {Url}...", DefaultOfficeLanUrl);
-        if (await IsTcpReachableAsync(DefaultOfficeLanUrl, TimeSpan.FromSeconds(1.0)))
-        {
-            _logger.LogInformation("Office LAN fallback is reachable: {Url} (In Office)", DefaultOfficeLanUrl);
-            Program.LogRuntime($"[RESOLVED] Office LAN fallback is reachable: {DefaultOfficeLanUrl} (In Office)");
-            return (DefaultOfficeLanUrl, "In Office");
-        }
-
-        // 6. Test Localhost fallback (if testing directly on server)
+        // 4. Test Localhost fallback (only if running directly on the server machine itself)
+        const string DefaultLocalhostUrl = "http://127.0.0.1:5000/hubs/endpoints";
         if (await IsTcpReachableAsync(DefaultLocalhostUrl, TimeSpan.FromSeconds(0.5)))
         {
             return (DefaultLocalhostUrl, "Localhost");
         }
 
-        // Fallback: Default to Remote URL so SignalR can attempt HTTP/WebSocket handshake
-        _logger.LogWarning("TCP probe didn't resolve an immediate endpoint. Falling back to remote: {Url}", normalizedRemote);
-        return (normalizedRemote, "Work From Home");
+        // Fallback: Default to Central Server URL so SignalR can attempt HTTP/WebSocket handshake
+        _logger.LogWarning("TCP probe didn't resolve an immediate endpoint. Falling back to central server: {Url}", normalizedRemote);
+        return (normalizedRemote, "Central Server");
     }
 
     private static async Task<bool> IsTcpReachableAsync(string url, TimeSpan timeout)
@@ -618,6 +607,74 @@ public class Worker : BackgroundService
         }
         catch { }
         return "127.0.0.1";
+    }
+
+    private static string? _cachedHardwareId = null;
+
+    public static string GetHardwareId()
+    {
+        if (!string.IsNullOrEmpty(_cachedHardwareId)) return _cachedHardwareId;
+
+        string serial = string.Empty;
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                using var searcher = new System.Management.ManagementObjectSearcher("SELECT SerialNumber FROM Win32_BIOS");
+                foreach (var obj in searcher.Get())
+                {
+                    serial = obj["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
+                    break;
+                }
+            }
+        }
+        catch { }
+
+        // Filter out generic strings produced by unbranded or custom motherboards
+        string[] invalidSerials = { "default string", "to be filled by o.e.m.", "none", "system serial number", "0", "empty" };
+        if (string.IsNullOrWhiteSpace(serial) || invalidSerials.Contains(serial.ToLowerInvariant()))
+        {
+            // Fallback 1: Motherboard UUID from Win32_ComputerSystemProduct
+            try
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    using var searcher = new System.Management.ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct");
+                    foreach (var obj in searcher.Get())
+                    {
+                        var uuid = obj["UUID"]?.ToString()?.Trim();
+                        if (!string.IsNullOrWhiteSpace(uuid) && uuid.Length > 8)
+                        {
+                            serial = uuid;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback 2: Permanent MachineGuid from Windows Registry
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                try
+                {
+                    if (OperatingSystem.IsWindows())
+                    {
+                        using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Cryptography");
+                        serial = key?.GetValue("MachineGuid")?.ToString()?.Trim() ?? string.Empty;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            serial = "WIN-" + Environment.MachineName;
+        }
+
+        _cachedHardwareId = serial;
+        return _cachedHardwareId;
     }
 
     private static string NormalizeHubUrl(string? url)

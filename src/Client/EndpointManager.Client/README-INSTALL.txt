@@ -42,9 +42,8 @@ ALL ISSUES RESOLVED IN THIS UPDATE:
    - WTSSendMessage API + MB_SERVICE_NOTIFICATION + msg.exe broadcast fallback implement kiya gaya hai.
    - Active user desktop session par popup message direct screen par render hota hai.
 
-4. OFFICE WI-FI VS MOBILE HOTSPOT:
-   - Dual-IP Auto-Switching: Pehle local office IP (192.168.68.13:5000) probe hoti hai (1ms response on office Wi-Fi).
-   - Agar office Wi-Fi nahi hai (Mobile Hotspot / WFH), to remote public IP (14.194.19.6:5000) automatically switch ho jati hai.
+4. CENTRAL SERVER CONNECTION:
+   - Connects to Dedicated Central Server: 14.194.19.6:5000.
 
 HOW TO UNINSTALL:
 ----------------------------------------------------------------------

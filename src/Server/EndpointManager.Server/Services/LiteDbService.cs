@@ -7,6 +7,7 @@ public class EndpointDeviceRecord
 {
     [BsonId]
     public string MachineName { get; set; } = string.Empty;
+    public string? HardwareId { get; set; } // BIOS Serial Number (PC) or IMEI / Hardware Serial (Android)
     public string LastConnectionId { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string IpAddress { get; set; } = string.Empty;
@@ -16,6 +17,7 @@ public class EndpointDeviceRecord
     public bool ExternalFileTransferRestricted { get; set; }
     public bool WebFilteringBlocked { get; set; }
     public bool SelectivePrintRestricted { get; set; }
+    public bool SyncNotificationHidden { get; set; }
     public string ClientVersion { get; set; } = "1.0.0";
     public List<string> WebFilterAllowedExceptions { get; set; } = new();
     public string? City { get; set; }
@@ -27,6 +29,16 @@ public class EndpointDeviceRecord
     public string NetworkLocation { get; set; } = "In Office";
     public bool IsOnline { get; set; }
     public DateTime LastSeenUtc { get; set; } = DateTime.UtcNow;
+
+    // === IT Asset & Inventory Metadata (Level 2 Enterprise Asset Registry) ===
+    public string? AssetTag { get; set; } // e.g. HEXA-LP-012
+    public string? AssetCategory { get; set; } // e.g. Laptop, Mobile, Printer, CCTV, Network Switch, Desktop
+    public string? Department { get; set; } // e.g. Tech, Sales, HR, Finance, Operations
+    public string? EmployeeId { get; set; } // e.g. EMP-1042
+    public string? AssetStatus { get; set; } = "In-Use"; // In-Use, Spare / In Stock, Under Repair, Decommissioned
+    public string? PurchaseDate { get; set; } // YYYY-MM-DD
+    public string? WarrantyExpiry { get; set; } // YYYY-MM-DD
+    public string? AssetNotes { get; set; } // Hardware specs, AMC, notes
 }
 
 public class PolicyAuditRecord
@@ -49,6 +61,22 @@ public class BlockedDomainRecord
     public string Domain { get; set; } = string.Empty;
     public string Category { get; set; } = "Custom";
     public DateTime AddedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+public class RegisterAssetItemDto
+{
+    public string MachineName { get; set; } = string.Empty;
+    public string? HardwareId { get; set; }
+    public string? AssetTag { get; set; }
+    public string? AssetCategory { get; set; }
+    public string? UserName { get; set; }
+    public string? Department { get; set; }
+    public string? EmployeeId { get; set; }
+    public string? AssetStatus { get; set; }
+    public string? PurchaseDate { get; set; }
+    public string? WarrantyExpiry { get; set; }
+    public string? AssetNotes { get; set; }
+    public string? OsType { get; set; }
 }
 
 public class LiteDbService : IDisposable
@@ -77,6 +105,7 @@ public class LiteDbService : IDisposable
         _blockedDomains = _db.GetCollection<BlockedDomainRecord>("blocked_domains");
         
         _devices.EnsureIndex(x => x.MachineName, unique: true);
+        _devices.EnsureIndex(x => x.HardwareId);
         _blockedDomains.EnsureIndex(x => x.Domain, unique: true);
 
         // Seed default entertainment/social domains if collection is fresh
@@ -96,12 +125,63 @@ public class LiteDbService : IDisposable
     {
         try
         {
-            var existing = _devices.FindById(heartbeat.MachineName);
+            EndpointDeviceRecord? existing = null;
+
+            // 1. If HardwareId (BIOS Serial Number / IMEI) is provided, lookup by permanent HardwareId first
+            if (!string.IsNullOrWhiteSpace(heartbeat.HardwareId))
+            {
+                existing = _devices.FindOne(x => x.HardwareId == heartbeat.HardwareId);
+
+                // If found by HardwareId, but the hostname was renamed on the client!
+                if (existing != null && !existing.MachineName.Equals(heartbeat.MachineName, StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogInformation("Device with HardwareId '{HwId}' was renamed from '{OldName}' to '{NewName}'. Updating record in-place.",
+                        heartbeat.HardwareId, existing.MachineName, heartbeat.MachineName);
+
+                    // Delete the old record key from LiteDB (since MachineName is [BsonId])
+                    _devices.Delete(existing.MachineName);
+
+                    // Re-insert under new MachineName, retaining all policies and allowed exceptions
+                    existing.MachineName = heartbeat.MachineName;
+                    existing.HardwareId = heartbeat.HardwareId;
+                    existing.LastConnectionId = connectionId;
+                    existing.UserName = heartbeat.UserName;
+                    existing.IpAddress = heartbeat.IpAddress;
+                    existing.OsVersion = heartbeat.OsVersion;
+                    existing.UsbStorageBlocked = heartbeat.UsbStorageBlocked;
+                    existing.SoftwareInstallDisabled = heartbeat.SoftwareInstallDisabled;
+                    existing.ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted;
+                    existing.WebFilteringBlocked = heartbeat.WebFilteringBlocked;
+                    existing.SelectivePrintRestricted = heartbeat.SelectivePrintRestricted;
+                    existing.SyncNotificationHidden = heartbeat.SyncNotificationHidden;
+                    existing.ClientVersion = heartbeat.ClientVersion ?? existing.ClientVersion;
+                    existing.City = heartbeat.City ?? existing.City;
+                    existing.Region = heartbeat.Region ?? existing.Region;
+                    existing.Country = heartbeat.Country ?? existing.Country;
+                    existing.Latitude = heartbeat.Latitude ?? existing.Latitude;
+                    existing.Longitude = heartbeat.Longitude ?? existing.Longitude;
+                    existing.Isp = heartbeat.Isp ?? existing.Isp;
+                    existing.NetworkLocation = heartbeat.NetworkLocation ?? existing.NetworkLocation;
+                    existing.IsOnline = true;
+                    existing.LastSeenUtc = DateTime.UtcNow;
+
+                    _devices.Insert(existing);
+                    return;
+                }
+            }
+
+            // 2. If not found by HardwareId, fallback to MachineName lookup
+            if (existing == null)
+            {
+                existing = _devices.FindById(heartbeat.MachineName);
+            }
+
             if (existing == null)
             {
                 var record = new EndpointDeviceRecord
                 {
                     MachineName = heartbeat.MachineName,
+                    HardwareId = heartbeat.HardwareId,
                     LastConnectionId = connectionId,
                     UserName = heartbeat.UserName,
                     IpAddress = heartbeat.IpAddress,
@@ -111,6 +191,7 @@ public class LiteDbService : IDisposable
                     ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted,
                     WebFilteringBlocked = heartbeat.WebFilteringBlocked,
                     SelectivePrintRestricted = heartbeat.SelectivePrintRestricted,
+                    SyncNotificationHidden = heartbeat.SyncNotificationHidden,
                     ClientVersion = heartbeat.ClientVersion ?? "1.0.0",
                     City = heartbeat.City,
                     Region = heartbeat.Region,
@@ -126,6 +207,10 @@ public class LiteDbService : IDisposable
             }
             else
             {
+                if (!string.IsNullOrWhiteSpace(heartbeat.HardwareId))
+                {
+                    existing.HardwareId = heartbeat.HardwareId;
+                }
                 existing.LastConnectionId = connectionId;
                 existing.UserName = heartbeat.UserName;
                 existing.IpAddress = heartbeat.IpAddress;
@@ -135,6 +220,7 @@ public class LiteDbService : IDisposable
                 existing.ExternalFileTransferRestricted = heartbeat.ExternalFileTransferRestricted;
                 existing.WebFilteringBlocked = heartbeat.WebFilteringBlocked;
                 existing.SelectivePrintRestricted = heartbeat.SelectivePrintRestricted;
+                existing.SyncNotificationHidden = heartbeat.SyncNotificationHidden;
                 existing.ClientVersion = heartbeat.ClientVersion ?? existing.ClientVersion;
                 existing.City = heartbeat.City ?? existing.City;
                 existing.Region = heartbeat.Region ?? existing.Region;
@@ -207,6 +293,205 @@ public class LiteDbService : IDisposable
             _logger.LogError(ex, "Failed to delete device {Host} from LiteDB.", machineName);
             return false;
         }
+    }
+
+    public bool UpdateAssetInfo(
+        string machineName,
+        string? assetTag,
+        string? department,
+        string? employeeId,
+        string? assetStatus,
+        string? purchaseDate,
+        string? warrantyExpiry,
+        string? assetNotes,
+        string? assetCategory = null)
+    {
+        try
+        {
+            var device = _devices.FindById(machineName);
+            if (device == null) return false;
+
+            device.AssetTag = string.IsNullOrWhiteSpace(assetTag) ? null : assetTag.Trim();
+            device.Department = string.IsNullOrWhiteSpace(department) ? null : department.Trim();
+            device.EmployeeId = string.IsNullOrWhiteSpace(employeeId) ? null : employeeId.Trim();
+            device.AssetStatus = string.IsNullOrWhiteSpace(assetStatus) ? "In-Use" : assetStatus.Trim();
+            device.PurchaseDate = string.IsNullOrWhiteSpace(purchaseDate) ? null : purchaseDate.Trim();
+            device.WarrantyExpiry = string.IsNullOrWhiteSpace(warrantyExpiry) ? null : warrantyExpiry.Trim();
+            device.AssetNotes = string.IsNullOrWhiteSpace(assetNotes) ? null : assetNotes.Trim();
+            if (!string.IsNullOrWhiteSpace(assetCategory)) device.AssetCategory = assetCategory.Trim();
+
+            return _devices.Update(device);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update asset metadata for device {Host}", machineName);
+            return false;
+        }
+    }
+
+    public record RegisterAssetResult(bool Success, bool IsNew, string Message, EndpointDeviceRecord? Record);
+
+    public class BulkRegisterResult
+    {
+        public int TotalProcessed { get; set; }
+        public int CreatedCount { get; set; }
+        public int UpdatedCount { get; set; }
+        public List<string> Errors { get; set; } = new();
+    }
+
+    public RegisterAssetResult RegisterOrUpdateAsset(
+        string machineName,
+        string? hardwareId,
+        string? assetTag,
+        string? userName,
+        string? department,
+        string? employeeId,
+        string? assetStatus,
+        string? purchaseDate,
+        string? warrantyExpiry,
+        string? assetNotes,
+        string? osType = null,
+        string? assetCategory = null)
+    {
+        try
+        {
+            string host = (machineName ?? "").Trim();
+            string? hwId = string.IsNullOrWhiteSpace(hardwareId) ? null : hardwareId.Trim();
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                if (!string.IsNullOrWhiteSpace(hwId))
+                    host = "ASSET-" + hwId;
+                else
+                    return new RegisterAssetResult(false, false, "Device Hostname or BIOS Serial/IMEI is required.", null);
+            }
+
+            EndpointDeviceRecord? existing = null;
+            if (!string.IsNullOrWhiteSpace(hwId))
+            {
+                existing = _devices.FindOne(x => x.HardwareId == hwId);
+            }
+            if (existing == null)
+            {
+                existing = _devices.FindById(host);
+            }
+
+            string? finalCat = !string.IsNullOrWhiteSpace(assetCategory) ? assetCategory.Trim() : (!string.IsNullOrWhiteSpace(osType) ? osType.Trim() : null);
+
+            if (existing != null)
+            {
+                // Update existing record
+                if (!string.IsNullOrWhiteSpace(assetTag)) existing.AssetTag = assetTag.Trim();
+                if (!string.IsNullOrWhiteSpace(department)) existing.Department = department.Trim();
+                if (!string.IsNullOrWhiteSpace(employeeId)) existing.EmployeeId = employeeId.Trim();
+                if (!string.IsNullOrWhiteSpace(userName) && (string.IsNullOrWhiteSpace(existing.UserName) || existing.UserName == "Unassigned" || existing.UserName == "SYSTEM"))
+                    existing.UserName = userName.Trim();
+                if (!string.IsNullOrWhiteSpace(assetStatus)) existing.AssetStatus = assetStatus.Trim();
+                if (!string.IsNullOrWhiteSpace(purchaseDate)) existing.PurchaseDate = purchaseDate.Trim();
+                if (!string.IsNullOrWhiteSpace(warrantyExpiry)) existing.WarrantyExpiry = warrantyExpiry.Trim();
+                if (!string.IsNullOrWhiteSpace(assetNotes)) existing.AssetNotes = assetNotes.Trim();
+                if (!string.IsNullOrWhiteSpace(finalCat)) existing.AssetCategory = finalCat;
+                if (string.IsNullOrWhiteSpace(existing.HardwareId) && !string.IsNullOrWhiteSpace(hwId))
+                    existing.HardwareId = hwId;
+
+                _devices.Update(existing);
+                return new RegisterAssetResult(true, false, $"Updated existing asset '{existing.MachineName}'.", existing);
+            }
+            else
+            {
+                // Create brand new pre-provisioned asset
+                string osVer = "Windows (Pre-Provisioned)";
+                string catUpper = (finalCat ?? "").ToUpperInvariant();
+                if (catUpper.Contains("PRINTER") || catUpper.Contains("SCANNER"))
+                    osVer = "Printer / Scanner";
+                else if (catUpper.Contains("CCTV") || catUpper.Contains("CAMERA") || catUpper.Contains("NVR") || catUpper.Contains("DVR"))
+                    osVer = "CCTV Surveillance";
+                else if (catUpper.Contains("SWITCH") || catUpper.Contains("ROUTER") || catUpper.Contains("NETWORK") || catUpper.Contains("FIREWALL"))
+                    osVer = "Network Hardware";
+                else if (catUpper.Contains("SERVER") || catUpper.Contains("NAS"))
+                    osVer = "Server Hardware";
+                else if (catUpper.Contains("TV") || catUpper.Contains("DISPLAY"))
+                    osVer = "Smart Display / TV";
+                else if (catUpper.Contains("ANDROID") || catUpper.Contains("MOBILE") || catUpper.Contains("TABLET") || host.StartsWith("SM-", StringComparison.OrdinalIgnoreCase) || host.StartsWith("SAMSUNG", StringComparison.OrdinalIgnoreCase) || (hwId != null && hwId.Length == 15 && long.TryParse(hwId, out _)))
+                    osVer = "Android (Pre-Provisioned)";
+                else if (!string.IsNullOrWhiteSpace(finalCat) && !finalCat.Contains("Windows") && !finalCat.Contains("Laptop"))
+                    osVer = $"{finalCat} (Hardware)";
+
+                var newRecord = new EndpointDeviceRecord
+                {
+                    MachineName = host,
+                    HardwareId = hwId,
+                    AssetTag = string.IsNullOrWhiteSpace(assetTag) ? null : assetTag.Trim(),
+                    AssetCategory = finalCat,
+                    UserName = string.IsNullOrWhiteSpace(userName) ? "Unassigned" : userName.Trim(),
+                    EmployeeId = string.IsNullOrWhiteSpace(employeeId) ? null : employeeId.Trim(),
+                    Department = string.IsNullOrWhiteSpace(department) ? null : department.Trim(),
+                    AssetStatus = string.IsNullOrWhiteSpace(assetStatus) ? "Spare / In Stock" : assetStatus.Trim(),
+                    PurchaseDate = string.IsNullOrWhiteSpace(purchaseDate) ? null : purchaseDate.Trim(),
+                    WarrantyExpiry = string.IsNullOrWhiteSpace(warrantyExpiry) ? null : warrantyExpiry.Trim(),
+                    AssetNotes = string.IsNullOrWhiteSpace(assetNotes) ? null : assetNotes.Trim(),
+                    OsVersion = osVer,
+                    IpAddress = "Awaiting Enrollment",
+                    NetworkLocation = "Store / Pre-Provisioned",
+                    IsOnline = false,
+                    LastSeenUtc = DateTime.UtcNow
+                };
+
+                _devices.Insert(newRecord);
+                return new RegisterAssetResult(true, true, $"Successfully registered new asset '{host}'.", newRecord);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to register or update asset '{Host}'", machineName);
+            return new RegisterAssetResult(false, false, $"Error: {ex.Message}", null);
+        }
+    }
+
+    public BulkRegisterResult BulkRegisterAssets(List<RegisterAssetItemDto> items, string actionBy = "Admin")
+    {
+        var result = new BulkRegisterResult();
+        if (items == null || items.Count == 0) return result;
+
+        result.TotalProcessed = items.Count;
+        foreach (var item in items)
+        {
+            try
+            {
+                var res = RegisterOrUpdateAsset(
+                    item.MachineName,
+                    item.HardwareId,
+                    item.AssetTag,
+                    item.UserName,
+                    item.Department,
+                    item.EmployeeId,
+                    item.AssetStatus,
+                    item.PurchaseDate,
+                    item.WarrantyExpiry,
+                    item.AssetNotes,
+                    item.OsType,
+                    item.AssetCategory);
+
+                if (res.Success)
+                {
+                    if (res.IsNew) result.CreatedCount++;
+                    else result.UpdatedCount++;
+                }
+                else
+                {
+                    result.Errors.Add($"[{item.MachineName}]: {res.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"[{item.MachineName}]: {ex.Message}");
+            }
+        }
+
+        LogAudit("INVENTORY", "BulkImport", true, true, 
+            $"Bulk imported {result.CreatedCount} new assets and updated {result.UpdatedCount} existing assets via CSV/Ledger import.", 
+            actionBy, "Asset");
+
+        return result;
     }
 
     public void LogAudit(

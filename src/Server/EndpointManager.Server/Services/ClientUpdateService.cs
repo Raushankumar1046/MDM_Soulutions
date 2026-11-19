@@ -12,18 +12,18 @@ using EndpointManager.Shared.Models;
 
 public class ClientUpdateInfo
 {
-    public string Version { get; set; } = "1.2.0";
+    public string Version { get; set; } = "1.3.0";
     public long FileSize { get; set; }
     public string Sha256 { get; set; } = string.Empty;
     public string DownloadUrl { get; set; } = "/api/updates/client/download";
-    public string ReleaseNotes { get; set; } = "Selective Print Guard, Granular RBAC, and OTA Silent Auto-Update Engine";
+    public string ReleaseNotes { get; set; } = "Hardware Serial / IMEI Device Identity & Remote Auto-Rename";
     public bool AutoUpdateFleet { get; set; }
     public DateTime? LastModifiedUtc { get; set; }
 }
 
 public class ClientUpdateService
 {
-    public const string ServerClientVersion = "1.2.0";
+    public const string ServerClientVersion = "1.3.0";
     private readonly ILogger<ClientUpdateService> _logger;
     private readonly LiteDbService _liteDb;
 
@@ -147,13 +147,11 @@ public class ClientUpdateService
         ps1.AppendLine("$detectedServerIp = if ($activeConn) { $activeConn.RemoteAddress } else { '192.168.68.152' };");
         ps1.AppendLine("Log-Ota \"Active server IP detected from TCP connection: $detectedServerIp\";");
 
-        // Multi-endpoint candidate URLs with fallback (Active LAN IP -> 192.168.68.152 -> Primary -> 14.194.19.6)
+        // Candidate URLs for client updates
         ps1.AppendLine($"$primaryUrl = '{downloadUrl}';");
         ps1.AppendLine("$candidateUrls = @(");
         ps1.AppendLine("    \"http://${detectedServerIp}:5000/api/updates/client/download\",");
-        ps1.AppendLine("    'http://192.168.68.152:5000/api/updates/client/download',");
         ps1.AppendLine("    $primaryUrl,");
-        ps1.AppendLine("    'http://192.168.68.13:5000/api/updates/client/download',");
         ps1.AppendLine("    'http://14.194.19.6:5000/api/updates/client/download'");
         ps1.AppendLine(") | Where-Object { $_ -and $_ -notmatch 'localhost' -and $_ -notmatch '127\\.0\\.0\\.1' } | Select-Object -Unique;");
 
@@ -290,14 +288,26 @@ public class ClientUpdateService
                         continue;
                     }
 
-                    var perClientCmd = new TerminalCommand
+                    bool isClientAndroid = kvp.Value.OsVersion?.Contains("Android", StringComparison.OrdinalIgnoreCase) == true;
+                    if (isClientAndroid)
                     {
-                        SessionId = Guid.NewGuid().ToString("N"),
-                        CommandText = universalCmdText
-                    };
-
-                    await hubContext.Clients.Client(kvp.Key).ExecuteTerminalCommand(perClientCmd);
-                    dispatchedCount++;
+                        string apkUrl = string.IsNullOrWhiteSpace(serverBaseUrl) || serverBaseUrl.Contains("localhost") || serverBaseUrl.Contains("127.0.0.1")
+                            ? "http://14.194.19.6:5000/downloads/CyberShield-MDM-Client.apk"
+                            : $"{serverBaseUrl.TrimEnd('/')}/downloads/CyberShield-MDM-Client.apk";
+                        await hubContext.Clients.Client(kvp.Key).ExecuteClientUpdate(apkUrl, info.Version, info.Sha256);
+                        dispatchedCount++;
+                    }
+                    else
+                    {
+                        await hubContext.Clients.Client(kvp.Key).ExecuteClientUpdate(fullDownloadUrl, info.Version, info.Sha256);
+                        var perClientCmd = new TerminalCommand
+                        {
+                            SessionId = Guid.NewGuid().ToString("N"),
+                            CommandText = universalCmdText
+                        };
+                        await hubContext.Clients.Client(kvp.Key).ExecuteTerminalCommand(perClientCmd);
+                        dispatchedCount++;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -338,6 +348,28 @@ public class ClientUpdateService
             if (string.IsNullOrEmpty(targetConnectionId))
             {
                 return (false, $"Target machine '{targetMachine}' is currently offline. It will receive the update automatically when it reconnects if fleet auto-update is enabled.", 0);
+            }
+
+            bool isAndroid = match.Value.OsVersion?.Contains("Android", StringComparison.OrdinalIgnoreCase) == true;
+            if (isAndroid)
+            {
+                string apkUrl = string.IsNullOrWhiteSpace(serverBaseUrl) || serverBaseUrl.Contains("localhost") || serverBaseUrl.Contains("127.0.0.1")
+                    ? "http://14.194.19.6:5000/downloads/CyberShield-MDM-Client.apk"
+                    : $"{serverBaseUrl.TrimEnd('/')}/downloads/CyberShield-MDM-Client.apk";
+
+                await hubContext.Clients.Client(targetConnectionId).ExecuteClientUpdate(apkUrl, info.Version, info.Sha256);
+
+                _liteDb.LogAudit(
+                    targetMachine,
+                    "ClientAutoUpdate",
+                    true,
+                    true,
+                    $"User '{adminUsername}' pushed Android Client Update v{info.Version} to '{targetMachine}' (URL: {apkUrl}).",
+                    actionBy: adminUsername,
+                    category: "ClientUpdate");
+
+                _logger.LogInformation("Android OTA update v{Ver} dispatched to [{Machine}] ({Id})", info.Version, targetMachine, targetConnectionId);
+                return (true, $"Android Mobile update v{info.Version} successfully pushed to '{targetMachine}'! The phone is installing it silently in the background.", 1);
             }
 
             // 1. Push native signal (for v1.2.0+ clients)

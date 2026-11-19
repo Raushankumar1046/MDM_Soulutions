@@ -8,6 +8,7 @@ import java.util.TimeZone;
 public class ClientHeartbeat {
     public String connectionId = "";
     public String machineName = "";
+    public String hardwareId = ""; // Phone IMEI or Hardware Serial / Android ID
     public String userName = "Android User";
     public String ipAddress = "";
     public String osVersion = "";
@@ -15,6 +16,7 @@ public class ClientHeartbeat {
     public boolean softwareInstallDisabled = false;
     public boolean externalFileTransferRestricted = false;
     public boolean webFilteringBlocked = false;
+    public boolean syncNotificationHidden = false;
     public String city;
     public String region;
     public String country;

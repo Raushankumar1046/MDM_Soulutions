@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Persistence & Background Services -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -20,6 +23,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Audio & Alarm control for Lost Phone Siren -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <application
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
@@ -28,6 +36,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CyberShieldMDM"
         android:usesCleartextTraffic="true"
+        android:testOnly="false"
         tools:targetApi="35">
 
         <!-- Main Enrollment / Dashboard Activity -->
@@ -38,6 +47,29 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Android Enterprise Zero-Touch / QR Code Provisioning Mode & Compliance Handlers -->
+        <activity
+            android:name=".GetProvisioningModeActivity"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.GET_PROVISIONING_MODE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".PolicyComplianceActivity"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.app.action.ADMIN_POLICY_COMPLIANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -58,6 +90,7 @@
                 <action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
                 <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
                 <action android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
+                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
             </intent-filter>
         </receiver>
 
@@ -77,31 +110,50 @@
             </intent-filter>
         </receiver>
 
-        <!-- Boot Completed Receiver to auto-start service on phone restart -->
+        <!-- Boot Completed Receiver to auto-start service on phone restart or app update -->
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="true">
             <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
+        <!-- Emergency Siren Silence Receiver -->
+        <receiver
+            android:name=".SirenStopReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.cybershield.mdm.ACTION_STOP_SIREN" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Silent Package Installer Receiver for Remote Auto-Updates -->
+        <receiver
+            android:name=".SilentInstallReceiver"
+            android:exported="false" />
+
         <!-- Foreground MDM Management & SignalR Service -->
         <service
             android:name=".CyberShieldService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="dataSync|location" />
+            android:directBootAware="true"
+            android:foregroundServiceType="dataSync" />
 
         <!-- On-Device DNS Web Filter Service -->
         <service
             android:name=".MdmVpnFilterService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>

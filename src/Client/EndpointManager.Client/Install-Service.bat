@@ -75,7 +75,7 @@ echo   SUCCESS: CyberShield Client Agent is now Installed!
 echo ==========================================================
 echo   * Task Manager -> Services: EndpointManagerClient (Running)
 echo   * Auto-Start on Reboot:     YES (24/7 Windows Service)
-echo   * Target Server:            192.168.68.13:5000 (Office LAN) / 14.194.19.6:5000 (Remote)
+echo   * Target Server:            14.194.19.6:5000
 echo   * Runtime Log:              C:\ProgramData\CyberShieldMDM\client_runtime.log
 echo ==========================================================
 echo.
