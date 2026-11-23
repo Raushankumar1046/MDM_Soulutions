@@ -9,6 +9,7 @@
     <color name="primary_dark">#020617</color>
     <color name="text_main">#F8FAFC</color>
     <color name="text_muted">#94A3B8</color>
+    <string name="accessibility_service_description">Enterprise remote assist and silent screen control service for CyberShield MDM.</string>
     <string name="activate_admin">Activate Device Administrator</string>
     <string name="admin_active">Device Administrator: ACTIVE</string>
     <string name="admin_inactive">Device Administrator: NOT ACTIVE</string>

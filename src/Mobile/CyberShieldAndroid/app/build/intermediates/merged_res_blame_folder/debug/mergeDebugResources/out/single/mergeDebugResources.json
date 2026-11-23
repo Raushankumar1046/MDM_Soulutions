@@ -1,11 +1,11 @@
 [
     {
-        "merged": "com.cybershield.mdm.app-debug-33:/layout_activity_main.xml.flat",
-        "source": "com.cybershield.mdm.app-main-35:/layout/activity_main.xml"
-    },
-    {
         "merged": "C:\\Users\\hexah\\.gradle\\daemon\\8.13\\com.cybershield.mdm.app-debug-33:\\xml_device_admin_receiver.xml.flat",
         "source": "C:\\Users\\hexah\\.gradle\\daemon\\8.13\\com.cybershield.mdm.app-main-35:\\xml\\device_admin_receiver.xml"
+    },
+    {
+        "merged": "com.cybershield.mdm.app-debug-33:/xml_accessibility_service_config.xml.flat",
+        "source": "com.cybershield.mdm.app-main-35:/xml/accessibility_service_config.xml"
     },
     {
         "merged": "C:\\Users\\hexah\\.gradle\\daemon\\8.13\\com.cybershield.mdm.app-debug-33:\\drawable_ic_launcher.xml.flat",

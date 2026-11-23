@@ -43,14 +43,18 @@ echo [Device Found] Connected Device:
 "%ADB_EXE%" devices
 echo.
 
-echo [2/3] Auto-Granting READ_PHONE_STATE & Enterprise Permissions...
+echo [2/3] Auto-Granting READ_PHONE_STATE, Silent Remote Screen & Permissions...
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.READ_PHONE_STATE >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.ACCESS_FINE_LOCATION >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.ACCESS_COARSE_LOCATION >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.POST_NOTIFICATIONS >nul 2>&1
+"%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.WRITE_SECURE_SETTINGS >nul 2>&1
+"%ADB_EXE%" shell settings put secure enabled_accessibility_services com.cybershield.mdm/com.cybershield.mdm.MdmAccessibilityService >nul 2>&1
+"%ADB_EXE%" shell settings put secure accessibility_enabled 1 >nul 2>&1
 echo   * Permission READ_PHONE_STATE: GRANTED!
 echo   * Permission GPS LOCATION:     GRANTED!
 echo   * Permission NOTIFICATIONS:    GRANTED!
+echo   * Silent Screen Stream:        ACTIVATED!
 
 echo.
 echo [3/3] Refreshing CyberShield MDM Service on Phone...

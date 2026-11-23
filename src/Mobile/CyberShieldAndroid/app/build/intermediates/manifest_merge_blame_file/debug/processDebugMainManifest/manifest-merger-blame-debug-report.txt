@@ -70,355 +70,384 @@
 35-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:29:5-85
 35-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:29:22-82
 36
-37    <permission
-37-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
-38        android:name="com.cybershield.mdm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-38-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
-39        android:protectionLevel="signature" />
-39-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
-40
-41    <uses-permission android:name="com.cybershield.mdm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-41-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
-41-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
-42
-43    <application
-43-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:31:5-162:19
-44        android:allowBackup="false"
-44-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:9-36
-45        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-45-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
-46        android:debuggable="true"
-47        android:extractNativeLibs="false"
-48        android:icon="@drawable/ic_launcher"
-48-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:33:9-45
-49        android:label="@string/app_name"
-49-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:34:9-41
-50        android:roundIcon="@drawable/ic_launcher"
-50-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:35:9-50
-51        android:supportsRtl="true"
-51-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:36:9-35
-52        android:testOnly="false"
-52-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:39:9-33
-53        android:theme="@style/Theme.CyberShieldMDM"
-53-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:37:9-52
-54        android:usesCleartextTraffic="true" >
-54-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:38:9-44
-55
-56        <!-- Main Enrollment / Dashboard Activity -->
-57        <activity
-57-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:43:9-51:20
-58            android:name="com.cybershield.mdm.MainActivity"
-58-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:44:13-41
-59            android:exported="true"
-59-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:45:13-36
-60            android:launchMode="singleTop" >
-60-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:46:13-43
-61            <intent-filter>
-61-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:47:13-50:29
-62                <action android:name="android.intent.action.MAIN" />
-62-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:17-69
-62-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:25-66
-63
-64                <category android:name="android.intent.category.LAUNCHER" />
-64-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:17-77
-64-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:27-74
-65            </intent-filter>
-66        </activity>
-67
-68        <!-- Android Enterprise Zero-Touch / QR Code Provisioning Mode & Compliance Handlers -->
-69        <activity
-69-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:54:9-63:20
-70            android:name="com.cybershield.mdm.GetProvisioningModeActivity"
-70-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:55:13-56
-71            android:exported="true"
-71-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:58:13-36
-72            android:permission="android.permission.BIND_DEVICE_ADMIN"
-72-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:56:13-70
-73            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-73-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:57:13-72
-74            <intent-filter>
-74-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:59:13-62:29
-75                <action android:name="android.app.action.GET_PROVISIONING_MODE" />
-75-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:17-83
-75-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:25-80
-76
-77                <category android:name="android.intent.category.DEFAULT" />
-77-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:17-76
-77-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:27-73
-78            </intent-filter>
-79        </activity>
-80        <activity
-80-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:65:9-74:20
-81            android:name="com.cybershield.mdm.PolicyComplianceActivity"
-81-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:66:13-53
-82            android:exported="true"
-82-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:69:13-36
-83            android:permission="android.permission.BIND_DEVICE_ADMIN"
-83-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:67:13-70
-84            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
-84-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:68:13-72
-85            <intent-filter>
-85-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:70:13-73:29
-86                <action android:name="android.app.action.ADMIN_POLICY_COMPLIANCE" />
-86-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:17-85
-86-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:25-82
-87
-88                <category android:name="android.intent.category.DEFAULT" />
-88-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:17-76
-88-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:27-73
-89            </intent-filter>
-90        </activity>
-91
-92        <!-- Device Admin Receivers (both names supported for ADB) -->
-93        <receiver
-93-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:77:9-95:20
-94            android:name="com.cybershield.mdm.MdmDeviceAdminReceiver"
-94-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:78:13-51
-95            android:description="@string/device_admin_description"
-95-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:79:13-67
-96            android:exported="true"
-96-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:82:13-36
-97            android:label="@string/app_name"
-97-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:80:13-45
-98            android:permission="android.permission.BIND_DEVICE_ADMIN" >
-98-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:81:13-70
-99            <meta-data
-99-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:83:13-85:65
-100                android:name="android.app.device_admin"
-100-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:84:17-56
-101                android:resource="@xml/device_admin_receiver" />
-101-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:85:17-62
-102
-103            <intent-filter>
-103-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:86:13-94:29
-104                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-104-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-82
-104-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:25-79
-105                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
-105-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-83
-105-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:25-80
-106                <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED" />
-106-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:17-99
-106-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:25-96
-107                <action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
-107-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:17-85
-107-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:25-82
-108                <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
-108-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:17-84
-108-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:25-81
-109                <action android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
-109-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:17-87
-109-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:25-84
-110                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
-110-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:17-91
-110-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:25-88
-111            </intent-filter>
-112        </receiver>
-113        <receiver
-113-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:97:9-111:20
-114            android:name="com.cybershield.mdm.DeviceAdminReceiver"
-114-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:98:13-48
-115            android:description="@string/device_admin_description"
-115-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:99:13-67
-116            android:exported="true"
-116-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:102:13-36
-117            android:label="@string/app_name"
-117-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:100:13-45
-118            android:permission="android.permission.BIND_DEVICE_ADMIN" >
-118-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:101:13-70
-119            <meta-data
-119-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:83:13-85:65
-120                android:name="android.app.device_admin"
-120-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:84:17-56
-121                android:resource="@xml/device_admin_receiver" />
-121-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:85:17-62
-122
-123            <intent-filter>
-123-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:106:13-110:29
-124                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-124-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-82
-124-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:25-79
-125                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
-125-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-83
-125-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:25-80
-126                <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED" />
-126-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:17-99
-126-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:25-96
-127            </intent-filter>
-128        </receiver>
-129
-130        <!-- Boot Completed Receiver to auto-start service on phone restart or app update -->
-131        <receiver
-131-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:114:9-127:20
-132            android:name="com.cybershield.mdm.BootReceiver"
-132-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:115:13-41
-133            android:directBootAware="true"
-133-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:118:13-43
-134            android:enabled="true"
-134-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:116:13-35
-135            android:exported="true" >
-135-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:117:13-36
-136            <intent-filter>
-136-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:119:13-126:29
-137                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-137-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:17-86
-137-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:25-83
-138                <action android:name="android.intent.action.BOOT_COMPLETED" />
-138-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:17-79
-138-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:25-76
-139                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-139-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:17-84
-139-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:25-81
-140                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-140-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:17-82
-140-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:25-79
-141                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-141-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:17-82
-141-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:25-79
-142
-143                <category android:name="android.intent.category.DEFAULT" />
-143-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:17-76
-143-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:27-73
-144            </intent-filter>
-145        </receiver>
-146
-147        <!-- Emergency Siren Silence Receiver -->
-148        <receiver
-148-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:130:9-137:20
-149            android:name="com.cybershield.mdm.SirenStopReceiver"
-149-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:131:13-46
-150            android:enabled="true"
-150-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:132:13-35
-151            android:exported="false" >
-151-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:133:13-37
-152            <intent-filter>
-152-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:134:13-136:29
-153                <action android:name="com.cybershield.mdm.ACTION_STOP_SIREN" />
-153-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:17-80
-153-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:25-77
-154            </intent-filter>
-155        </receiver>
-156
-157        <!-- Silent Package Installer Receiver for Remote Auto-Updates -->
-158        <receiver
-158-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:140:9-142:40
-159            android:name="com.cybershield.mdm.SilentInstallReceiver"
-159-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:141:13-50
-160            android:exported="false" />
-160-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:142:13-37
-161
-162        <!-- Foreground MDM Management & SignalR Service -->
-163        <service
-163-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:145:9-150:56
-164            android:name="com.cybershield.mdm.CyberShieldService"
-164-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:146:13-47
-165            android:directBootAware="true"
-165-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:149:13-43
-166            android:enabled="true"
-166-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:147:13-35
-167            android:exported="false"
-167-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:148:13-37
-168            android:foregroundServiceType="dataSync" />
-168-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:150:13-53
-169
-170        <!-- On-Device DNS Web Filter Service -->
-171        <service
-171-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:153:9-160:19
-172            android:name="com.cybershield.mdm.MdmVpnFilterService"
-172-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:154:13-48
-173            android:exported="true"
-173-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:156:13-36
-174            android:permission="android.permission.BIND_VPN_SERVICE" >
-174-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:155:13-69
-175            <intent-filter>
-175-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:157:13-159:29
-176                <action android:name="android.net.VpnService" />
-176-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:17-65
-176-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:25-62
-177            </intent-filter>
-178        </service>
-179
-180        <activity
-180-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:9-173
-181            android:name="com.google.android.gms.common.api.GoogleApiActivity"
-181-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:19-85
-182            android:exported="false"
-182-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:146-170
-183            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-183-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:86-145
-184
-185        <meta-data
-185-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
-186            android:name="com.google.android.gms.version"
-186-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
-187            android:value="@integer/google_play_services_version" />
-187-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
-188
-189        <provider
-189-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
-190            android:name="androidx.startup.InitializationProvider"
-190-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
-191            android:authorities="com.cybershield.mdm.androidx-startup"
-191-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
-192            android:exported="false" >
-192-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
-193            <meta-data
-193-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
-194                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-194-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
-195                android:value="androidx.startup" />
-195-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
-196            <meta-data
-196-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
-197                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-197-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
-198                android:value="androidx.startup" />
-198-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
-199            <meta-data
-199-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
-200                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-200-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
-201                android:value="androidx.startup" />
-201-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
-202        </provider>
-203
-204        <receiver
-204-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
-205            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-205-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
-206            android:directBootAware="false"
-206-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
-207            android:enabled="true"
-207-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
-208            android:exported="true"
-208-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
-209            android:permission="android.permission.DUMP" >
-209-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
-210            <intent-filter>
-210-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
-211                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-211-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
-211-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
-212            </intent-filter>
-213            <intent-filter>
-213-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
-214                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-214-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
-214-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
-215            </intent-filter>
-216            <intent-filter>
-216-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
-217                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-217-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
-217-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
-218            </intent-filter>
-219            <intent-filter>
-219-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
-220                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-220-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
-220-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
-221            </intent-filter>
-222        </receiver>
-223    </application>
-224
-225</manifest>
+37    <!-- Silent Remote Screen & Accessibility Permissions -->
+38    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+38-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:5-116
+38-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:22-77
+39
+40    <permission
+40-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+41        android:name="com.cybershield.mdm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+41-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+42        android:protectionLevel="signature" />
+42-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+43
+44    <uses-permission android:name="com.cybershield.mdm.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+44-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+44-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+45
+46    <application
+46-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:34:5-178:19
+47        android:allowBackup="false"
+47-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:35:9-36
+48        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+48-->[androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+49        android:debuggable="true"
+50        android:extractNativeLibs="false"
+51        android:icon="@drawable/ic_launcher"
+51-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:36:9-45
+52        android:label="@string/app_name"
+52-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:37:9-41
+53        android:roundIcon="@drawable/ic_launcher"
+53-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:38:9-50
+54        android:supportsRtl="true"
+54-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:39:9-35
+55        android:testOnly="false"
+55-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:42:9-33
+56        android:theme="@style/Theme.CyberShieldMDM"
+56-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:40:9-52
+57        android:usesCleartextTraffic="true" >
+57-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:41:9-44
+58
+59        <!-- Main Enrollment / Dashboard Activity -->
+60        <activity
+60-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:46:9-54:20
+61            android:name="com.cybershield.mdm.MainActivity"
+61-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:47:13-41
+62            android:exported="true"
+62-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:13-36
+63            android:launchMode="singleTop" >
+63-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:13-43
+64            <intent-filter>
+64-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:50:13-53:29
+65                <action android:name="android.intent.action.MAIN" />
+65-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:51:17-69
+65-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:51:25-66
+66
+67                <category android:name="android.intent.category.LAUNCHER" />
+67-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:52:17-77
+67-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:52:27-74
+68            </intent-filter>
+69        </activity>
+70
+71        <!-- Android Enterprise Zero-Touch / QR Code Provisioning Mode & Compliance Handlers -->
+72        <activity
+72-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:57:9-66:20
+73            android:name="com.cybershield.mdm.GetProvisioningModeActivity"
+73-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:58:13-56
+74            android:exported="true"
+74-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:13-36
+75            android:permission="android.permission.BIND_DEVICE_ADMIN"
+75-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:59:13-70
+76            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+76-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:13-72
+77            <intent-filter>
+77-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:62:13-65:29
+78                <action android:name="android.app.action.GET_PROVISIONING_MODE" />
+78-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:63:17-83
+78-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:63:25-80
+79
+80                <category android:name="android.intent.category.DEFAULT" />
+80-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:17-76
+80-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:27-73
+81            </intent-filter>
+82        </activity>
+83        <activity
+83-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:68:9-77:20
+84            android:name="com.cybershield.mdm.PolicyComplianceActivity"
+84-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:69:13-53
+85            android:exported="true"
+85-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:72:13-36
+86            android:permission="android.permission.BIND_DEVICE_ADMIN"
+86-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:70:13-70
+87            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+87-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:13-72
+88            <intent-filter>
+88-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:73:13-76:29
+89                <action android:name="android.app.action.ADMIN_POLICY_COMPLIANCE" />
+89-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:74:17-85
+89-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:74:25-82
+90
+91                <category android:name="android.intent.category.DEFAULT" />
+91-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:17-76
+91-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:27-73
+92            </intent-filter>
+93        </activity>
+94
+95        <!-- Device Admin Receivers (both names supported for ADB) -->
+96        <receiver
+96-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:80:9-98:20
+97            android:name="com.cybershield.mdm.MdmDeviceAdminReceiver"
+97-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:81:13-51
+98            android:description="@string/device_admin_description"
+98-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:82:13-67
+99            android:exported="true"
+99-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:85:13-36
+100            android:label="@string/app_name"
+100-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:83:13-45
+101            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+101-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:84:13-70
+102            <meta-data
+102-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:86:13-88:65
+103                android:name="android.app.device_admin"
+103-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-56
+104                android:resource="@xml/device_admin_receiver" />
+104-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-62
+105
+106            <intent-filter>
+106-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:13-97:29
+107                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+107-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:17-82
+107-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:25-79
+108                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+108-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:17-83
+108-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:25-80
+109                <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED" />
+109-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:17-99
+109-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:25-96
+110                <action android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
+110-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:17-85
+110-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:25-82
+111                <action android:name="android.app.action.ACTION_PASSWORD_FAILED" />
+111-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:94:17-84
+111-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:94:25-81
+112                <action android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
+112-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:95:17-87
+112-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:95:25-84
+113                <action android:name="android.app.action.PROFILE_PROVISIONING_COMPLETE" />
+113-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:96:17-91
+113-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:96:25-88
+114            </intent-filter>
+115        </receiver>
+116        <receiver
+116-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:100:9-114:20
+117            android:name="com.cybershield.mdm.DeviceAdminReceiver"
+117-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:101:13-48
+118            android:description="@string/device_admin_description"
+118-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:102:13-67
+119            android:exported="true"
+119-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:105:13-36
+120            android:label="@string/app_name"
+120-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:103:13-45
+121            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+121-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:104:13-70
+122            <meta-data
+122-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:86:13-88:65
+123                android:name="android.app.device_admin"
+123-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-56
+124                android:resource="@xml/device_admin_receiver" />
+124-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-62
+125
+126            <intent-filter>
+126-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:109:13-113:29
+127                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+127-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:17-82
+127-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:25-79
+128                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+128-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:17-83
+128-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:25-80
+129                <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED" />
+129-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:17-99
+129-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:25-96
+130            </intent-filter>
+131        </receiver>
+132
+133        <!-- Boot Completed Receiver to auto-start service on phone restart or app update -->
+134        <receiver
+134-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:117:9-130:20
+135            android:name="com.cybershield.mdm.BootReceiver"
+135-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:118:13-41
+136            android:directBootAware="true"
+136-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:13-43
+137            android:enabled="true"
+137-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:119:13-35
+138            android:exported="true" >
+138-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:13-36
+139            <intent-filter>
+139-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:13-129:29
+140                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+140-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:17-86
+140-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:25-83
+141                <action android:name="android.intent.action.BOOT_COMPLETED" />
+141-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:17-79
+141-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:25-76
+142                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+142-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:125:17-84
+142-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:125:25-81
+143                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+143-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:126:17-82
+143-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:126:25-79
+144                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+144-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:127:17-82
+144-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:127:25-79
+145
+146                <category android:name="android.intent.category.DEFAULT" />
+146-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:17-76
+146-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:27-73
+147            </intent-filter>
+148        </receiver>
+149
+150        <!-- Emergency Siren Silence Receiver -->
+151        <receiver
+151-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:133:9-140:20
+152            android:name="com.cybershield.mdm.SirenStopReceiver"
+152-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:134:13-46
+153            android:enabled="true"
+153-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:13-35
+154            android:exported="false" >
+154-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:136:13-37
+155            <intent-filter>
+155-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:137:13-139:29
+156                <action android:name="com.cybershield.mdm.ACTION_STOP_SIREN" />
+156-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:138:17-80
+156-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:138:25-77
+157            </intent-filter>
+158        </receiver>
+159
+160        <!-- Silent Package Installer Receiver for Remote Auto-Updates -->
+161        <receiver
+161-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:143:9-145:40
+162            android:name="com.cybershield.mdm.SilentInstallReceiver"
+162-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:144:13-50
+163            android:exported="false" />
+163-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:145:13-37
+164
+165        <!-- Foreground MDM Management & SignalR Service -->
+166        <service
+166-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:148:9-153:56
+167            android:name="com.cybershield.mdm.CyberShieldService"
+167-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:149:13-47
+168            android:directBootAware="true"
+168-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:152:13-43
+169            android:enabled="true"
+169-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:150:13-35
+170            android:exported="false"
+170-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:151:13-37
+171            android:foregroundServiceType="dataSync" />
+171-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:153:13-53
+172
+173        <!-- On-Device DNS Web Filter Service -->
+174        <service
+174-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:156:9-163:19
+175            android:name="com.cybershield.mdm.MdmVpnFilterService"
+175-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:157:13-48
+176            android:exported="true"
+176-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:159:13-36
+177            android:permission="android.permission.BIND_VPN_SERVICE" >
+177-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:13-69
+178            <intent-filter>
+178-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:160:13-162:29
+179                <action android:name="android.net.VpnService" />
+179-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:161:17-65
+179-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:161:25-62
+180            </intent-filter>
+181        </service>
+182
+183        <!-- Silent Remote Physical Screen Streaming & Touch Injection Service -->
+184        <service
+184-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:166:9-176:19
+185            android:name="com.cybershield.mdm.MdmAccessibilityService"
+185-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:167:13-52
+186            android:exported="true"
+186-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:169:13-36
+187            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+187-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:168:13-79
+188            <intent-filter>
+188-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:170:13-172:29
+189                <action android:name="android.accessibilityservice.AccessibilityService" />
+189-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:171:17-92
+189-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:171:25-89
+190            </intent-filter>
+191
+192            <meta-data
+192-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:173:13-175:72
+193                android:name="android.accessibilityservice"
+193-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:174:17-60
+194                android:resource="@xml/accessibility_service_config" />
+194-->C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:175:17-69
+195        </service>
+196
+197        <activity
+197-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+198            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+198-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+199            android:exported="false"
+199-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+200            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+200-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hexah\.gradle\caches\8.13\transforms\948c424b14beca645ea6a4eff82e6218\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+201
+202        <meta-data
+202-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+203            android:name="com.google.android.gms.version"
+203-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+204            android:value="@integer/google_play_services_version" />
+204-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\aad15d50f43a7c9e03619c14bb500e37\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+205
+206        <provider
+206-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+207            android:name="androidx.startup.InitializationProvider"
+207-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
+208            android:authorities="com.cybershield.mdm.androidx-startup"
+208-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
+209            android:exported="false" >
+209-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
+210            <meta-data
+210-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+211                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+211-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
+212                android:value="androidx.startup" />
+212-->[androidx.emoji2:emoji2:1.3.0] C:\Users\hexah\.gradle\caches\8.13\transforms\d4b5f8f0a47fdd84f65fcdf43faa7e20\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
+213            <meta-data
+213-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+214                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+214-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+215                android:value="androidx.startup" />
+215-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\hexah\.gradle\caches\8.13\transforms\fa1cc15ab56045c12572a6b8acfd6c5d\transformed\jetified-lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+216            <meta-data
+216-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+217                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+217-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+218                android:value="androidx.startup" />
+218-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+219        </provider>
+220
+221        <receiver
+221-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+222            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+222-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+223            android:directBootAware="false"
+223-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+224            android:enabled="true"
+224-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+225            android:exported="true"
+225-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+226            android:permission="android.permission.DUMP" >
+226-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+227            <intent-filter>
+227-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+228                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+228-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+228-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+229            </intent-filter>
+230            <intent-filter>
+230-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+231                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+231-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+231-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+232            </intent-filter>
+233            <intent-filter>
+233-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+234                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+234-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+234-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+235            </intent-filter>
+236            <intent-filter>
+236-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+237                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+237-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+237-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\hexah\.gradle\caches\8.13\transforms\bd102c445930940b7ffe3c4d3b49267c\transformed\jetified-profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+238            </intent-filter>
+239        </receiver>
+240    </application>
+241
+242</manifest>

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-164:12
-INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-164:12
-INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-164:12
-INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-164:12
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-180:12
+INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-180:12
+INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-180:12
+INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:2:1-180:12
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\hexah\.gradle\caches\8.13\transforms\c1fa0296dc8f0b3ba18dedc5af7fb030\transformed\material-1.12.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] C:\Users\hexah\.gradle\caches\8.13\transforms\17b7e41b99968f464646b43f3d3884ae\transformed\constraintlayout-2.2.0\AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.appcompat:appcompat-resources:1.7.0] C:\Users\hexah\.gradle\caches\8.13\transforms\fb9decbdb62f969d24d6aa3b2f517179\transformed\jetified-appcompat-resources-1.7.0\AndroidManifest.xml:2:1-7:12
@@ -131,9 +131,15 @@ uses-permission#android.permission.ACCESS_NOTIFICATION_POLICY
 ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:29:5-85
 	android:name
 		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:29:22-82
+uses-permission#android.permission.WRITE_SECURE_SETTINGS
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:5-116
+	tools:ignore
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:78-113
+	android:name
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:22-77
 application
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:31:5-162:19
-INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:31:5-162:19
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:34:5-178:19
+INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:34:5-178:19
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\hexah\.gradle\caches\8.13\transforms\c1fa0296dc8f0b3ba18dedc5af7fb030\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\hexah\.gradle\caches\8.13\transforms\c1fa0296dc8f0b3ba18dedc5af7fb030\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.2.0] C:\Users\hexah\.gradle\caches\8.13\transforms\17b7e41b99968f464646b43f3d3884ae\transformed\constraintlayout-2.2.0\AndroidManifest.xml:7:5-20
@@ -163,217 +169,237 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\hexah\.gradle\cach
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.0] C:\Users\hexah\.gradle\caches\8.13\transforms\0376f7aef288e0fc9cb51152f06069bd\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:36:9-35
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:39:9-35
 	android:label
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:34:9-41
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:37:9-41
 	android:testOnly
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:39:9-33
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:42:9-33
 	android:roundIcon
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:35:9-50
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:38:9-50
 	tools:targetApi
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:40:9-29
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:43:9-29
 	android:icon
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:33:9-45
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:36:9-45
 	android:allowBackup
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:32:9-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:35:9-36
 	android:theme
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:37:9-52
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:40:9-52
 	android:usesCleartextTraffic
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:38:9-44
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:41:9-44
 activity#com.cybershield.mdm.MainActivity
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:43:9-51:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:46:9-54:20
 	android:launchMode
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:46:13-43
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:13-43
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:45:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:13-36
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:44:13-41
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:47:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:47:13-50:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:50:13-53:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:17-69
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:51:17-69
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:48:25-66
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:51:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:17-77
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:52:17-77
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:49:27-74
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:52:27-74
 activity#com.cybershield.mdm.GetProvisioningModeActivity
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:54:9-63:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:57:9-66:20
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:58:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:13-36
 	android:permission
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:56:13-70
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:59:13-70
 	android:theme
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:57:13-72
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:13-72
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:55:13-56
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:58:13-56
 intent-filter#action:name:android.app.action.GET_PROVISIONING_MODE+category:name:android.intent.category.DEFAULT
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:59:13-62:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:62:13-65:29
 action#android.app.action.GET_PROVISIONING_MODE
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:17-83
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:63:17-83
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:60:25-80
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:63:25-80
 category#android.intent.category.DEFAULT
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:17-76
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:17-76
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:61:27-73
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:64:27-73
 activity#com.cybershield.mdm.PolicyComplianceActivity
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:65:9-74:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:68:9-77:20
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:69:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:72:13-36
 	android:permission
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:67:13-70
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:70:13-70
 	android:theme
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:68:13-72
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:13-72
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:66:13-53
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:69:13-53
 intent-filter#action:name:android.app.action.ADMIN_POLICY_COMPLIANCE+category:name:android.intent.category.DEFAULT
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:70:13-73:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:73:13-76:29
 action#android.app.action.ADMIN_POLICY_COMPLIANCE
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:17-85
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:74:17-85
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:71:25-82
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:74:25-82
 receiver#com.cybershield.mdm.MdmDeviceAdminReceiver
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:77:9-95:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:80:9-98:20
 	android:label
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:80:13-45
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:83:13-45
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:82:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:85:13-36
 	android:permission
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:81:13-70
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:84:13-70
 	android:description
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:79:13-67
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:82:13-67
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:78:13-51
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:81:13-51
 meta-data#android.app.device_admin
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:83:13-85:65
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:86:13-88:65
 	android:resource
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:85:17-62
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-62
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:84:17-56
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-56
 intent-filter#action:name:android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED+action:name:android.app.action.ACTION_PASSWORD_CHANGED+action:name:android.app.action.ACTION_PASSWORD_FAILED+action:name:android.app.action.ACTION_PASSWORD_SUCCEEDED+action:name:android.app.action.DEVICE_ADMIN_DISABLED+action:name:android.app.action.DEVICE_ADMIN_ENABLED+action:name:android.app.action.PROFILE_PROVISIONING_COMPLETE
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:86:13-94:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:13-97:29
 action#android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:17-82
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:17-82
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:87:25-79
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:25-79
 action#android.app.action.DEVICE_ADMIN_DISABLED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:17-83
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:17-83
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:88:25-80
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:25-80
 action#android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:17-99
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:17-99
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:89:25-96
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:25-96
 action#android.app.action.ACTION_PASSWORD_CHANGED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:17-85
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:17-85
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:90:25-82
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:25-82
 action#android.app.action.ACTION_PASSWORD_FAILED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:17-84
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:94:17-84
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:91:25-81
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:94:25-81
 action#android.app.action.ACTION_PASSWORD_SUCCEEDED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:17-87
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:95:17-87
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:92:25-84
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:95:25-84
 action#android.app.action.PROFILE_PROVISIONING_COMPLETE
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:17-91
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:96:17-91
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:93:25-88
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:96:25-88
 receiver#com.cybershield.mdm.DeviceAdminReceiver
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:97:9-111:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:100:9-114:20
 	android:label
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:100:13-45
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:103:13-45
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:102:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:105:13-36
 	android:permission
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:101:13-70
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:104:13-70
 	android:description
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:99:13-67
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:102:13-67
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:98:13-48
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:101:13-48
 intent-filter#action:name:android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED+action:name:android.app.action.DEVICE_ADMIN_DISABLED+action:name:android.app.action.DEVICE_ADMIN_ENABLED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:106:13-110:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:109:13-113:29
 receiver#com.cybershield.mdm.BootReceiver
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:114:9-127:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:117:9-130:20
 	android:enabled
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:116:13-35
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:119:13-35
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:117:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:13-36
 	android:directBootAware
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:118:13-43
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:13-43
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:115:13-41
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:118:13-41
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.LOCKED_BOOT_COMPLETED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.QUICKBOOT_POWERON+action:name:com.htc.intent.action.QUICKBOOT_POWERON+category:name:android.intent.category.DEFAULT
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:119:13-126:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:13-129:29
 action#android.intent.action.LOCKED_BOOT_COMPLETED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:17-86
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:17-86
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:120:25-83
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:25-83
 action#android.intent.action.BOOT_COMPLETED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:17-79
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:17-79
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:121:25-76
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:25-76
 action#android.intent.action.MY_PACKAGE_REPLACED
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:17-84
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:125:17-84
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:122:25-81
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:125:25-81
 action#android.intent.action.QUICKBOOT_POWERON
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:17-82
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:126:17-82
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:123:25-79
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:126:25-79
 action#com.htc.intent.action.QUICKBOOT_POWERON
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:17-82
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:127:17-82
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:124:25-79
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:127:25-79
 receiver#com.cybershield.mdm.SirenStopReceiver
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:130:9-137:20
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:133:9-140:20
 	android:enabled
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:132:13-35
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:13-35
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:133:13-37
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:136:13-37
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:131:13-46
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:134:13-46
 intent-filter#action:name:com.cybershield.mdm.ACTION_STOP_SIREN
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:134:13-136:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:137:13-139:29
 action#com.cybershield.mdm.ACTION_STOP_SIREN
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:17-80
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:138:17-80
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:135:25-77
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:138:25-77
 receiver#com.cybershield.mdm.SilentInstallReceiver
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:140:9-142:40
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:143:9-145:40
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:142:13-37
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:145:13-37
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:141:13-50
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:144:13-50
 service#com.cybershield.mdm.CyberShieldService
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:145:9-150:56
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:148:9-153:56
 	android:enabled
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:147:13-35
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:150:13-35
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:148:13-37
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:151:13-37
 	android:directBootAware
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:149:13-43
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:152:13-43
 	android:foregroundServiceType
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:150:13-53
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:153:13-53
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:146:13-47
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:149:13-47
 service#com.cybershield.mdm.MdmVpnFilterService
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:153:9-160:19
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:156:9-163:19
 	android:exported
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:156:13-36
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:159:13-36
 	android:permission
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:155:13-69
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:13-69
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:154:13-48
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:157:13-48
 intent-filter#action:name:android.net.VpnService
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:157:13-159:29
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:160:13-162:29
 action#android.net.VpnService
-ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:17-65
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:161:17-65
 	android:name
-		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:158:25-62
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:161:25-62
+service#com.cybershield.mdm.MdmAccessibilityService
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:166:9-176:19
+	android:exported
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:169:13-36
+	android:permission
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:168:13-79
+	android:name
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:167:13-52
+intent-filter#action:name:android.accessibilityservice.AccessibilityService
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:170:13-172:29
+action#android.accessibilityservice.AccessibilityService
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:171:17-92
+	android:name
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:171:25-89
+meta-data#android.accessibilityservice
+ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:173:13-175:72
+	android:resource
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:175:17-69
+	android:name
+		ADDED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml:174:17-60
 uses-sdk
 INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\hexah\OneDrive\Desktop\MDM\src\Mobile\CyberShieldAndroid\app\src\main\AndroidManifest.xml

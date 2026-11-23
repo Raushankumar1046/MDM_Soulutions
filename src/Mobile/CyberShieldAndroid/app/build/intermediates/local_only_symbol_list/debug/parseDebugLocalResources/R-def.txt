@@ -22,6 +22,7 @@ id tvDeviceModel
 id tvOsVersion
 id tvServerStatus
 layout activity_main
+string accessibility_service_description
 string activate_admin
 string admin_active
 string admin_inactive
@@ -31,4 +32,5 @@ string server_url_hint
 string status_connected
 string status_disconnected
 style Theme.CyberShieldMDM
+xml accessibility_service_config
 xml device_admin_receiver

@@ -1,13 +1,18 @@
 package com.cybershield.mdm;
 
+import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
+
+import com.cybershield.mdm.models.RemoteInputEvent;
 
 import com.cybershield.mdm.models.TerminalCommand;
 import com.cybershield.mdm.models.TerminalOutput;
@@ -94,27 +99,150 @@ public class RemoteGatewayManager {
     }
 
     /**
-     * Starts live screen status frame streaming back to the admin browser console.
+     * Wakes up the mobile display if it is currently locked or asleep so admin can see the screen.
+     */
+    private void wakeScreenIfSleeping() {
+        try {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            if (pm != null && !pm.isInteractive()) {
+                @SuppressWarnings("deprecation")
+                PowerManager.WakeLock wl = pm.newWakeLock(
+                        PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                        "cybershield:screen_wake"
+                );
+                wl.acquire(1500);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    /**
+     * Starts live screen streaming back to the admin browser console.
+     * Uses silent, zero-notification physical screen capture via MdmAccessibilityService (Android 11+).
+     * Automatically falls back to high-fidelity live telemetry canvas if accessibility is initializing.
      */
     public synchronized void startScreenStream(String targetAdminId, HubConnection hubConnection) {
         if (isStreaming) return;
         isStreaming = true;
         Log.i(TAG, "Starting remote screen stream for Admin ID: " + targetAdminId);
 
-        streamScheduler = Executors.newSingleThreadScheduledExecutor();
-        streamScheduler.scheduleWithFixedDelay(() -> {
-            if (!isStreaming || hubConnection == null || hubConnection.getConnectionState() != HubConnectionState.CONNECTED) {
-                return;
-            }
+        wakeScreenIfSleeping();
 
-            try {
-                // Generate high-fidelity status canvas frame representing live mobile display
-                String base64Frame = generateStatusFrame();
-                hubConnection.send("SendScreenFrame", targetAdminId, base64Frame);
-            } catch (Exception e) {
-                Log.w(TAG, "Error streaming frame: " + e.getMessage());
+        streamScheduler = Executors.newSingleThreadScheduledExecutor();
+
+        Runnable captureTask = new Runnable() {
+            @Override
+            public void run() {
+                if (!isStreaming || hubConnection == null || hubConnection.getConnectionState() != HubConnectionState.CONNECTED) {
+                    return;
+                }
+
+                MdmAccessibilityService a11y = MdmAccessibilityService.getInstance();
+                if (a11y != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    a11y.capturePhysicalScreen(base64Frame -> {
+                        if (!isStreaming) return;
+
+                        if (base64Frame != null) {
+                            try {
+                                hubConnection.send("SendScreenFrame", targetAdminId, base64Frame);
+                            } catch (Exception ex) {
+                                Log.w(TAG, "Failed sending physical screen frame: " + ex.getMessage());
+                            }
+                            // Adaptive delay for smooth 5-6 FPS stream with low latency
+                            if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
+                                streamScheduler.schedule(this, 160, TimeUnit.MILLISECONDS);
+                            }
+                        } else {
+                            // Fallback to high-fidelity telemetry canvas if capture momentarily unavailable
+                            try {
+                                String fb = generateStatusFrame();
+                                hubConnection.send("SendScreenFrame", targetAdminId, fb);
+                            } catch (Exception ignored) {}
+                            if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
+                                streamScheduler.schedule(this, 500, TimeUnit.MILLISECONDS);
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback to telemetry status frame
+                    try {
+                        String base64Frame = generateStatusFrame();
+                        hubConnection.send("SendScreenFrame", targetAdminId, base64Frame);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Error streaming frame: " + e.getMessage());
+                    }
+                    if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
+                        streamScheduler.schedule(this, 800, TimeUnit.MILLISECONDS);
+                    }
+                }
             }
-        }, 0, 800, TimeUnit.MILLISECONDS);
+        };
+
+        // Trigger immediate capture
+        streamScheduler.execute(captureTask);
+    }
+
+    /**
+     * Processes remote touch, gesture and key navigation inputs from the web admin console.
+     */
+    public void handleRemoteInput(Object inputObj) {
+        if (inputObj == null) return;
+        try {
+            RemoteInputEvent event;
+            if (inputObj instanceof RemoteInputEvent) {
+                event = (RemoteInputEvent) inputObj;
+            } else {
+                String json = gson.toJson(inputObj);
+                event = gson.fromJson(json, RemoteInputEvent.class);
+            }
+            if (event == null) return;
+
+            MdmAccessibilityService a11y = MdmAccessibilityService.getInstance();
+            if (a11y == null) return;
+
+            DisplayMetrics dm = context.getResources().getDisplayMetrics();
+            int screenW = dm.widthPixels;
+            int screenH = dm.heightPixels;
+
+            float x = (float) (Math.max(0.0, Math.min(1.0, event.normalizedX)) * screenW);
+            float y = (float) (Math.max(0.0, Math.min(1.0, event.normalizedY)) * screenH);
+
+            switch (event.eventType) {
+                case 2: // MouseDown
+                case 4: // MouseClick
+                case 5: // DoubleClick
+                    a11y.injectTap(x, y);
+                    break;
+
+                case 9: // MouseWheel
+                    if (event.wheelDelta < 0) {
+                        // Scroll Down -> swipe upwards
+                        a11y.injectSwipe(screenW * 0.5f, screenH * 0.7f, screenW * 0.5f, screenH * 0.3f, 200);
+                    } else if (event.wheelDelta > 0) {
+                        // Scroll Up -> swipe downwards
+                        a11y.injectSwipe(screenW * 0.5f, screenH * 0.3f, screenW * 0.5f, screenH * 0.7f, 200);
+                    }
+                    break;
+
+                case 6: // KeyDown / Key Shortcuts
+                    if (event.keyCode == 4 || event.keyCode == 27) { // Android Back / Esc
+                        a11y.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+                    } else if (event.keyCode == 3 || event.keyCode == 91) { // Android Home / Win
+                        a11y.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
+                    } else if (event.keyCode == 187) { // Android Recents
+                        a11y.performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+                    } else if (event.keyCode == 26) { // Lock / Power
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            a11y.performGlobalAction(AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN);
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Error processing remote input: " + e.getMessage());
+        }
     }
 
     public synchronized void stopScreenStream() {

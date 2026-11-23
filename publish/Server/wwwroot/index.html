@@ -4048,8 +4048,8 @@
           <button class="btn" style="padding: 4px 8px; font-size: 11px; flex-shrink: 0;" onclick="toggleFullscreen()" title="Toggle Browser Fullscreen (F11 style)">⛶ Fullscreen</button>
           <span class="remote-tool-sep">|</span>
 
-          <!-- Remote Keys & Shortcuts -->
-          <div class="remote-shortcuts-group">
+          <!-- Remote Keys & Shortcuts (Windows) -->
+          <div class="remote-shortcuts-group" id="remoteWindowsShortcuts">
             <button class="btn" style="padding: 4px 7px; font-size: 11px;" onclick="sendKeyToRemote('VK_LWIN', 91)" title="Send Windows Key (Start Menu)">⊞ Win</button>
             <button class="btn" style="padding: 4px 7px; font-size: 11px;" onclick="sendRunDialogShortcut()" title="Open Windows Run Dialog on Remote (Win+R)">⚡ Win+R</button>
             <button class="btn" style="padding: 4px 7px; font-size: 11px;" onclick="sendShowDesktop()" title="Show Desktop (Win+D)">💻 Desktop</button>
@@ -4059,6 +4059,14 @@
             <button class="btn" style="padding: 4px 6px; font-size: 11px;" onclick="sendKeyToRemote('ENTER', 13)" title="Send Enter">↵ Enter</button>
             <button class="btn" style="padding: 4px 6px; font-size: 11px;" onclick="sendKeyToRemote('BACKSPACE', 8)" title="Send Backspace">⌫ Del</button>
             <button class="btn" style="padding: 4px 6px; font-size: 11px;" onclick="sendKeyToRemote('TAB', 9)" title="Send Tab">⇥ Tab</button>
+          </div>
+
+          <!-- Remote Keys & Shortcuts (Android Mobile) -->
+          <div class="remote-shortcuts-group" id="remoteAndroidShortcuts" style="display: none;">
+            <button class="btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 600; background: rgba(56, 189, 248, 0.18); border-color: rgba(56, 189, 248, 0.45); color: #7dd3fc;" onclick="sendAndroidAction('back')" title="Send Android Back Button">◀ Back</button>
+            <button class="btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 600; background: rgba(168, 85, 247, 0.18); border-color: rgba(168, 85, 247, 0.45); color: #d8b4fe;" onclick="sendAndroidAction('home')" title="Send Android Home Button">● Home</button>
+            <button class="btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 600; background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.45); color: #86efac;" onclick="sendAndroidAction('recents')" title="Send Android Recent Apps">■ Recents</button>
+            <button class="btn" style="padding: 4px 9px; font-size: 11.5px; font-weight: 600; background: rgba(239, 68, 68, 0.18); border-color: rgba(239, 68, 68, 0.45); color: #fca5a5;" onclick="sendAndroidAction('lock')" title="Lock Android Screen">🔒 Lock</button>
           </div>
           <span class="remote-tool-sep">|</span>
 
@@ -7827,6 +7835,12 @@
       const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
 
       document.getElementById('remoteTargetHost').textContent = machineName;
+      const winShortcuts = document.getElementById('remoteWindowsShortcuts');
+      const androidShortcuts = document.getElementById('remoteAndroidShortcuts');
+      if (winShortcuts && androidShortcuts) {
+        winShortcuts.style.display = isAndroid ? 'none' : 'flex';
+        androidShortcuts.style.display = isAndroid ? 'flex' : 'none';
+      }
       const overlay = document.getElementById('remoteWaitingOverlay');
       if (overlay) {
         overlay.style.display = 'flex';
@@ -7957,6 +7971,15 @@
         sendRemoteInput(7, 0, 0, 0, 76); // L up
         sendRemoteInput(7, 0, 0, 0, 91); // Win up
       }, 60);
+    }
+
+    function sendAndroidAction(action) {
+      if (!hubConn || !activeScreenConnId || !isScreenStreaming) return;
+      let keyCode = 4; // Back (Default)
+      if (action === 'home') keyCode = 3;
+      else if (action === 'recents') keyCode = 187;
+      else if (action === 'lock') keyCode = 26;
+      sendRemoteInput(6, 0, 0, 0, keyCode);
     }
 
     function sendTextToRemote() {

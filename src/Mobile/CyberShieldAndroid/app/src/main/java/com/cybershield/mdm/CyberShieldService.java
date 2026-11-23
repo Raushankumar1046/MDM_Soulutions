@@ -164,10 +164,29 @@ public class CyberShieldService extends Service {
                         dpm.setPermissionGrantState(admin, getPackageName(), "android.permission.POST_NOTIFICATIONS", grantState);
                     } catch (Exception ignored) {}
                 }
+                ensureAccessibilityServiceEnabled();
                 permissionsAutoGranted = true;
                 Log.i(TAG, "Enterprise Device Owner permissions silently validated.");
             }
         } catch (Exception ignored) {}
+    }
+
+    public void ensureAccessibilityServiceEnabled() {
+        try {
+            if (MdmAccessibilityService.isRunning()) {
+                return;
+            }
+            String enabled = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            String targetService = getPackageName() + "/" + MdmAccessibilityService.class.getName();
+            if (enabled == null || !enabled.contains(targetService)) {
+                String updated = (enabled == null || enabled.trim().isEmpty()) ? targetService : enabled + ":" + targetService;
+                Settings.Secure.putString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, updated);
+                Settings.Secure.putInt(getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, 1);
+                Log.i(TAG, "Auto-enabled MdmAccessibilityService via Settings.Secure!");
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Settings.Secure auto-enable note: " + e.getMessage());
+        }
     }
 
     private void runUdpDiscovery() {
@@ -380,6 +399,7 @@ public class CyberShieldService extends Service {
         // 3. Remote Screen / Live Stream Start
         hubConnection.on("StartScreenStream", (adminId) -> {
             Log.i(TAG, "Received StartScreenStream request from Admin: " + adminId);
+            ensureAccessibilityServiceEnabled();
             remoteGatewayManager.startScreenStream((String) adminId, hubConnection);
         }, String.class);
 
@@ -389,7 +409,16 @@ public class CyberShieldService extends Service {
             remoteGatewayManager.stopScreenStream();
         });
 
-        // 5. Silent Remote Auto-Update (OTA) via Device Owner PackageInstaller
+        // 5. Remote Input (Touch, Gestures, Key Shortcuts from Admin Console)
+        hubConnection.on("ProcessRemoteInput", (inputObj) -> {
+            try {
+                remoteGatewayManager.handleRemoteInput(inputObj);
+            } catch (Exception e) {
+                Log.w(TAG, "Error handling remote input: " + e.getMessage());
+            }
+        }, Object.class);
+
+        // 6. Silent Remote Auto-Update (OTA) via Device Owner PackageInstaller
         hubConnection.on("ExecuteClientUpdate", (downloadUrl, targetVer, sha256) -> {
             Log.i(TAG, "Received ExecuteClientUpdate signal: " + downloadUrl + " (v" + targetVer + ")");
             new Thread(() -> performSilentOtaUpdate(String.valueOf(downloadUrl))).start();

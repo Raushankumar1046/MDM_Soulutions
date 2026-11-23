@@ -96,11 +96,14 @@ exit /b 1
 :dpm_ok
 
 echo.
-echo [4/5] Auto-Granting Enterprise Permissions (IMEI Read, GPS Location, Notifications)...
+echo [4/5] Auto-Granting Enterprise Permissions (IMEI Read, GPS, Silent Remote Screen, Notifications)...
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.READ_PHONE_STATE >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.ACCESS_FINE_LOCATION >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.ACCESS_COARSE_LOCATION >nul 2>&1
 "%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.POST_NOTIFICATIONS >nul 2>&1
+"%ADB_EXE%" shell pm grant com.cybershield.mdm android.permission.WRITE_SECURE_SETTINGS >nul 2>&1
+"%ADB_EXE%" shell settings put secure enabled_accessibility_services com.cybershield.mdm/com.cybershield.mdm.MdmAccessibilityService >nul 2>&1
+"%ADB_EXE%" shell settings put secure accessibility_enabled 1 >nul 2>&1
 
 :: Detect active Local LAN IP
 set "LOCAL_IP="
