@@ -7655,6 +7655,7 @@
         ? selectedModalDevice 
         : (allLoadedDevices.find(d => d.machineName === machineName) || {});
       const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+      window.activeScreenIsAndroid = !!isAndroid;
 
       const titleEl = document.querySelector('#terminalModal .modal-title');
       if (titleEl) {
@@ -7726,6 +7727,7 @@
         ? selectedModalDevice 
         : (allLoadedDevices.find(d => d.machineName === activeTermHost) || {});
       const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+      window.activeScreenIsAndroid = !!isAndroid;
 
       const screen = document.getElementById('termScreen');
       const cmdLine = document.createElement('div');
@@ -7840,6 +7842,7 @@
         ? selectedModalDevice 
         : (allLoadedDevices.find(d => d.machineName === machineName) || {});
       const isAndroid = (dev.osVersion && dev.osVersion.toLowerCase().includes('android'));
+      window.activeScreenIsAndroid = !!isAndroid;
 
       document.getElementById('remoteTargetHost').textContent = machineName;
       const winShortcuts = document.getElementById('remoteWindowsShortcuts');
@@ -8036,8 +8039,9 @@
       if (!canvas) return;
       canvasEventsConfigured = true;
 
-      // Mouse Move & Dragging
+      // Mouse Move & Dragging (Skip on Android touchscreen so SignalR doesn't get flooded)
       canvas.addEventListener('mousemove', (e) => {
+        if (window.activeScreenIsAndroid) return;
         const now = Date.now();
         // ~33 events/sec for fluid cursor positioning and dragging
         if (now - lastMouseMoveSent > 30) {
@@ -8061,6 +8065,7 @@
       canvas.addEventListener('mouseup', (e) => {
         e.preventDefault();
         isCanvasMouseDown = false;
+        if (window.activeScreenIsAndroid) return;
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(3, nx, ny, e.button);
       });

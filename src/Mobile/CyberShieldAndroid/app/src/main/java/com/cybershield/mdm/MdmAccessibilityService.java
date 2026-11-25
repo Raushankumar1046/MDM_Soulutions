@@ -97,10 +97,10 @@ public class MdmAccessibilityService extends AccessibilityService {
 
                                     if (swBmp != null) {
                                         Bitmap finalBmp = swBmp;
-                                        // Downscale if width > 720 to ensure ultra-low network latency (~40-60 KB per frame)
-                                        if (swBmp.getWidth() > 720) {
-                                            int targetW = 720;
-                                            int targetH = (int) ((float) swBmp.getHeight() * 720f / (float) swBmp.getWidth());
+                                        // Downscale to 480px width for ultra-fast streaming (~20-35 KB per frame over 4G/hotspot)
+                                        if (swBmp.getWidth() > 480) {
+                                            int targetW = 480;
+                                            int targetH = (int) ((float) swBmp.getHeight() * 480f / (float) swBmp.getWidth());
                                             finalBmp = Bitmap.createScaledBitmap(swBmp, targetW, targetH, true);
                                             if (finalBmp != swBmp) {
                                                 swBmp.recycle();
@@ -108,7 +108,7 @@ public class MdmAccessibilityService extends AccessibilityService {
                                         }
 
                                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                        finalBmp.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+                                        finalBmp.compress(Bitmap.CompressFormat.JPEG, 45, baos);
                                         finalBmp.recycle();
 
                                         byte[] bytes = baos.toByteArray();

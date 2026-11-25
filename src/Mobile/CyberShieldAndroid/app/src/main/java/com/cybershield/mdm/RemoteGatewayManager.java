@@ -128,7 +128,7 @@ public class RemoteGatewayManager {
         wakeScreenIfSleeping();
 
         streamScheduler = Executors.newSingleThreadScheduledExecutor();
-        final long[] captureIntervalMs = new long[] { 350L };
+        final long[] targetCycleMs = new long[] { 350L };
 
         Runnable captureTask = new Runnable() {
             @Override
@@ -139,26 +139,28 @@ public class RemoteGatewayManager {
 
                 MdmAccessibilityService a11y = MdmAccessibilityService.getInstance();
                 if (a11y != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    final long captureStartMs = System.currentTimeMillis();
                     a11y.capturePhysicalScreen((base64Frame, errorCode) -> {
                         if (!isStreaming) return;
 
+                        long elapsedMs = System.currentTimeMillis() - captureStartMs;
                         if (base64Frame != null) {
                             try {
                                 hubConnection.send("SendScreenFrame", targetAdminId, base64Frame);
                             } catch (Exception ex) {
                                 Log.w(TAG, "Failed sending physical screen frame: " + ex.getMessage());
                             }
+                            long nextDelay = Math.max(40L, targetCycleMs[0] - elapsedMs);
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
-                                streamScheduler.schedule(this, captureIntervalMs[0], TimeUnit.MILLISECONDS);
+                                streamScheduler.schedule(this, nextDelay, TimeUnit.MILLISECONDS);
                             }
                         } else {
-                            // Android 11+ enforces a rate-limit cooldown (ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT = 3).
-                            // Do NOT overwrite the live screen with generateStatusFrame() — that causes display flicker!
-                            // Instead, adapt the interval and quietly wait for the next valid capture.
+                            // Android enforces a rate-limit cooldown (ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT = 3).
+                            // Do NOT overwrite the live screen with generateStatusFrame().
                             if (errorCode == 3) {
-                                captureIntervalMs[0] = Math.min(1100L, captureIntervalMs[0] + 200L);
+                                targetCycleMs[0] = Math.min(1050L, targetCycleMs[0] + 180L);
                             }
-                            long retryDelay = (errorCode == 3) ? 350L : 800L;
+                            long retryDelay = (errorCode == 3) ? 250L : 600L;
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
                                 streamScheduler.schedule(this, retryDelay, TimeUnit.MILLISECONDS);
                             }
