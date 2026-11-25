@@ -27,7 +27,7 @@ public class MdmAccessibilityService extends AccessibilityService {
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     public interface ScreenshotCallback {
-        void onComplete(String base64Jpeg);
+        void onComplete(String base64Jpeg, int errorCode);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class MdmAccessibilityService extends AccessibilityService {
 
                                         byte[] bytes = baos.toByteArray();
                                         String b64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-                                        callback.onComplete(b64);
+                                        callback.onComplete(b64, 0);
                                         return;
                                     }
                                 }
@@ -125,21 +125,21 @@ public class MdmAccessibilityService extends AccessibilityService {
                                 try { buffer.close(); } catch (Exception ignored) {}
                             }
                         }
-                        callback.onComplete(null);
+                        callback.onComplete(null, -1);
                     }
 
                     @Override
                     public void onFailure(int errorCode) {
                         Log.w(TAG, "takeScreenshot failed with code: " + errorCode);
-                        callback.onComplete(null);
+                        callback.onComplete(null, errorCode);
                     }
                 });
             } catch (Exception e) {
                 Log.e(TAG, "Exception calling takeScreenshot: " + e.getMessage());
-                callback.onComplete(null);
+                callback.onComplete(null, -1);
             }
         } else {
-            callback.onComplete(null);
+            callback.onComplete(null, -1);
         }
     }
 

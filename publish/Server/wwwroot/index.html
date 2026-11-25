@@ -7593,6 +7593,13 @@
             isRenderingFrame = false;
           }
         };
+        img.onerror = () => {
+          if (pendingFrameBase64) {
+            requestAnimationFrame(renderNextFrame);
+          } else {
+            isRenderingFrame = false;
+          }
+        };
         img.src = 'data:image/jpeg;base64,' + b64;
       }
 

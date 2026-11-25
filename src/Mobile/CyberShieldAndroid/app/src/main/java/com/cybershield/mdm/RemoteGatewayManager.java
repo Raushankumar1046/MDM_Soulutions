@@ -128,6 +128,7 @@ public class RemoteGatewayManager {
         wakeScreenIfSleeping();
 
         streamScheduler = Executors.newSingleThreadScheduledExecutor();
+        final long[] captureIntervalMs = new long[] { 350L };
 
         Runnable captureTask = new Runnable() {
             @Override
@@ -138,7 +139,7 @@ public class RemoteGatewayManager {
 
                 MdmAccessibilityService a11y = MdmAccessibilityService.getInstance();
                 if (a11y != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    a11y.capturePhysicalScreen(base64Frame -> {
+                    a11y.capturePhysicalScreen((base64Frame, errorCode) -> {
                         if (!isStreaming) return;
 
                         if (base64Frame != null) {
@@ -147,23 +148,24 @@ public class RemoteGatewayManager {
                             } catch (Exception ex) {
                                 Log.w(TAG, "Failed sending physical screen frame: " + ex.getMessage());
                             }
-                            // Adaptive delay for smooth 5-6 FPS stream with low latency
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
-                                streamScheduler.schedule(this, 160, TimeUnit.MILLISECONDS);
+                                streamScheduler.schedule(this, captureIntervalMs[0], TimeUnit.MILLISECONDS);
                             }
                         } else {
-                            // Fallback to high-fidelity telemetry canvas if capture momentarily unavailable
-                            try {
-                                String fb = generateStatusFrame();
-                                hubConnection.send("SendScreenFrame", targetAdminId, fb);
-                            } catch (Exception ignored) {}
+                            // Android 11+ enforces a rate-limit cooldown (ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT = 3).
+                            // Do NOT overwrite the live screen with generateStatusFrame() — that causes display flicker!
+                            // Instead, adapt the interval and quietly wait for the next valid capture.
+                            if (errorCode == 3) {
+                                captureIntervalMs[0] = Math.min(1100L, captureIntervalMs[0] + 200L);
+                            }
+                            long retryDelay = (errorCode == 3) ? 350L : 800L;
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
-                                streamScheduler.schedule(this, 500, TimeUnit.MILLISECONDS);
+                                streamScheduler.schedule(this, retryDelay, TimeUnit.MILLISECONDS);
                             }
                         }
                     });
                 } else {
-                    // Fallback to telemetry status frame
+                    // Fallback to telemetry status frame only when AccessibilityService is unavailable
                     try {
                         String base64Frame = generateStatusFrame();
                         hubConnection.send("SendScreenFrame", targetAdminId, base64Frame);
