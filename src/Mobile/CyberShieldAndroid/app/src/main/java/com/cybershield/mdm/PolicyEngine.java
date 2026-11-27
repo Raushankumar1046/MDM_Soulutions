@@ -72,11 +72,15 @@ public class PolicyEngine {
         // 3. Pre-initialize password reset token for remote screen lock clearing
         try { initPasswordResetToken(); } catch (Exception e) { Log.w(TAG, "Password token init: " + e.getMessage()); }
 
-        // 4. Block personal Samsung account to prevent cloud/FRP locks
-        try { setSamsungAccountBlocked(true); } catch (Exception e) { Log.w(TAG, "Samsung account block: " + e.getMessage()); }
+        android.content.SharedPreferences prefs = context.getSharedPreferences("CyberShieldPrefs", Context.MODE_PRIVATE);
 
-        // 5. Force GPS Location Always ON (Option 6)
-        try { setLocationAlwaysOn(true); } catch (Exception e) { Log.w(TAG, "Force GPS location: " + e.getMessage()); }
+        // 4. Respect saved Samsung account restriction (default false so toggle matches UI)
+        boolean blockSamsung = prefs.getBoolean("samsung_account_blocked", false);
+        try { setSamsungAccountBlocked(blockSamsung); } catch (Exception e) { Log.w(TAG, "Samsung account block: " + e.getMessage()); }
+
+        // 5. Respect saved GPS force-on policy (Option 6, default true)
+        boolean forceGps = prefs.getBoolean("gps_forced_on", true);
+        try { setLocationAlwaysOn(forceGps); } catch (Exception e) { Log.w(TAG, "Force GPS location: " + e.getMessage()); }
 
         Log.i(TAG, "Baseline enterprise anti-tamper, GPS force-on & lock protection policies evaluated.");
     }
@@ -116,15 +120,10 @@ public class PolicyEngine {
         if (!isAdminActive()) return false;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                // Block uninstalling this specific package
+                // Block uninstalling ONLY the CyberShield MDM package so third-party apps can still be uninstalled by IT Admin
                 dpm.setUninstallBlocked(adminComponent, context.getPackageName(), blocked);
-
-                if (blocked) {
-                    dpm.addUserRestriction(adminComponent, UserManager.DISALLOW_UNINSTALL_APPS);
-                } else {
-                    dpm.clearUserRestriction(adminComponent, UserManager.DISALLOW_UNINSTALL_APPS);
-                }
-                Log.i(TAG, "App Uninstall Protection set to: " + blocked);
+                dpm.clearUserRestriction(adminComponent, UserManager.DISALLOW_UNINSTALL_APPS);
+                Log.i(TAG, "MDM Agent Uninstall Protection set to: " + blocked + " (third-party app uninstall allowed)");
                 return true;
             }
         } catch (Exception e) {

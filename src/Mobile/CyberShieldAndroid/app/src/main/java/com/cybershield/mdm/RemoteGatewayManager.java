@@ -128,7 +128,7 @@ public class RemoteGatewayManager {
         wakeScreenIfSleeping();
 
         streamScheduler = Executors.newSingleThreadScheduledExecutor();
-        final long[] targetCycleMs = new long[] { 350L };
+        final long[] targetCycleMs = new long[] { 340L };
 
         Runnable captureTask = new Runnable() {
             @Override
@@ -150,17 +150,17 @@ public class RemoteGatewayManager {
                             } catch (Exception ex) {
                                 Log.w(TAG, "Failed sending physical screen frame: " + ex.getMessage());
                             }
-                            long nextDelay = Math.max(40L, targetCycleMs[0] - elapsedMs);
+                            long nextDelay = Math.max(30L, targetCycleMs[0] - elapsedMs);
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
                                 streamScheduler.schedule(this, nextDelay, TimeUnit.MILLISECONDS);
                             }
                         } else {
-                            // Android enforces a rate-limit cooldown (ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT = 3).
-                            // Do NOT overwrite the live screen with generateStatusFrame().
+                            // Fine-grained adaptive cooldown tuning (+50ms steps) + fast 120ms retry
+                            // so we lock onto the exact minimum OS interval (e.g. 340-400ms on Android 12+ or 1000ms on older OEMs)
                             if (errorCode == 3) {
-                                targetCycleMs[0] = Math.min(1050L, targetCycleMs[0] + 180L);
+                                targetCycleMs[0] = Math.min(1040L, targetCycleMs[0] + 50L);
                             }
-                            long retryDelay = (errorCode == 3) ? 250L : 600L;
+                            long retryDelay = (errorCode == 3) ? 120L : 500L;
                             if (isStreaming && streamScheduler != null && !streamScheduler.isShutdown()) {
                                 streamScheduler.schedule(this, retryDelay, TimeUnit.MILLISECONDS);
                             }
@@ -211,10 +211,40 @@ public class RemoteGatewayManager {
             float y = (float) (Math.max(0.0, Math.min(1.0, event.normalizedY)) * screenH);
 
             switch (event.eventType) {
-                case 2: // MouseDown
-                case 4: // MouseClick
-                case 5: // DoubleClick
-                    a11y.injectTap(x, y);
+                case 2: // MouseDown / Long Press (Right click or wheelDelta >= 450)
+                    if (event.button == 2 || event.wheelDelta >= 450) {
+                        a11y.injectLongPress(x, y, Math.max(700L, event.wheelDelta));
+                    } else {
+                        a11y.injectTap(x, y);
+                    }
+                    break;
+
+                case 4: // MouseClick or Swipe ("swipe:endNx,endNy,durMs")
+                    if (event.text != null && event.text.startsWith("swipe:")) {
+                        try {
+                            String[] parts = event.text.substring(6).split(",");
+                            if (parts.length >= 2) {
+                                double endNx = Math.max(0.0, Math.min(1.0, Double.parseDouble(parts[0])));
+                                double endNy = Math.max(0.0, Math.min(1.0, Double.parseDouble(parts[1])));
+                                long dur = parts.length >= 3 ? Long.parseLong(parts[2]) : 250L;
+                                a11y.injectSwipe(x, y, (float) (endNx * screenW), (float) (endNy * screenH), dur);
+                            }
+                        } catch (Exception ex) {
+                            Log.w(TAG, "Failed parsing swipe gesture: " + ex.getMessage());
+                        }
+                    } else if (event.button == 2 || event.wheelDelta >= 450) {
+                        a11y.injectLongPress(x, y, Math.max(700L, event.wheelDelta));
+                    } else {
+                        a11y.injectTap(x, y);
+                    }
+                    break;
+
+                case 5: // DoubleClick -> Long Press on Android if right-click, else tap
+                    if (event.button == 2) {
+                        a11y.injectLongPress(x, y, 750L);
+                    } else {
+                        a11y.injectTap(x, y);
+                    }
                     break;
 
                 case 9: // MouseWheel

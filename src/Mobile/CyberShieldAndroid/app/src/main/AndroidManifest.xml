@@ -53,6 +53,16 @@
             </intent-filter>
         </activity>
 
+        <!-- Translucent On-Screen IT Admin Alert Popup -->
+        <activity
+            android:name=".ItAlertActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:exported="false" />
+
         <!-- Android Enterprise Zero-Touch / QR Code Provisioning Mode & Compliance Handlers -->
         <activity
             android:name=".GetProvisioningModeActivity"

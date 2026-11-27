@@ -12,10 +12,12 @@ public class ClientHeartbeat {
     public String userName = "Android User";
     public String ipAddress = "";
     public String osVersion = "";
+    public String clientVersion = "1.3.0";
     public boolean usbStorageBlocked = false;
     public boolean softwareInstallDisabled = false;
     public boolean externalFileTransferRestricted = false;
     public boolean webFilteringBlocked = false;
+    public boolean selectivePrintRestricted = false;
     public boolean syncNotificationHidden = false;
     public String city;
     public String region;

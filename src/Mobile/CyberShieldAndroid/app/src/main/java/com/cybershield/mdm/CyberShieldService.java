@@ -73,6 +73,12 @@ public class CyberShieldService extends Service {
     // Discreet system notification channel
     public static final String CHANNEL_ID = "android_system_sync_channel_v2";
     public static final String KEY_HIDE_SYNC_NOTIFICATION = "hide_sync_notification";
+    public static final String KEY_USB_BLOCKED = "usb_blocked";
+    public static final String KEY_SOFTWARE_BLOCKED = "software_blocked";
+    public static final String KEY_WEB_FILTER_BLOCKED = "web_filter_blocked";
+    public static final String KEY_WEB_FILTER_PAYLOAD = "web_filter_payload";
+    public static final String KEY_SAMSUNG_ACCOUNT_BLOCKED = "samsung_account_blocked";
+    public static final String KEY_GPS_FORCED_ON = "gps_forced_on";
     private static final int NOTIFICATION_ID = 1001;
 
     private int currentUrlIndex = 0;
@@ -88,6 +94,7 @@ public class CyberShieldService extends Service {
     private boolean isUsbStorageBlocked = false;
     private boolean isSoftwareInstallBlocked = false;
     private boolean isWebFilteringBlocked = false;
+    private boolean isSamsungAccountBlocked = false;
     private boolean isSyncNotificationHidden = false;
     private boolean permissionsAutoGranted = false;
     private String cachedHardwareId = null;
@@ -119,6 +126,15 @@ public class CyberShieldService extends Service {
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         isSyncNotificationHidden = prefs.getBoolean(KEY_HIDE_SYNC_NOTIFICATION, false);
+        isUsbStorageBlocked = prefs.getBoolean(KEY_USB_BLOCKED, false);
+        isSoftwareInstallBlocked = prefs.getBoolean(KEY_SOFTWARE_BLOCKED, false);
+        isWebFilteringBlocked = prefs.getBoolean(KEY_WEB_FILTER_BLOCKED, false);
+        isSamsungAccountBlocked = prefs.getBoolean(KEY_SAMSUNG_ACCOUNT_BLOCKED, false);
+
+        if (isWebFilteringBlocked) {
+            String savedWebPayload = prefs.getString(KEY_WEB_FILTER_PAYLOAD, "");
+            applyWebFilteringPayload(savedWebPayload, true);
+        }
 
         createNotificationChannel();
         startInForeground();
@@ -271,6 +287,32 @@ public class CyberShieldService extends Service {
                 }
             } catch (Exception ignored) {}
         }
+    }
+
+    private void showItAlertNotification(String msg) {
+        try {
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
+            String alertChannelId = "cybershield_it_alerts";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel ch = new NotificationChannel(
+                        alertChannelId,
+                        "IT Admin Alerts",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+                ch.setDescription("Important corporate IT announcements and alerts");
+                manager.createNotificationChannel(ch);
+            }
+            Notification alertNotif = new NotificationCompat.Builder(this, alertChannelId)
+                    .setContentTitle("IT Admin Notice")
+                    .setContentText(msg)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .build();
+            manager.notify((int) (System.currentTimeMillis() % 100000), alertNotif);
+        } catch (Exception ignored) {}
     }
 
     private void updateNotification(boolean isConnected) {
@@ -494,12 +536,14 @@ public class CyberShieldService extends Service {
 
                 case 1: // UsbStorageBlock -> Restrict USB File Transfer (MTP/PTP)
                     isUsbStorageBlocked = cmd.enableRestriction;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putBoolean(KEY_USB_BLOCKED, isUsbStorageBlocked).apply();
                     success = policyEngine.setUsbDataTransferBlocked(cmd.enableRestriction);
                     message = "USB Data Transfer restriction set to: " + cmd.enableRestriction;
                     break;
 
                 case 2: // DisableSoftwareInstallation -> Block App & APK Installations
                     isSoftwareInstallBlocked = cmd.enableRestriction;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putBoolean(KEY_SOFTWARE_BLOCKED, isSoftwareInstallBlocked).apply();
                     success = policyEngine.setSoftwareInstallBlocked(cmd.enableRestriction);
                     message = "App / Software installation restriction set to: " + cmd.enableRestriction;
                     break;
@@ -511,6 +555,10 @@ public class CyberShieldService extends Service {
 
                 case 4: // WebFilteringBlock -> Sync On-Device DNS Blacklist
                     isWebFilteringBlocked = cmd.enableRestriction;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                            .putBoolean(KEY_WEB_FILTER_BLOCKED, isWebFilteringBlocked)
+                            .putString(KEY_WEB_FILTER_PAYLOAD, cmd.payload != null ? cmd.payload : "")
+                            .apply();
                     success = applyWebFilteringPayload(cmd.payload, cmd.enableRestriction);
                     message = "DNS Web Filtering policy updated. Restriction: " + cmd.enableRestriction;
                     break;
@@ -523,9 +571,20 @@ public class CyberShieldService extends Service {
 
                 case 12: // SendNotification
                     String alertMsg = cmd.payload != null ? cmd.payload : "Corporate IT Compliance Notice";
-                    mainHandler.post(() -> Toast.makeText(getApplicationContext(), alertMsg, Toast.LENGTH_LONG).show());
+                    mainHandler.post(() -> {
+                        try {
+                            Intent alertIntent = new Intent(getApplicationContext(), ItAlertActivity.class);
+                            alertIntent.putExtra(ItAlertActivity.EXTRA_MESSAGE, alertMsg);
+                            alertIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(alertIntent);
+                        } catch (Exception ex) {
+                            Log.w(TAG, "ItAlertActivity launch fallback to Toast: " + ex.getMessage());
+                        }
+                        Toast.makeText(getApplicationContext(), "IT Admin Alert: " + alertMsg, Toast.LENGTH_LONG).show();
+                    });
+                    showItAlertNotification(alertMsg);
                     success = true;
-                    message = "Notification displayed on screen.";
+                    message = "IT Alert popup displayed on screen.";
                     break;
 
                 case 15: // ClearScreenLock / Remote Password Reset (Samsung Care Bypass)
@@ -538,6 +597,8 @@ public class CyberShieldService extends Service {
 
                 case 16: // BlockSamsungAccount
                     boolean blockSamsung = cmd.enableRestriction;
+                    isSamsungAccountBlocked = blockSamsung;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putBoolean(KEY_SAMSUNG_ACCOUNT_BLOCKED, blockSamsung).apply();
                     success = policyEngine.setSamsungAccountBlocked(blockSamsung);
                     message = "Samsung Account sign-in restriction set to: " + blockSamsung;
                     break;
@@ -561,6 +622,7 @@ public class CyberShieldService extends Service {
 
                 case 19: // ForceGpsAlwaysOn (Option 6)
                     boolean forceGps = cmd.enableRestriction;
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit().putBoolean(KEY_GPS_FORCED_ON, forceGps).apply();
                     success = policyEngine.setLocationAlwaysOn(forceGps);
                     message = "Forced GPS location always ON policy: " + forceGps;
                     break;
@@ -710,11 +772,18 @@ public class CyberShieldService extends Service {
         hb.hardwareId = getDeviceHardwareId();
         hb.userName = "Android Mobile (" + Build.BRAND + ")";
         hb.osVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")";
+        try {
+            String ver = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            hb.clientVersion = (ver != null && !ver.isEmpty()) ? ver : "1.3.0";
+        } catch (Exception ignored) {
+            hb.clientVersion = "1.3.0";
+        }
         hb.ipAddress = getDeviceIpAddress();
         hb.externalFileTransferRestricted = policyEngine.isCameraDisabled();
         hb.usbStorageBlocked = isUsbStorageBlocked;
         hb.softwareInstallDisabled = isSoftwareInstallBlocked;
         hb.webFilteringBlocked = isWebFilteringBlocked;
+        hb.selectivePrintRestricted = isSamsungAccountBlocked;
         hb.syncNotificationHidden = isSyncNotificationHidden;
 
         // Location reading

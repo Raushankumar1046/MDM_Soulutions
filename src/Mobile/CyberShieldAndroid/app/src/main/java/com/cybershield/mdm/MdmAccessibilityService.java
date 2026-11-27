@@ -25,6 +25,7 @@ public class MdmAccessibilityService extends AccessibilityService {
     private static final String TAG = "MdmAccessibility";
     private static volatile MdmAccessibilityService instance;
     private final Executor executor = Executors.newSingleThreadExecutor();
+    private final ByteArrayOutputStream reusableBaos = new ByteArrayOutputStream(32768);
 
     public interface ScreenshotCallback {
         void onComplete(String base64Jpeg, int errorCode);
@@ -97,21 +98,24 @@ public class MdmAccessibilityService extends AccessibilityService {
 
                                     if (swBmp != null) {
                                         Bitmap finalBmp = swBmp;
-                                        // Downscale to 480px width for ultra-fast streaming (~20-35 KB per frame over 4G/hotspot)
-                                        if (swBmp.getWidth() > 480) {
-                                            int targetW = 480;
-                                            int targetH = (int) ((float) swBmp.getHeight() * 480f / (float) swBmp.getWidth());
+                                        // Downscale to 420px width for crisp readability + ultra-fast ~15-25 KB frames
+                                        if (swBmp.getWidth() > 420) {
+                                            int targetW = 420;
+                                            int targetH = (int) ((float) swBmp.getHeight() * 420f / (float) swBmp.getWidth());
                                             finalBmp = Bitmap.createScaledBitmap(swBmp, targetW, targetH, true);
                                             if (finalBmp != swBmp) {
                                                 swBmp.recycle();
                                             }
                                         }
 
-                                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                        finalBmp.compress(Bitmap.CompressFormat.JPEG, 45, baos);
+                                        byte[] bytes;
+                                        synchronized (reusableBaos) {
+                                            reusableBaos.reset();
+                                            finalBmp.compress(Bitmap.CompressFormat.JPEG, 42, reusableBaos);
+                                            bytes = reusableBaos.toByteArray();
+                                        }
                                         finalBmp.recycle();
 
-                                        byte[] bytes = baos.toByteArray();
                                         String b64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
                                         callback.onComplete(b64, 0);
                                         return;
@@ -156,6 +160,23 @@ public class MdmAccessibilityService extends AccessibilityService {
             dispatchGesture(builder.build(), null, null);
         } catch (Exception e) {
             Log.w(TAG, "Failed injecting tap: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Injects a remote long-press (hold) gesture to trigger context menus like App Uninstall / App Info.
+     */
+    public void injectLongPress(float x, float y, long durationMs) {
+        try {
+            Path holdPath = new Path();
+            holdPath.moveTo(x, y);
+            long holdDur = Math.max(650L, Math.min(2000L, durationMs));
+            GestureDescription.StrokeDescription stroke = new GestureDescription.StrokeDescription(holdPath, 0, holdDur);
+            GestureDescription.Builder builder = new GestureDescription.Builder();
+            builder.addStroke(stroke);
+            dispatchGesture(builder.build(), null, null);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed injecting long press: " + e.getMessage());
         }
     }
 

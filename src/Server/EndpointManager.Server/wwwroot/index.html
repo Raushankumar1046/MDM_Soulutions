@@ -3965,8 +3965,8 @@
         <!-- Canary OTA Client Update Box -->
         <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 10px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
           <div>
-            <div style="font-size: 13px; font-weight: 600; color: #93c5fd;">🚀 Canary Push: Update This Laptop to v1.3.0</div>
-            <div style="font-size: 11px; color: var(--text-muted);">Silently downloads & updates client agent on this specific machine for testing without impacting other fleet laptops.</div>
+            <div id="modalCanaryTitle" style="font-size: 13px; font-weight: 600; color: #93c5fd;">🚀 Canary Push: Update This Laptop to v1.3.0</div>
+            <div id="modalCanarySub" style="font-size: 11px; color: var(--text-muted);">Silently downloads & updates client agent on this specific machine for testing without impacting other fleet laptops.</div>
           </div>
           <button class="btn btn-primary" id="modalBtnPushUpdate" onclick="pushUpdateToCurrentDevice()" style="background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; font-size: 12px; font-weight: 600; white-space: nowrap; padding: 8px 14px;">
             ⚡ Push Update Now
@@ -6771,6 +6771,22 @@
 
       const gpsRow = document.getElementById('modalGpsPolicyRow');
       if (gpsRow) gpsRow.style.display = isAndroid ? 'flex' : 'none';
+      const gpsSwitch = document.getElementById('modalGpsSwitch');
+      if (gpsSwitch && isAndroid) {
+        try {
+          const savedGps = localStorage.getItem('cybershield_gps_' + d.machineName);
+          gpsSwitch.checked = (savedGps === null) ? true : (savedGps === 'true');
+        } catch (e) { gpsSwitch.checked = true; }
+        gpsSwitch.onchange = function() {
+          try { localStorage.setItem('cybershield_gps_' + d.machineName, String(this.checked)); } catch (e) {}
+          handleModalPolicyToggle(19, this.checked);
+        };
+      }
+
+      const canaryTitle = document.getElementById('modalCanaryTitle');
+      const canarySub = document.getElementById('modalCanarySub');
+      if (canaryTitle) canaryTitle.textContent = isAndroid ? '🚀 Canary Push: Update This Mobile Phone to v1.3.0' : '🚀 Canary Push: Update This Laptop to v1.3.0';
+      if (canarySub) canarySub.textContent = isAndroid ? 'Silently downloads & installs the latest Android MDM APK over-the-air (no cable required).' : 'Silently downloads & updates client agent on this specific machine for testing without impacting other fleet laptops.';
 
       const notifRow = document.getElementById('modalSyncNotifPolicyRow');
       if (notifRow) notifRow.style.display = isAndroid ? 'flex' : 'none';
@@ -8032,6 +8048,7 @@
     let canvasEventsConfigured = false;
     let isCanvasMouseDown = false;
     let lastMouseDownButton = 0;
+    let androidTouchStart = null;
 
     function setupCanvasEvents() {
       if (canvasEventsConfigured) return;
@@ -8058,6 +8075,16 @@
         isCanvasMouseDown = true;
         lastMouseDownButton = e.button;
         const { nx, ny } = getNormalizedCoords(e, canvas);
+        if (window.activeScreenIsAndroid) {
+          if (e.button === 2) {
+            // Right-Click on Android immediately triggers Long Press (Uninstall / Context Menu)
+            androidTouchStart = null;
+            sendRemoteInput(2, nx, ny, 2, 0, null, 750);
+          } else {
+            androidTouchStart = { nx, ny, time: Date.now() };
+          }
+          return;
+        }
         sendRemoteInput(2, nx, ny, e.button);
       });
 
@@ -8065,8 +8092,27 @@
       canvas.addEventListener('mouseup', (e) => {
         e.preventDefault();
         isCanvasMouseDown = false;
-        if (window.activeScreenIsAndroid) return;
         const { nx, ny } = getNormalizedCoords(e, canvas);
+        if (window.activeScreenIsAndroid) {
+          if (androidTouchStart) {
+            const start = androidTouchStart;
+            androidTouchStart = null;
+            const dur = Date.now() - start.time;
+            const dist = Math.hypot(nx - start.nx, ny - start.ny);
+            if (dist > 0.03) {
+              // Dragged -> Send Swipe gesture
+              const swipeDur = Math.min(1000, Math.max(180, dur));
+              sendRemoteInput(4, start.nx, start.ny, 0, 0, 'swipe:' + nx.toFixed(4) + ',' + ny.toFixed(4) + ',' + swipeDur);
+            } else if (dur >= 420) {
+              // Held mouse button >= 420ms -> Send Long Press (Uninstall / App Info menu)
+              sendRemoteInput(2, start.nx, start.ny, 0, 0, null, Math.min(1500, Math.max(700, dur)));
+            } else {
+              // Quick click -> Send Tap
+              sendRemoteInput(2, start.nx, start.ny, 0);
+            }
+          }
+          return;
+        }
         sendRemoteInput(3, nx, ny, e.button);
       });
 
@@ -8074,6 +8120,10 @@
       window.addEventListener('mouseup', (e) => {
         if (isCanvasMouseDown) {
           isCanvasMouseDown = false;
+          if (window.activeScreenIsAndroid) {
+            androidTouchStart = null;
+            return;
+          }
           const { nx, ny } = getNormalizedCoords(e, canvas);
           sendRemoteInput(3, nx, ny, lastMouseDownButton);
         }
@@ -8082,6 +8132,7 @@
       // Double Click
       canvas.addEventListener('dblclick', (e) => {
         e.preventDefault();
+        if (window.activeScreenIsAndroid) return;
         const { nx, ny } = getNormalizedCoords(e, canvas);
         sendRemoteInput(5, nx, ny, 0);
       });
